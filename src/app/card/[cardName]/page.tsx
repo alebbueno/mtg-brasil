@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+// import { notFound } from "next/navigation";
 import { fetchCardByName } from "@/app/lib/scryfall";
 import CardDisplay from "@/app/components/CardDisplay";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -95,7 +95,7 @@ export default async function CardPage({ params }: Props) {
   }
 
   // Determina se a carta tem faces
-  const isDoubleFaced = card.card_faces && card.card_faces.length > 0;
+  const isDoubleFaced = !!(card.card_faces && card.card_faces.length > 0);
   const displayCard = isDoubleFaced ? card.card_faces![0] : card;
 
   // Traduz o oracle_text, se disponível
