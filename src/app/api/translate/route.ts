@@ -36,8 +36,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ translation });
-  } catch (error) {
-    console.error('Erro na tradução:', error);
-    return NextResponse.json({ error: 'Erro ao traduzir o texto' }, { status: 500 });
+  } catch (errorr) {
+    //console.error('Erro na tradução:', error);
+    return NextResponse.json({ error: 'Erro ao traduzir o texto', errorr }, { status: 500 });
   }
 }

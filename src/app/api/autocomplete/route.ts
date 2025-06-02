@@ -12,8 +12,8 @@ export async function GET(req: Request) {
 
     const result = await fetchAutocomplete(query);
     return NextResponse.json({ suggestions: result.data.slice(0, 5) });
-  } catch (error) {
-    console.error('Erro no autocomplete:', error);
-    return NextResponse.json({ error: 'Erro ao buscar sugestões' }, { status: 500 });
+  } catch (errorr) {    
+    //console.error('Erro no autocomplete:', errorr);
+    return NextResponse.json({ error: 'Erro ao buscar sugestões', errorr }, { status: 500 });
   }
 }

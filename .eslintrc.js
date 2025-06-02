@@ -20,6 +20,8 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@next/next/recommended',
+    'next',
+    'next/core-web-vitals'
   ],
   settings: {
     react: {

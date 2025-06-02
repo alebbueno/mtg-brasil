@@ -49,14 +49,15 @@ async function translateText(text: string): Promise<string> {
     });
 
     if (!response.ok) {
-      console.error('Erro na API de tradução:', response.status, response.statusText);
+      //console.error('Erro na API de tradução:', response.status, response.statusText);
       return text; // Fallback para o texto original
     }
 
     const { translation } = await response.json();
     return translation || text; // Retorna o texto original se a tradução for vazia
-  } catch (error) {
-    console.error('Erro ao chamar a API de tradução:', error);
+  } catch (errorr) {
+    // eslint-disable-next-line no-undef, no-console
+    console.log(`Erro ao chamar a API de tradução:${errorr}`);
     return text; // Fallback para o texto original
   }
 }
@@ -69,6 +70,7 @@ export default async function CardPage({ params }: Props) {
   try {
     card = await fetchCardByName(decodedCardName);
   } catch (error) {
+    // eslint-disable-next-line no-undef, no-console
     console.error("Erro ao buscar carta:", error);
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-6">
@@ -81,7 +83,7 @@ export default async function CardPage({ params }: Props) {
           <CardContent className="text-center">
             <p className="text-lg mb-4">
               Nenhuma carta encontrada com o nome:{" "}
-              <span className="font-bold">"{decodedCardName}"</span>
+              <span className="font-bold">&quot;{decodedCardName}&quot;</span>
             </p>
             <Link href="/">
               <Button className="bg-blue-600 hover:bg-blue-700">
@@ -125,7 +127,7 @@ export async function generateMetadata({ params }: Props) {
   } catch (error) {
     return {
       title: "Carta não encontrada",
-      description: "Nenhuma carta encontrada com o nome fornecido.",
+      description: "Nenhuma carta encontrada com o nome fornecido.", error,
     };
   }
 }

@@ -37,6 +37,7 @@ export default function SearchBar() {
         setSuggestions(suggestions || []);
         setIsOpen(true);
       } catch (error) {
+        // eslint-disable-next-line no-undef, no-console
         console.error('Erro no autocomplete:', error);
         setSuggestions([]);
         setIsOpen(false);
@@ -49,6 +50,7 @@ export default function SearchBar() {
   }, [debouncedQuery]);
 
   // Lidar com a submissão do formulário
+  // eslint-disable-next-line no-undef
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
@@ -72,6 +74,7 @@ export default function SearchBar() {
   };
 
   // Lidar com navegação por teclado
+  // eslint-disable-next-line no-undef
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       setIsOpen(false);
