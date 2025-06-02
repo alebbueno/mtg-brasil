@@ -13,7 +13,7 @@ export default function SetPage({ params }: { params: Promise<{ set: string }> }
   const [loading, setLoading] = useState(true);
   const [setInfo, setSetInfo] = useState<any>(null);
 
-  const observer = useRef<IntersectionObserver>();
+  const observer = useRef<IntersectionObserver | undefined>(undefined);
 
   const lastCardRef = useCallback(
     (node: HTMLDivElement) => {
@@ -28,6 +28,7 @@ export default function SetPage({ params }: { params: Promise<{ set: string }> }
 
       if (node) observer.current.observe(node);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [loading, nextPage]
   );
 
@@ -61,6 +62,7 @@ export default function SetPage({ params }: { params: Promise<{ set: string }> }
   useEffect(() => {
     fetchSetInfo();
     fetchCards();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [set]);
 
   return (
