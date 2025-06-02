@@ -9,6 +9,7 @@ export default function Header() {
         </Link>
         <nav className="flex gap-6 text-neutral-200">
           <Link href="/">Buscar</Link>
+          <Link href="/collections">Coleções</Link>
           <Link href="/favorites">Favoritos</Link>
         </nav>
       </div>
