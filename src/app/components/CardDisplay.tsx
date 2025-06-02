@@ -35,7 +35,7 @@ interface ScryfallCard {
 interface Props {
   card: ScryfallCard;
   isDoubleFaced: boolean;
-  displayCard: ScryfallCard | ScryfallCard['card_faces'][0];
+  displayCard: ScryfallCard | NonNullable<ScryfallCard['card_faces']>[number];
   translatedOracleText: string;
 }
 
