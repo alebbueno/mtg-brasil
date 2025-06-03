@@ -105,12 +105,17 @@ export default async function CardPage({ params }: Props) {
     ? await translateText(displayCard.oracle_text)
     : '';
 
+  const translatedBackOracleText = isDoubleFaced && card.card_faces![1]?.oracle_text
+    ? await translateText(card.card_faces![1].oracle_text)
+    : "";
+
   return (
     <CardDisplay
       card={card}
       isDoubleFaced={isDoubleFaced}
       displayCard={displayCard}
       translatedOracleText={translatedOracleText}
+      translatedBackOracleText={translatedBackOracleText}
     />
   );
 }

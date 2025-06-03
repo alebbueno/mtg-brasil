@@ -37,6 +37,7 @@ interface Props {
   isDoubleFaced: boolean;
   displayCard: ScryfallCard | NonNullable<ScryfallCard['card_faces']>[number];
   translatedOracleText: string;
+  translatedBackOracleText: string;
 }
 
 // Função para converter símbolos de mana em elementos estilizados
@@ -81,7 +82,7 @@ const renderOracleText = (text: string) => {
   });
 };
 
-export default function CardDisplay({ card, isDoubleFaced, displayCard, translatedOracleText }: Props) {
+export default function CardDisplay({ card, isDoubleFaced, displayCard, translatedOracleText, translatedBackOracleText }: Props) {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-6 flex items-center justify-center">
       <Card className="w-full max-w-5xl bg-gray-800 border-gray-700 shadow-xl rounded-xl overflow-hidden">
@@ -94,6 +95,7 @@ export default function CardDisplay({ card, isDoubleFaced, displayCard, translat
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Imagens da carta */}
             <div className="space-y-4">
+              
               <div>
                 <p className="text-sm text-gray-400 mb-2">{isDoubleFaced ? "Frente" : "Carta"}</p>
                 {displayCard.image_uris?.normal ? (
@@ -165,12 +167,24 @@ export default function CardDisplay({ card, isDoubleFaced, displayCard, translat
                           <TooltipContent className="bg-gray-800 border-gray-700 text-white max-w-md p-4 shadow-lg rounded-md transition-opacity duration-200">
                             <h4 className="text-sm font-semibold mb-2">Texto Original (Inglês)</h4>
                             <div className="text-sm">{renderOracleText(displayCard.oracle_text)}</div>
+                            {isDoubleFaced && card.card_faces![1]?.oracle_text && (
+                              <div className="text-sm border-t-gray-50 border-t-1 py-3 mt-3 text-gray-100">
+                                <strong>Verso: </strong>
+                                {card.card_faces![1]?.oracle_text}
+                              </div>
+                            )}
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     )}
                   </div>
                   <div className="text-lg text-gray-100">{renderOracleText(translatedOracleText)}</div>
+                  {isDoubleFaced && card.card_faces![1]?.oracle_text && (
+                    <div className="text-lg border-t-gray-50 border-t-1 py-3 mt-3 text-gray-100">
+                      <strong>Verso: </strong>
+                      {renderOracleText(translatedBackOracleText)}
+                    </div>
+                  )}
                 </div>
               )}
               {(displayCard.power || displayCard.toughness) && (

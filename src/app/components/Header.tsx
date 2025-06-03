@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import GlobalSearch from './GlobalSearch';
 
 export default function Header() {
   return (
@@ -7,6 +8,7 @@ export default function Header() {
         <Link href="/" className="text-2xl font-bold text-amber-400">
           🧙 MTG Translate
         </Link>
+        <GlobalSearch />
         <nav className="flex gap-6 text-neutral-200">
           <Link href="/">Buscar</Link>
           <Link href="/collections">Coleções</Link>

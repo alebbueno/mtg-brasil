@@ -1,21 +1,8 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
 import React from 'react';
 import Header from '@/app/components/Header';
 import Footer from '@/app/components/Footer';
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-  weight: ['400', '700'],
-});
 
 export const metadata: Metadata = {
   title: 'MTG Brasil - Busque e Traduza Cartas de Magic',
@@ -33,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-neutral-950 text-neutral-100 antialiased flex flex-col min-h-screen`}
+        className={` bg-neutral-950 text-neutral-100 antialiased flex flex-col min-h-screen`}
       >
         <Header />
         <main className="flex-grow">{children}</main>
