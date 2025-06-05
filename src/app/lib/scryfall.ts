@@ -295,3 +295,31 @@ export async function fetchLatestSets(count: number = 3): Promise<SetData[]> {
 }
 
 // Você pode adicionar mais funções aqui conforme necessário.
+
+export async function fetchCardsByNames(names: string[]): Promise<any[]> {
+  if (!names || !Array.isArray(names) || names.length === 0) {
+    throw new Error('Lista de nomes de cartas inválida');
+  }
+
+  // Divide em lotes de 75 (limite do endpoint /cards/collection)
+  const batches = [];
+  for (let i = 0; i < names.length; i += 75) {
+    batches.push(names.slice(i, i + 75));
+  }
+
+  const results = [];
+  for (const batch of batches) {
+    const res = await fetch('https://api.scryfall.com/cards/collection', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifiers: batch.map(name => ({ name })) }),
+    });
+    if (!res.ok) {
+      throw new Error(`Erro ao buscar cartas: ${res.status} - ${res.statusText}`);
+    }
+    const { data } = await res.json();
+    results.push(...data);
+  }
+
+  return results;
+}
