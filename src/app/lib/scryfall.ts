@@ -254,8 +254,9 @@ export async function fetchLatestSets(count: number = 3): Promise<SetData[]> {
       let errorBodyText = "N/A";
       try {
         errorBodyText = await response.text(); // Tenta pegar o corpo como texto para depuração
+      // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
       } catch (e) { /* ignora */ }
-      console.error("fetchLatestSets: Erro na API Scryfall. Status:", response.status, "Corpo:", errorBodyText);
+      console.error("fetchLatestSets: Erro na API Scryfall. Status: ${e}", response.status, "Corpo:", errorBodyText);
       throw new Error(`Scryfall API error (sets): ${response.status} ${response.statusText}`);
     }
     
