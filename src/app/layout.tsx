@@ -46,6 +46,7 @@ export default function RootLayout({
       <body
         className={` bg-neutral-950 text-neutral-100 antialiased flex flex-col min-h-screen`}
       >
+        <Header />
         {/* Snippet do GTM <noscript> para o <body> */}
         {GTM_ID && (
           <noscript>
@@ -58,7 +59,7 @@ export default function RootLayout({
           </noscript>
         )}
         {children}
-        <Header />
+        
         <main className="flex-grow">{children}</main>
         <Footer />
       </body>
