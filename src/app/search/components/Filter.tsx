@@ -9,13 +9,14 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Input } from '@/components/ui/input';
 import { Filter, Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { useSets } from '@/app/hooks/useSets';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DialogTitle } from '@radix-ui/react-dialog'; // Novo import
+import { DialogTitle } from '@radix-ui/react-dialog';
 
 interface SearchFiltersProps {
   selectedTypes: string[];
@@ -28,6 +29,10 @@ interface SearchFiltersProps {
   setSelectedFormats: (formats: string[]) => void;
   selectedSet: string;
   setSelectedSet: (set: string) => void;
+  selectedCmc: string[];
+  setSelectedCmc: (cmc: string[]) => void;
+  selectedArtist: string;
+  setSelectedArtist: (artist: string) => void;
   onApplyFilters: () => void;
   onOpen?: () => void;
 }
@@ -36,6 +41,7 @@ const types = ['Creature', 'Instant', 'Sorcery', 'Land', 'Enchantment', 'Artifac
 const colors = ['White', 'Blue', 'Black', 'Red', 'Green', 'Colorless', 'Multicolor'];
 const rarities = ['Common', 'Uncommon', 'Rare', 'Mythic'];
 const formats = ['Standard', 'Modern', 'Commander', 'Legacy', 'Vintage', 'Pioneer', 'Pauper'];
+const cmcOptions = ['1', '2', '3', '4', '5', '>5'];
 
 const colorStyles: Record<string, string> = {
   White: 'bg-white text-black',
@@ -65,6 +71,10 @@ export default function SearchFilters({
   setSelectedFormats,
   selectedSet,
   setSelectedSet,
+  selectedCmc,
+  setSelectedCmc,
+  selectedArtist,
+  setSelectedArtist,
   onApplyFilters,
   onOpen,
 }: SearchFiltersProps) {
@@ -72,8 +82,12 @@ export default function SearchFilters({
   const [openCombobox, setOpenCombobox] = useState(false);
 
   const totalFilters = useMemo(() => {
-    return selectedTypes.length + selectedColors.length + selectedRarity.length + selectedFormats.length + (selectedSet ? 1 : 0);
-  }, [selectedTypes, selectedColors, selectedRarity, selectedFormats, selectedSet]);
+    let count = selectedTypes.length + selectedColors.length + selectedRarity.length + selectedFormats.length;
+    if (selectedSet) count += 1;
+    if (selectedCmc.length > 0) count += 1;
+    if (selectedArtist) count += 1;
+    return count;
+  }, [selectedTypes, selectedColors, selectedRarity, selectedFormats, selectedSet, selectedCmc, selectedArtist]);
 
   const toggle = (value: string, list: string[], setter: (v: string[]) => void) => {
     setter(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
@@ -85,6 +99,8 @@ export default function SearchFilters({
     setSelectedRarity([]);
     setSelectedFormats([]);
     setSelectedSet('');
+    setSelectedCmc([]);
+    setSelectedArtist('');
     onApplyFilters();
   };
 
@@ -312,6 +328,56 @@ export default function SearchFilters({
                           </Command>
                         </PopoverContent>
                       </Popover>
+                    </CardContent>
+                  </Card>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Custo de Mana */}
+              <AccordionItem value="cmc" className="border-none">
+                <AccordionTrigger className="text-neutral-100 hover:text-amber-500 py-2">
+                  Custo de Mana
+                </AccordionTrigger>
+                <AccordionContent>
+                  <Card className="bg-neutral-800 border-neutral-700">
+                    <CardContent className="p-4 space-y-2">
+                      {cmcOptions.map((cmc) => (
+                        <div key={cmc} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`cmc-${cmc}`}
+                            checked={selectedCmc.includes(cmc)}
+                            onCheckedChange={() => toggle(cmc, selectedCmc, setSelectedCmc)}
+                            aria-label={`Filtrar por CMC ${cmc}`}
+                          />
+                          <label
+                            htmlFor={`cmc-${cmc}`}
+                            className="text-sm text-neutral-200 hover:text-neutral-100 cursor-pointer"
+                          >
+                            {cmc === '>5' ? 'Mais de 5' : cmc}
+                          </label>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Artista */}
+              <AccordionItem value="artist" className="border-none">
+                <AccordionTrigger className="text-neutral-100 hover:text-amber-500 py-2">
+                  Artista
+                </AccordionTrigger>
+                <AccordionContent>
+                  <Card className="bg-neutral-800 border-neutral-700">
+                    <CardContent className="p-4">
+                      <Input
+                        id="artist"
+                        type="text"
+                        value={selectedArtist}
+                        onChange={(e) => setSelectedArtist(e.target.value)}
+                        placeholder="Digite o nome do artista"
+                        className="bg-neutral-700 border-neutral-600 text-neutral-100"
+                      />
                     </CardContent>
                   </Card>
                 </AccordionContent>

@@ -37,14 +37,12 @@ export async function GET(request: NextRequest) {
         status: translateResponse.status,
         statusText: translateResponse.statusText,
       });
-      // Fallback para query original
     } else {
       const { translation } = await translateResponse.json();
       translatedQuery = translation || query;
     }
   } catch (e: unknown) {
     console.error('Erro ao chamar API de tradução:', { error: e instanceof Error ? e.message : 'Unknown error' });
-    // Fallback para query original
   }
 
   // Obter filtros
@@ -53,12 +51,15 @@ export async function GET(request: NextRequest) {
   const rarity = searchParams.get('rarity')?.split(',').filter(Boolean) || [];
   const formats = searchParams.get('formats')?.split(',').filter(Boolean) || [];
   const set = searchParams.get('set') || '';
+  const cmc = searchParams.get('cmc')?.split(',').filter(Boolean) || [];
+  const artist = searchParams.get('artist') || '';
 
   // Validar filtros
   const validColors = ['White', 'Blue', 'Black', 'Red', 'Green', 'Colorless', 'Multicolor'];
   const validTypes = ['Creature', 'Instant', 'Sorcery', 'Land', 'Enchantment', 'Artifact', 'Planeswalker'];
   const validRarities = ['Common', 'Uncommon', 'Rare', 'Mythic'];
   const validFormats = ['Standard', 'Modern', 'Commander', 'Legacy', 'Vintage', 'Pioneer', 'Pauper'];
+  const validCmc = ['1', '2', '3', '4', '5', '>5'];
 
   if (types.some((t) => !validTypes.includes(t))) {
     return NextResponse.json({ error: 'Tipo de carta inválido' }, { status: 400 });
@@ -75,12 +76,16 @@ export async function GET(request: NextRequest) {
   if (set && !/^[a-z0-9]{3,}$/.test(set)) {
     return NextResponse.json({ error: 'Código de coleção inválido' }, { status: 400 });
   }
+  if (cmc.some((c) => !validCmc.includes(c))) {
+    return NextResponse.json({ error: 'Valor de CMC inválido' }, { status: 400 });
+  }
 
-  const hasFilters = types.length || colors.length || rarity.length || formats.length || set;
+  // Verificar se há filtros ativos
+  const hasFilters = types.length || colors.length || rarity.length || formats.length || set || cmc.length || artist;
 
   try {
     const result = hasFilters
-      ? await fetchFilteredSearchResults(translatedQuery, { types, colors, rarity, formats, set }, page)
+      ? await fetchFilteredSearchResults(translatedQuery, { types, colors, rarity, formats, set, cmc, artist }, page)
       : await fetchSearchResults(translatedQuery, page);
     return NextResponse.json(
       {
@@ -100,6 +105,8 @@ export async function GET(request: NextRequest) {
       rarity,
       formats,
       set,
+      cmc,
+      artist,
       page,
       error: error.message,
       stack: error.stack,

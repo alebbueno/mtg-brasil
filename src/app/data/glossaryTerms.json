@@ -1,0 +1,314 @@
+{
+  "terms": [
+    {
+      "original": "Eerie",
+      "translated": "Sinistro",
+      "definition": "Sempre que você conjura uma mágica com um custo de mana específico, você pode realizar uma ação adicional, como copiar a mágica ou obter um efeito bônus."
+    },
+    {
+      "original": "Battalion",
+      "translated": "Batalhão",
+      "definition": "Quando você ataca com três ou mais criaturas, as criaturas com Batalhão recebem um bônus ou desencadeiam um efeito."
+    },
+    {
+      "original": "Bloodrush",
+      "translated": "Ímpeto de Sangue",
+      "definition": "Você pode descartar uma carta com Ímpeto de Sangue e pagar seu custo para dar um bônus de poder e habilidades a uma criatura atacante até o final do turno."
+    },
+    {
+      "original": "Channel",
+      "translated": "Canalizar",
+      "definition": "Você pode pagar um custo alternativo para descartar uma carta com Canalizar e obter um efeito imediato, em vez de conjurá-la normalmente."
+    },
+    {
+      "original": "Chroma",
+      "translated": "Croma",
+      "definition": "Um efeito que depende do número de símbolos de mana de uma cor específica nas manas pagas para conjurar uma mágica."
+    },
+    {
+      "original": "Cohort",
+      "translated": "Coorte",
+      "definition": "Você pode ativar uma habilidade de Coorte se controlar outra criatura aliada, geralmente concedendo bônus ou efeitos à criatura."
+    },
+    {
+      "original": "Constellation",
+      "translated": "Constelação",
+      "definition": "Sempre que um encantamento entra no campo de batalha sob seu controle, você desencadeia um efeito adicional."
+    },
+    {
+      "original": "Converge",
+      "translated": "Convergir",
+      "definition": "O efeito de uma mágica com Convergir depende do número de cores diferentes de mana usadas para pagá-la."
+    },
+    {
+      "original": "Delirium",
+      "translated": "Delírio",
+      "definition": "Habilidades com Delírio são ativadas ou melhoradas se houver quatro ou mais tipos de carta diferentes no seu cemitério."
+    },
+    {
+      "original": "Domain",
+      "translated": "Domínio",
+      "definition": "Um efeito que se intensifica com base no número de tipos de terreno básico que você controla (Floresta, Ilha, Montanha, Pântano, Planície)."
+    },
+    {
+      "original": "Fateful hour",
+      "translated": "Hora Fatídica",
+      "definition": "Se você tiver 5 ou menos pontos de vida, mágicas ou habilidades com Hora Fatídica ganham efeitos adicionais ou mais poderosos."
+    },
+    {
+      "original": "Ferocious",
+      "translated": "Feroz",
+      "definition": "Habilidades com Feroz são ativadas ou melhoradas se você controlar uma criatura com poder 4 ou maior."
+    },
+    {
+      "original": "Formidable",
+      "translated": "Formidável",
+      "definition": "Habilidades com Formidável são desencadeadas se o poder total das criaturas que você controla for 8 ou mais."
+    },
+    {
+      "original": "Grandeur",
+      "translated": "Grandeza",
+      "definition": "Você pode descartar uma carta com o mesmo nome que uma criatura com Grandeza para desencadear um efeito poderoso."
+    },
+    {
+      "original": "Hellbent",
+      "translated": "Desespero",
+      "definition": "Habilidades com Desespero são ativadas ou melhoradas se você não tiver cartas na mão."
+    },
+    {
+      "original": "Heroic",
+      "translated": "Heroico",
+      "definition": "Sempre que você conjura uma mágica que alvo uma criatura com Heroico, você desencadeia um efeito adicional."
+    },
+    {
+      "original": "Imprint",
+      "translated": "Impressão",
+      "definition": "Quando uma carta com Impressão entra no campo de batalha, você pode exilar uma carta para que ela ganhe efeitos baseados na carta exilada."
+    },
+    {
+      "original": "Inspired",
+      "translated": "Inspirado",
+      "definition": "Quando uma criatura com Inspirado é desvirada, você pode desencadear uma habilidade especial."
+    },
+    {
+      "original": "Join forces",
+      "translated": "Unir Forças",
+      "definition": "Cada jogador pode pagar um custo adicional para contribuir com um efeito compartilhado, cujo resultado depende das contribuições."
+    },
+    {
+      "original": "Kinship",
+      "translated": "Parentesco",
+      "definition": "No início da sua manutenção, se a carta do topo do seu grimório compartilhar um tipo de criatura com uma criatura com Parentesco, você pode desencadear um efeito."
+    },
+    {
+      "original": "Landfall",
+      "translated": "Queda de Terreno",
+      "definition": "Sempre que um terreno entra no campo de batalha sob seu controle, você desencadeia um efeito adicional."
+    },
+    {
+      "original": "Lieutenant",
+      "translated": "Tenente",
+      "definition": "Uma criatura com Tenente ganha bônus ou efeitos adicionais se você controlar seu comandante."
+    },
+    {
+      "original": "Metalcraft",
+      "translated": "Metalurgia",
+      "definition": "Habilidades com Metalurgia são ativadas ou melhoradas se você controlar três ou mais artefatos."
+    },
+    {
+      "original": "Morbid",
+      "translated": "Mórbido",
+      "definition": "Habilidades com Mórbido são desencadeadas se uma criatura morreu neste turno."
+    },
+    {
+      "original": "Parley",
+      "translated": "Parlamentar",
+      "definition": "Cada jogador revela a carta do topo do grimório, e um efeito ocorre com base nas cartas reveladas."
+    },
+    {
+      "original": "Radiance",
+      "translated": "Radiação",
+      "definition": "Habilidades com Radiação afetam a criatura alvo e todas as outras criaturas que compartilham uma cor com ela."
+    },
+    {
+      "original": "Raid",
+      "translated": "Incursão",
+      "definition": "Habilidades com Incursão são ativadas ou melhoradas se você atacou com uma criatura neste turno."
+    },
+    {
+      "original": "Rally",
+      "translated": "Reunir",
+      "definition": "Sempre que uma criatura aliada entra no campo de batalha, você desencadeia um efeito para todas as criaturas aliadas."
+    },
+    {
+      "original": "Spell mastery",
+      "translated": "Maestria em Mágicas",
+      "definition": "Habilidades com Maestria em Mágicas são melhoradas se houver duas ou mais mágicas instantâneas ou feitiços no seu cemitério."
+    },
+    {
+      "original": "Strive",
+      "translated": "Esforço",
+      "definition": "Você pode pagar um custo adicional para escolher mais alvos para uma mágica com Esforço."
+    },
+    {
+      "original": "Sweep",
+      "translated": "Varrida",
+      "definition": "Você devolve terrenos que controla para a mão para desencadear um efeito proporcional ao número de terrenos devolvidos."
+    },
+    {
+      "original": "Tempting offer",
+      "translated": "Oferta Tentadora",
+      "definition": "Um efeito que permite que outros jogadores copiem sua ação, mas com um benefício maior para você."
+    },
+    {
+      "original": "Threshold",
+      "translated": "Limiar",
+      "definition": "Habilidades com Limiar são ativadas ou melhoradas se você tiver sete ou mais cartas no cemitério."
+    },
+    {
+      "original": "Will of the council",
+      "translated": "Vontade do Conselho",
+      "definition": "Os jogadores votam em uma opção, e o resultado da votação determina o efeito da mágica ou habilidade."
+    },
+    {
+      "original": "Adamant",
+      "translated": "Adamante",
+      "definition": "Se você gastou três ou mais manas de uma mesma cor para conjurar uma mágica com Adamante, ela ganha um efeito adicional."
+    },
+    {
+      "original": "Addendum",
+      "translated": "Adendo",
+      "definition": "Mágicas com Adendo ganham efeitos adicionais se forem conjuradas durante sua fase principal."
+    },
+    {
+      "original": "Council's dilemma",
+      "translated": "Dilema do Conselho",
+      "definition": "Cada jogador vota em uma opção, e o número de votos determina os efeitos para todos os jogadores."
+    },
+    {
+      "original": "Eminence",
+      "translated": "Eminência",
+      "definition": "Uma habilidade que funciona mesmo se a criatura com Eminência estiver na zona de comando ou na mão."
+    },
+    {
+      "original": "Enrage",
+      "translated": "Enfurecer",
+      "definition": "Sempre que uma criatura com Enfurecer recebe dano, ela desencadeia um efeito."
+    },
+    {
+      "original": "Hero's Reward",
+      "translated": "Recompensa do Herói",
+      "definition": "Habilidades que são desencadeadas quando uma criatura morre em combate, concedendo benefícios."
+    },
+    {
+      "original": "Kinfall",
+      "translated": "Queda de Parentes",
+      "definition": "Sempre que uma criatura do mesmo tipo entra no campo de batalha, você desencadeia um efeito."
+    },
+    {
+      "original": "Landship",
+      "translated": "Navio Terrestre",
+      "definition": "Um efeito que trata terrenos como se fossem criaturas ou veículos sob certas condições."
+    },
+    {
+      "original": "Legacy",
+      "translated": "Legado",
+      "definition": "Habilidades que criam efeitos persistentes que afetam o jogo mesmo após a carta sair do campo de batalha."
+    },
+    {
+      "original": "Revolt",
+      "translated": "Revolta",
+      "definition": "Habilidades com Revolta são desencadeadas se um permanente que você controlava deixou o campo de batalha neste turno."
+    },
+    {
+      "original": "Underdog",
+      "translated": "Azarão",
+      "definition": "Habilidades com Azarão são ativadas se você tiver menos pontos de vida que um oponente."
+    },
+    {
+      "original": "Undergrowth",
+      "translated": "Subcrescimento",
+      "definition": "Efeitos que dependem do número de cartas de criatura no seu cemitério."
+    },
+    {
+      "original": "Descend",
+      "translated": "Descida",
+      "definition": "Sempre que um card de permanente vai para o seu cemitério, você desencadeia um efeito."
+    },
+    {
+      "original": "Fathomless descent",
+      "translated": "Descida Insondável",
+      "definition": "Efeitos que se intensificam com base no número de cards de permanente no seu cemitério."
+    },
+    {
+      "original": "Magecraft",
+      "translated": "Artes Mágicas",
+      "definition": "Sempre que você conjura ou copia uma mágica instantânea ou feitiço, você desencadeia um efeito."
+    },
+    {
+      "original": "Teamwork",
+      "translated": "Trabalho em Equipe",
+      "definition": "Habilidades que são ativadas quando várias criaturas que você controla agem juntas, como atacar ou bloquear."
+    },
+    {
+      "original": "Pack tactics",
+      "translated": "Táticas de Matilha",
+      "definition": "Habilidades com Táticas de Matilha são desencadeadas se você atacar com criaturas cujo poder total seja 6 ou mais."
+    },
+    {
+      "original": "Coven",
+      "translated": "Conventículo",
+      "definition": "Habilidades com Conventículo são ativadas se você controlar três ou mais criaturas com poderes diferentes."
+    },
+    {
+      "original": "Alliance",
+      "translated": "Aliança",
+      "definition": "Sempre que outra criatura entra no campo de batalha sob seu controle, você desencadeia um efeito."
+    },
+    {
+      "original": "Corrupted",
+      "translated": "Corrompido",
+      "definition": "Habilidades com Corrompido são ativadas se um oponente tiver três ou mais marcadores de veneno."
+    },
+    {
+      "original": "Secret council",
+      "translated": "Conselho Secreto",
+      "definition": "Cada jogador escolhe secretamente uma opção, e o efeito depende das escolhas coletivas."
+    },
+    {
+      "original": "Celebration",
+      "translated": "Celebração",
+      "definition": "Habilidades com Celebração são ativadas se dois ou mais permanentes não-terreno entrarem no campo de batalha neste turno."
+    },
+    {
+      "original": "Paradox",
+      "translated": "Paradoxo",
+      "definition": "Habilidades com Paradoxo são desencadeadas quando você conjura uma mágica de uma zona que não seja sua mão."
+    },
+    {
+      "original": "Will of the Planeswalkers",
+      "translated": "Vontade dos Planeswalkers",
+      "definition": "Efeitos que dependem de escolhas ou interações envolvendo planeswalkers controlados pelos jogadores."
+    },
+    {
+      "original": "Survival",
+      "translated": "Sobrevivência",
+      "definition": "Habilidades que são desencadeadas quando uma criatura sobrevive a dano ou combate."
+    },
+    {
+      "original": "Flurry",
+      "translated": "Rajada",
+      "definition": "Permite que uma criatura ataque ou realize ações múltiplas em um único turno sob certas condições."
+    },
+    {
+      "original": "Valiant",
+      "translated": "Valente",
+      "definition": "Habilidades com Valente são desencadeadas quando uma criatura com baixo poder é alvo de uma mágica ou habilidade."
+    },
+    {
+      "original": "Start your engines!",
+      "translated": "Liguem seus motores!",
+      "definition": "Habilidades que ativam ou melhoram veículos quando eles se tornam tripulados ou atacam."
+    }
+  ]
+}

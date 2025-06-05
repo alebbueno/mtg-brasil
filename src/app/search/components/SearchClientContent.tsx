@@ -8,7 +8,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import SearchFilters from '@/app/search/components/Filter'; // Certifique-se que este caminho está correto
+import SearchFilters from '@/app/search/components/Filter';
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -18,7 +18,6 @@ const fetcher = async (url: string) => {
   return res.json();
 };
 
-// Interface para o tipo de carta (ajuste conforme necessário)
 interface MTGCard {
   id: string;
   name: string;
@@ -28,17 +27,13 @@ interface MTGCard {
     art_crop?: string;
   };
   type_line?: string;
-  // Adicione outros campos que você usa
 }
 
-// Interface para a resposta da API (ajuste conforme necessário)
 interface ApiResponse {
   data: MTGCard[];
   has_more: boolean;
   next_page?: string;
-  // Adicione outros campos da sua API
 }
-
 
 export default function SearchClientContent() {
   const searchParams = useSearchParams();
@@ -49,16 +44,20 @@ export default function SearchClientContent() {
   const [selectedRarity, setSelectedRarity] = useState<string[]>([]);
   const [selectedFormats, setSelectedFormats] = useState<string[]>([]);
   const [selectedSet, setSelectedSet] = useState<string>('');
+  const [selectedCmc, setSelectedCmc] = useState<string[]>([]);
+  const [selectedArtist, setSelectedArtist] = useState<string>('');
 
   const [tempTypes, setTempTypes] = useState<string[]>(selectedTypes);
   const [tempColors, setTempColors] = useState<string[]>(selectedColors);
   const [tempRarity, setTempRarity] = useState<string[]>(selectedRarity);
   const [tempFormats, setTempFormats] = useState<string[]>(selectedFormats);
   const [tempSet, setTempSet] = useState<string>(selectedSet);
+  const [tempCmc, setTempCmc] = useState<string[]>(selectedCmc);
+  const [tempArtist, setTempArtist] = useState<string>(selectedArtist);
 
   const getKey = (pageIndex: number, previousPageData: ApiResponse | null): string | null => {
-    if (!query) return null; // Não buscar se não houver query
-    if (previousPageData && !previousPageData.has_more) return null; // Alcançou o fim
+    if (!query) return null;
+    if (previousPageData && !previousPageData.has_more) return null;
 
     const params = new URLSearchParams();
     params.set('q', query);
@@ -68,7 +67,9 @@ export default function SearchClientContent() {
     if (selectedRarity.length) params.set('rarity', selectedRarity.join(','));
     if (selectedFormats.length) params.set('formats', selectedFormats.join(','));
     if (selectedSet) params.set('set', selectedSet);
-    
+    if (selectedCmc.length) params.set('cmc', selectedCmc.join(','));
+    if (selectedArtist) params.set('artist', selectedArtist);
+
     return `${baseUrl}/api/search?${params.toString()}`;
   };
 
@@ -77,12 +78,12 @@ export default function SearchClientContent() {
     error,
     size,
     setSize,
-    isLoading, // Este é o isLoading geral do useSWRInfinite
-    isValidating, // Adicionado para verificar revalidações
+    isLoading,
+    isValidating,
   } = useSWRInfinite<ApiResponse>(getKey, fetcher, {
     revalidateFirstPage: false,
     revalidateOnFocus: false,
-    revalidateIfStale: false, // Adicionado para evitar revalidações desnecessárias
+    revalidateIfStale: false,
   });
 
   const isLoadingInitialData = !data && !error && isLoading;
@@ -101,8 +102,10 @@ export default function SearchClientContent() {
     setSelectedRarity(tempRarity);
     setSelectedFormats(tempFormats);
     setSelectedSet(tempSet);
-    setSize(1); // Reinicia a paginação para aplicar os novos filtros
-  }, [tempTypes, tempColors, tempRarity, tempFormats, tempSet, setSize]);
+    setSelectedCmc(tempCmc);
+    setSelectedArtist(tempArtist);
+    setSize(1);
+  }, [tempTypes, tempColors, tempRarity, tempFormats, tempSet, tempCmc, tempArtist, setSize]);
 
   const handleOpenFilters = useCallback(() => {
     setTempTypes(selectedTypes);
@@ -110,7 +113,9 @@ export default function SearchClientContent() {
     setTempRarity(selectedRarity);
     setTempFormats(selectedFormats);
     setTempSet(selectedSet);
-  }, [selectedTypes, selectedColors, selectedRarity, selectedFormats, selectedSet]);
+    setTempCmc(selectedCmc);
+    setTempArtist(selectedArtist);
+  }, [selectedTypes, selectedColors, selectedRarity, selectedFormats, selectedSet, selectedCmc, selectedArtist]);
 
   useEffect(() => {
     if (!loaderRef.current || !hasMore || isLoadingMore || isValidating) return;
@@ -121,15 +126,14 @@ export default function SearchClientContent() {
           setSize((prevSize) => prevSize + 1);
         }
       },
-      { threshold: 0.5 } // Ajuste o threshold conforme necessário
+      { threshold: 0.5 }
     );
 
     observer.observe(loaderRef.current);
     return () => observer.disconnect();
   }, [hasMore, isLoadingMore, isValidating, setSize]);
 
-
-  if (!query && !isLoadingInitialData) { // Adicionado !isLoadingInitialData para evitar flash
+  if (!query && !isLoadingInitialData) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100 p-6 flex items-center justify-center">
         <Card className="w-full max-w-md bg-neutral-800 border-neutral-700">
@@ -148,8 +152,7 @@ export default function SearchClientContent() {
       </div>
     );
   }
-  
-  // Não renderize a tela de erro imediatamente se for o carregamento inicial
+
   if (error && !isLoadingInitialData) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
@@ -168,9 +171,6 @@ export default function SearchClientContent() {
     );
   }
 
-  // Se for o carregamento inicial e não houver query, não mostre os skeletons ainda
-  // A tela de "nenhuma busca" já cuida disso.
-  // Se houver query e estiver carregando, aí sim mostre os skeletons.
   if (isLoadingInitialData && query) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100 p-6">
@@ -197,12 +197,11 @@ export default function SearchClientContent() {
     );
   }
 
-
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Busca: &ldquo;{query}&rdquo;</h1>
+          <h1 className="text-3xl font-bold">Busca: “{query}”</h1>
           <SearchFilters
             selectedTypes={tempTypes}
             setSelectedTypes={setTempTypes}
@@ -214,17 +213,21 @@ export default function SearchClientContent() {
             setSelectedFormats={setTempFormats}
             selectedSet={tempSet}
             setSelectedSet={setTempSet}
+            selectedCmc={tempCmc}
+            setSelectedCmc={setTempCmc}
+            selectedArtist={tempArtist}
+            setSelectedArtist={setTempArtist}
             onApplyFilters={handleApplyFilters}
             onOpen={handleOpenFilters}
           />
         </div>
 
-        {isEmpty && query && ( // Mostrar apenas se houve busca e está vazio
+        {isEmpty && query && (
           <div className="flex items-center justify-center min-h-[40vh] text-center">
             <Card className="bg-neutral-800 border-neutral-700">
               <CardContent className="p-6">
                 <p className="text-neutral-300">
-                  Nenhuma carta encontrada com os critérios para &ldquo;{query}&rdquo;.
+                  Nenhuma carta encontrada com os critérios para “{query}”.
                 </p>
                 <p className="text-neutral-400 text-sm mt-2">Tente refinar seus filtros ou alterar o termo de busca.</p>
               </CardContent>
@@ -236,7 +239,7 @@ export default function SearchClientContent() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
             {cards.map((card: MTGCard) => (
               <Link
-                href={`/card/${encodeURIComponent(card.id)}`} // Idealmente usar ID se disponível e único
+                href={`/card/${encodeURIComponent(card.name)}`}
                 key={card.id}
                 className="group"
               >
@@ -248,8 +251,8 @@ export default function SearchClientContent() {
                         alt={card.name}
                         width={250}
                         height={350}
-                        className="rounded-md w-full object-contain aspect-[5/7]" // aspect ratio para cartas
-                        unoptimized // Se as imagens vêm de uma API externa e você não quer otimização do Next/Image
+                        className="rounded-md w-full object-contain aspect-[5/7]"
+                        unoptimized
                       />
                     ) : (
                       <Skeleton className="h-[300px] sm:h-[350px] w-full rounded-md bg-neutral-700 flex items-center justify-center">
@@ -266,7 +269,7 @@ export default function SearchClientContent() {
             ))}
 
             {isLoadingMore &&
-              [...Array(5)].map((_, i) => ( // Menos skeletons para "loading more"
+              [...Array(5)].map((_, i) => (
                 <Card key={`loading-${i}`} className="bg-neutral-800 border-neutral-700 animate-pulse">
                   <CardContent className="p-2">
                     <Skeleton className="h-[300px] sm:h-[350px] w-full rounded-md bg-neutral-700" />
