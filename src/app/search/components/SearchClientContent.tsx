@@ -239,7 +239,8 @@ export default function SearchClientContent() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
             {cards.map((card: MTGCard) => (
               <Link
-                href={`/card/${encodeURIComponent(card.name)}`}
+                href={`/card/cardId/${encodeURIComponent(card.id)}`} // Usa ID por padrão para evitar ambiguidades
+                // Para usar nome, substitua por: href={`/card/${encodeURIComponent(card.name)}`}
                 key={card.id}
                 className="group"
               >

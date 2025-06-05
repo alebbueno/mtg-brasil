@@ -12,7 +12,7 @@ export function CardItem({ id, name, image }: CardItemProps) {
       key={id}
       className="bg-neutral-900 rounded-xl p-2 hover:scale-105 transition"
     >
-      <Link href={`/card/${encodeURIComponent(name)}`}>
+      <Link href={`/card/cardId/${encodeURIComponent(id)}`}>
         {image ? (
           <img
             src={image}
