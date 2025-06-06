@@ -1,7 +1,7 @@
 // Header.tsx
 import Link from 'next/link';
 import GlobalSearch from './GlobalSearch'; // Mantenha seu componente GlobalSearch
-import { BookOpen, Info } from 'lucide-react'; // Ícones para novos links (opcional)
+import { BookOpen } from 'lucide-react'; // Ícones para novos links (opcional)
 
 export default function Header() {
   return (
@@ -25,12 +25,15 @@ export default function Header() {
           <Link href="/glossary" className="hover:text-amber-400 transition-colors text-sm sm:text-base flex items-center gap-1">
             <BookOpen size={16} /> Glossário
           </Link>
-          <Link href="/favorites" className="hover:text-amber-400 transition-colors text-sm sm:text-base">
+          <Link href="/deck-analyzer" className="hover:text-amber-400 transition-colors text-sm sm:text-base flex items-center gap-1">
+            <BookOpen size={16} /> Analise de Deck IA
+          </Link>
+          {/* <Link href="/favorites" className="hover:text-amber-400 transition-colors text-sm sm:text-base">
             Favoritos
           </Link>
           <Link href="/about" className="hover:text-amber-400 transition-colors text-sm sm:text-base flex items-center gap-1">
             <Info size={16} /> Sobre
-          </Link>
+          </Link> */}
           {/* Futuramente: Link para Login/Perfil */}
         </nav>
       </div>
