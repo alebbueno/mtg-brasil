@@ -1,7 +1,7 @@
 'use client';
 
 import { useFavorites } from '@/app/store/favorites';
-import Header from '@/app/components/Header';
+// import Header from '@/app/components/Header';
 import Link from 'next/link';
 
 export default function FavoritesPage() {
@@ -9,7 +9,7 @@ export default function FavoritesPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col">
-      <Header />
+      {/* <Header /> */}
       <main className="flex-1 p-6 max-w-6xl mx-auto">
         <h1 className="text-4xl text-amber-400 mb-4">Favoritos</h1>
         {favorites.length === 0 && <p>Você não tem cartas favoritas.</p>}
