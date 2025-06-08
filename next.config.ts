@@ -6,10 +6,19 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'cards.scryfall.io',
+        hostname: 'lh3.googleusercontent.com',
         port: '',
-        pathname: '/**',
+        pathname: '/a/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cards.scryfall.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 'c2.scryfall.com',
+      },
+      // Você pode adicionar outros domínios aqui se precisar
     ],
   },
 };
