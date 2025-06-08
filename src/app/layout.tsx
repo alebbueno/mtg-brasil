@@ -14,8 +14,6 @@ export const metadata: Metadata = {
   },
 };
 
-
-// É uma boa prática armazenar seu ID do GTM em uma variável de ambiente
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
 export default function RootLayout({
@@ -26,11 +24,10 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="dark">
       <head>
-         {/* Script do GTM para o <head> */}
         {GTM_ID && (
           <Script
             id="gtm-head"
-            strategy="afterInteractive" // Carrega após a página se tornar interativa
+            strategy="afterInteractive"
             dangerouslySetInnerHTML={{
               __html: `
                 (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -44,9 +41,8 @@ export default function RootLayout({
         )}
       </head>
       <body
-        className={` bg-neutral-950 text-neutral-100 antialiased flex flex-col min-h-screen`}
+        className="bg-neutral-950 text-neutral-100 antialiased flex flex-col min-h-screen"
       >
-        {/* Snippet do GTM <noscript> para o <body> */}
         {GTM_ID && (
           <noscript>
             <iframe

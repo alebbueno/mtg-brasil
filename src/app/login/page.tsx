@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
-// app/login/page.tsx
 'use client'
 
 import { useState } from 'react'
@@ -33,14 +32,16 @@ export default function LoginPage() {
       })
 
       if (error) {
-        // Lança o erro para ser apanhado pelo bloco catch
         throw error
       }
 
-      // Login bem-sucedido, atualiza a página para que o novo estado de autenticação
-      // seja reconhecido pelos Server Components (como o Header).
-      // O seu ficheiro middleware.ts irá tratar do redirecionamento.
+      // Aguarda um pequeno atraso para garantir que a sessão seja propagada
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      console.log('Login com email/senha bem-sucedido')
+
+      // Força a revalidação dos Server Components e redireciona
       router.refresh()
+      router.push('/')
 
     } catch (error: any) {
       console.error('Login Error:', error)
@@ -50,20 +51,27 @@ export default function LoginPage() {
         setError(error.message || 'Ocorreu um erro inesperado.')
       }
     } finally {
-      // Este bloco é executado sempre, após o try ou o catch.
-      // Isto garante que o botão é reativado, mesmo que a navegação demore.
       setIsSubmitting(false)
     }
   }
 
   const handleLoginWithGoogle = async () => {
-    const supabase = createClient()
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${location.origin}/auth/callback`,
-      },
-    })
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+      if (error) {
+        throw error
+      }
+      console.log('Iniciando login com Google')
+    } catch (error: any) {
+      console.error('Google Login Error:', error)
+      setError(error.message || 'Erro ao fazer login com Google.')
+    }
   }
 
   return (
@@ -141,7 +149,11 @@ export default function LoginPage() {
             </Alert>
           )}
 
-          <Button type="submit" className="w-full text-lg py-6 bg-amber-500 text-black hover:bg-amber-600" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            className="w-full text-lg py-6 bg-amber-500 text-black hover:bg-amber-600"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? 'A entrar...' : 'Entrar com Email'}
           </Button>
         </form>
