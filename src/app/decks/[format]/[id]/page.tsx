@@ -1,9 +1,11 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { createClient } from '@/app/utils/supabase/server';
 import { fetchCardsByNames } from '@/app/lib/scryfall';
+import type { NextPage } from 'next';
 
 // Definindo interfaces claras para os dados
 interface DeckCard {
@@ -29,16 +31,14 @@ interface DeckFromDB {
   created_at: string;
 }
 
-// Tipagem para as props da página dinâmica
-interface DeckPageProps {
-  params: {
-    format: 'commander' | 'pauper' | 'modern';
-    id: string;
-  };
-  searchParams?: Record<string, string | string[] | undefined>;
-}
+// Tipagem para os params da página dinâmica
+type DeckPageParams = {
+  format: 'commander' | 'pauper' | 'modern';
+  id: string;
+};
 
-export default async function DeckPage({ params }: DeckPageProps) {
+// Definindo o componente com NextPage
+const DeckPage: NextPage<{ params: DeckPageParams }> = async ({ params }) => {
   const { format, id } = params;
 
   // Cria uma instância do cliente Supabase para esta requisição no servidor
@@ -165,4 +165,6 @@ export default async function DeckPage({ params }: DeckPageProps) {
       </div>
     </main>
   );
-}
+};
+
+export default DeckPage;
