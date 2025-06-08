@@ -45,6 +45,7 @@ export default async function Header() {
                 <Heart size={16} /> Favoritos
               </Link>
               <div className="flex items-center gap-2">
+                {user.user_metadata.full_name}
                 {user.user_metadata.avatar_url && (
                   <Image
                     src={user.user_metadata.avatar_url}

@@ -24,26 +24,35 @@ export default function LoginPage() {
     event.preventDefault()
     setIsSubmitting(true)
     setError(null)
-    const supabase = createClient()
+    
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+      if (error) {
+        // Lança o erro para ser apanhado pelo bloco catch
+        throw error
+      }
 
-    if (error) {
+      // Login bem-sucedido, atualiza a página para que o novo estado de autenticação
+      // seja reconhecido pelos Server Components (como o Header).
+      // O seu ficheiro middleware.ts irá tratar do redirecionamento.
+      router.refresh()
+
+    } catch (error: any) {
       console.error('Login Error:', error)
-      // Melhora a mensagem de erro para o utilizador
       if (error.message === 'Invalid login credentials') {
         setError('Email ou senha inválidos. Por favor, verifique os seus dados.')
       } else {
-        setError(error.message)
+        setError(error.message || 'Ocorreu um erro inesperado.')
       }
+    } finally {
+      // Este bloco é executado sempre, após o try ou o catch.
+      // Isto garante que o botão é reativado, mesmo que a navegação demore.
       setIsSubmitting(false)
-    } else {
-      // Força um refresh da página para que o novo estado de login seja
-      // reconhecido pelos Server Components (como o Header).
-      router.refresh()
     }
   }
 
@@ -61,7 +70,6 @@ export default function LoginPage() {
     <div
       className="min-h-screen w-full flex items-center justify-center p-4 bg-neutral-950"
       style={{
-        // Fundo temático com gradientes subtis que remetem às cores de mana
         backgroundImage: `radial-gradient(circle at top right, rgba(217, 119, 6, 0.1), transparent 40%),
                           radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.1), transparent 50%)`,
       }}
@@ -76,7 +84,6 @@ export default function LoginPage() {
           </p>
         </header>
 
-        {/* Botão de Login com Google, agora com mais destaque */}
         <Button
           onClick={handleLoginWithGoogle}
           variant="outline"
@@ -86,14 +93,12 @@ export default function LoginPage() {
           Continuar com Google
         </Button>
 
-        {/* Divisor */}
         <div className="flex items-center">
           <div className="flex-grow border-t border-neutral-700"></div>
           <span className="flex-shrink mx-4 text-neutral-500 text-xs uppercase">OU</span>
           <div className="flex-grow border-t border-neutral-700"></div>
         </div>
 
-        {/* Formulário de Login com Email e Senha */}
         <form onSubmit={handleSignIn} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-neutral-400">Email</Label>
@@ -111,7 +116,7 @@ export default function LoginPage() {
             <div className="flex items-center justify-between">
               <Label htmlFor="password" className="text-neutral-400">Senha</Label>
               <Link
-                href="/forgot-password" // Link para a nova página de recuperação de senha
+                href="/forgot-password"
                 className="text-xs font-medium text-amber-400 hover:underline"
               >
                 Esqueceu a senha?
@@ -141,7 +146,6 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        {/* Link para Cadastro */}
         <div className="mt-6 text-center text-sm">
           <p className="text-neutral-400">
             Não tem uma conta?{' '}
