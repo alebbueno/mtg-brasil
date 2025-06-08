@@ -66,8 +66,6 @@ export default function UserMenu({ user, fallbackInitial, profile }: UserMenuPro
       
       {user ? (
         <DropdownMenu>
-
-            aa{user.user_metadata.avatar_url}
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-10 w-10 border-2 border-neutral-600 hover:border-amber-400 transition-colors">

@@ -35,9 +35,6 @@ export default async function Header() {
         <div className="flex-1 px-4 lg:px-8">
           <GlobalSearch />
         </div>
-
-        {user?.email}
-
         <UserMenu 
           user={user ? {
             email: user.email || '',
