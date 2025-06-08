@@ -2,14 +2,13 @@
 /* eslint-disable no-console */
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-// Importante: Importa a função createClient correta para Server Components
 import { createClient } from '@/app/utils/supabase/server';
 import { fetchCardsByNames } from '@/app/lib/scryfall';
 
 // Definindo interfaces claras para os dados
 interface DeckCard {
-  count: number;
   name: string;
+  count: number;
 }
 
 interface Decklist {
@@ -30,25 +29,25 @@ interface DeckFromDB {
   created_at: string;
 }
 
-// Componente da página com a tipagem das props definida diretamente na assinatura.
-// Esta é a abordagem mais robusta para evitar erros de tipo.
-export default async function DeckPage({
-  params,
-}: {
+// Tipagem para as props da página dinâmica
+interface DeckPageProps {
   params: {
     format: 'commander' | 'pauper' | 'modern';
     id: string;
   };
-}) {
+  searchParams?: Record<string, string | string[] | undefined>;
+}
+
+export default async function DeckPage({ params }: DeckPageProps) {
   const { format, id } = params;
-  
-  // Importante: Cria uma instância do cliente Supabase para esta requisição no servidor
+
+  // Cria uma instância do cliente Supabase para esta requisição no servidor
   const supabase = createClient();
 
-  // Buscar o deck no Supabase usando o cliente correto
+  // Buscar o deck no Supabase
   const { data: deck, error } = await supabase
     .from('daily_decks')
-    .select<"*", DeckFromDB>("*") // Especifica o tipo de retorno para o select
+    .select<"*", DeckFromDB>("*")
     .eq('deck_id', id)
     .eq('format', format)
     .single();
@@ -68,7 +67,7 @@ export default async function DeckPage({
   const cardsData = await fetchCardsByNames(cardNames);
   const cardImageMap = cardsData.reduce((map, card) => {
     if (card && card.name) {
-        map.set(card.name, card.image_uris?.normal || `https://placehold.co/265x370/171717/EAB308?text=${encodeURIComponent(card.name)}`);
+      map.set(card.name, card.image_uris?.normal || `https://placehold.co/265x370/171717/EAB308?text=${encodeURIComponent(card.name)}`);
     }
     return map;
   }, new Map<string, string>());
@@ -147,12 +146,12 @@ export default async function DeckPage({
                 <div key={`${card.name}-${index}`} className="relative group">
                   <div className="relative w-full aspect-[5/7] rounded-lg overflow-hidden">
                     <Image
-                        src={cardImageMap.get(card.name) || `https://placehold.co/265x370/171717/EAB308?text=${encodeURIComponent(card.name)}`}
-                        alt={card.name}
-                        fill
-                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-                        className="rounded-lg shadow-lg w-full transition-transform duration-300 group-hover:scale-105"
-                        loading="lazy"
+                      src={cardImageMap.get(card.name) || `https://placehold.co/265x370/171717/EAB308?text=${encodeURIComponent(card.name)}`}
+                      alt={card.name}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                      className="rounded-lg shadow-lg w-full transition-transform duration-300 group-hover:scale-105"
+                      loading="lazy"
                     />
                   </div>
                   <div className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2 bg-black bg-opacity-70 text-white text-xs font-bold px-2 py-1 rounded">
