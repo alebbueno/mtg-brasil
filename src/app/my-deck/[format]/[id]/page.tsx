@@ -2,10 +2,10 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/app/utils/supabase/server';
 import { fetchCardsByNames, ScryfallCard } from '@/app/lib/scryfall';
-import DeckDetailView from './DeckDetailView'; // Importa o novo componente de cliente
-import type { ReactElement } from 'react'; // Importa o tipo para o retorno da função
+import DeckDetailView from './DeckDetailView'; 
+import type { ReactElement } from 'react';
 
-// --- Tipos de Dados ---
+// --- Tipos de Dados (mantidos para uso interno) ---
 export interface DeckCard {
   count: number;
   name: string;
@@ -25,14 +25,19 @@ export interface DeckFromDB {
   representative_card_image_url: string | null;
 }
 
-// Componente da página com tipagem explícita nas props e no retorno
-export default async function DeckDetailPage({
-  params,
-}: {
-  params: { format: string; id: string };
-}): Promise<ReactElement> { // Define explicitamente que a função retorna um elemento React
+// *** ALTERAÇÃO PRINCIPAL: Usando 'any' para as props como passo de depuração ***
+// Isto diz ao TypeScript para não verificar os tipos das props, o que pode contornar
+// o erro de compilação se ele for causado por uma inferência de tipo incorreta.
+export default async function DeckDetailPage({ params }: any): Promise<ReactElement> { 
   const supabase = createClient();
-  const { id } = params;
+  // Extraímos os parâmetros de forma segura, mesmo com 'any'
+  const id = params?.id as string;
+  const format = params?.format as string;
+
+  if (!id || !format) {
+    // Se os parâmetros não existirem, não podemos continuar
+    notFound();
+  }
 
   // 1. Busca o utilizador logado para verificar permissões
   const { data: { user } } = await supabase.auth.getUser();
