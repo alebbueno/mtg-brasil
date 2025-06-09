@@ -2,14 +2,10 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/app/utils/supabase/server';
 import { fetchCardsByNames, type ScryfallCard } from '@/app/lib/scryfall';
-import DeckDetailView from './DeckDetailView'; 
+import DeckDetailView from './DeckDetailView';
 import type { DeckFromDB } from '@/app/lib/types';
 
-export default async function DeckDetailPage({
-  params,
-}: {
-  params: { format: string; id: string };
-}) {
+export default async function DeckDetailPage({ params }: any) {
   const supabase = createClient();
   const { id, format } = params;
 
