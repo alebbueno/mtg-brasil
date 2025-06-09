@@ -15,7 +15,7 @@ export interface ScryfallCard {
   color_identity: string[];
   rarity: string;
   set_name: string;
-  legalities: { // Campo adicionado para corrigir o erro de build
+  legalities: {
     standard: string;
     modern: string;
     pauper: string;
@@ -23,7 +23,14 @@ export interface ScryfallCard {
     legacy: string;
     vintage: string;
     pioneer: string;
-    [key: string]: string; // Permite outros formatos
+    [key: string]: string;
+  };
+  prices: { // Campo adicionado para corrigir o erro de build
+    usd: string | null;
+    usd_foil: string | null;
+    eur: string | null;
+    eur_foil: string | null;
+    tix: string | null;
   };
   image_uris?: {
     small: string;
