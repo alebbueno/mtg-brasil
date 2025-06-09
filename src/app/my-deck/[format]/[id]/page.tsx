@@ -3,17 +3,18 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
 // app/my-deck/[format]/[id]/page.tsx
-'use client' // Converte para um Componente de Cliente para permitir interatividade
+'use client'
 
 import { useState, useEffect, useCallback } from 'react';
-import { notFound, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { createClient } from '@/app/utils/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { fetchCardsByNames, ScryfallCard } from '@/app/lib/scryfall';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Droplets, Globe, Lock, Loader2 } from 'lucide-react';
+import { BarChart, Droplets, Globe, Lock, Loader2, Frown } from 'lucide-react';
 import { DeckPrivacyToggle } from '@/app/components/deck/DeckPrivacyToggle';
+import { Button } from '@/components/ui/button';
 
 // --- Tipos de Dados ---
 interface DeckCard {
@@ -65,7 +66,7 @@ function CardListSection({
                   key={card.id} 
                   className="text-neutral-200 hover:bg-neutral-800 p-1 rounded-md cursor-pointer flex justify-between items-center text-sm"
                   onMouseEnter={() => onCardHover(card.image_uris?.normal || null)}
-                  onMouseLeave={() => onCardHover(null)} // Opcional: limpa a imagem ao sair
+                  onMouseLeave={() => onCardHover(null)}
                 >
                   <span>{count}x {card.name}</span>
                 </li>
@@ -96,28 +97,27 @@ export default function DeckDetailPage({
   const [deck, setDeck] = useState<DeckFromDB | null>(null);
   const [scryfallCardMap, setScryfallCardMap] = useState<Map<string, ScryfallCard>>(new Map());
   const [loading, setLoading] = useState(true);
+  const [notFoundError, setNotFoundError] = useState(false); // Novo estado para o erro 404
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   // Lógica para buscar os dados, agora dentro de um useEffect
   const fetchDeckData = useCallback(async (loggedInUser: User) => {
-    // Buscar dados do deck no Supabase
     const { data: deckData, error: deckError } = await supabase
       .from('decks')
       .select<"*", DeckFromDB>("*")
       .eq('id', id)
       .single();
     
-    // As políticas de segurança (RLS) do Supabase já restringem o acesso a decks privados.
-    // Se deckError existir, significa que o deck não foi encontrado ou o utilizador não tem permissão.
     if (deckError || !deckData) {
       console.error(`Deck não encontrado ou sem permissão (ID: ${id}):`, deckError);
-      return notFound();
+      setNotFoundError(true); // Em vez de notFound(), definimos o estado de erro
+      setLoading(false);
+      return;
     }
     
     setDeck(deckData);
     setPreviewImageUrl(deckData.representative_card_image_url);
 
-    // Buscar dados das cartas no Scryfall
     const allCardNames = [
       ...deckData.decklist.mainboard.map(c => c.name),
       ...(deckData.decklist.sideboard?.map(c => c.name) || []),
@@ -142,18 +142,33 @@ export default function DeckDetailPage({
     checkUserAndFetchData();
   }, [router, fetchDeckData, supabase]);
 
-  // Função para lidar com o hover do rato na lista de cartas
   const handleCardHover = (imageUrl: string | null) => {
     setPreviewImageUrl(imageUrl || deck?.representative_card_image_url || null);
   };
 
-  // Enquanto os dados estão a ser carregados
-  if (loading || !deck) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-950">
         <Loader2 className="h-12 w-12 animate-spin text-amber-500" />
       </div>
     );
+  }
+
+  // Se o estado notFoundError for verdadeiro, mostra uma mensagem de erro
+  if (notFoundError) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-950 text-neutral-300">
+        <Frown className="h-16 w-16 text-amber-500 mb-4" />
+        <h1 className="text-4xl font-bold">404 - Deck Não Encontrado</h1>
+        <p className="mt-2">O deck que procura não existe ou não tem permissão para o ver.</p>
+        <Button onClick={() => router.push('/my-decks')} className="mt-6">Voltar para Meus Decks</Button>
+      </div>
+    );
+  }
+
+  if (!deck) {
+    // Este caso não deve acontecer se a lógica estiver correta, mas é uma segurança
+    return <div className="min-h-screen flex items-center justify-center bg-neutral-950">Deck não carregado.</div>;
   }
 
   // Agrupa as cartas após os dados serem carregados
@@ -212,8 +227,6 @@ export default function DeckDetailPage({
 
         {/* Layout Principal: Imagem à Esquerda, Conteúdo à Direita */}
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
-          
-          {/* Coluna da Imagem (3 colunas de largura) */}
           <div className="lg:col-span-3 sticky top-24 self-start">
             <Image
                 src={previewImageUrl || 'https://placehold.co/340x475/171717/EAB308?text=Passe+o+rato'}
@@ -223,8 +236,6 @@ export default function DeckDetailPage({
                 className="rounded-lg shadow-lg mx-auto transition-all duration-300"
             />
           </div>
-
-          {/* Coluna do Conteúdo (7 colunas de largura) */}
           <main className="lg:col-span-7 space-y-8">
             <aside className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="bg-neutral-900 border-neutral-800">
