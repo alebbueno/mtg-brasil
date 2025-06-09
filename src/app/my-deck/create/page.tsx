@@ -1,7 +1,8 @@
 // app/my-deck/create/page.tsx
 'use client'
 
-import { useFormState, useFormStatus } from 'react-dom'
+import { useActionState } from 'react' // hook para estado da ação
+import { useFormStatus } from 'react-dom' // hook para estado do formulário
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,6 +19,7 @@ import { createDeck } from '@/app/actions/deckActions'
 import { Loader2, PlusCircle, Globe, Lock } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { useState } from 'react'
+import AutocompleteInput from '@/app/components/deck/AutocompleteInput'
 
 const initialState = {
   message: '',
@@ -34,8 +36,10 @@ function SubmitButton() {
 }
 
 export default function CreateDeckPage() {
-  const [state, formAction] = useFormState(createDeck, initialState)
+  const [state, formAction] = useActionState(createDeck, initialState)
   const [isPublic, setIsPublic] = useState(false)
+  const [selectedFormat, setSelectedFormat] = useState('')
+  const [commander, setCommander] = useState('')
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 py-8 px-4 md:px-6">
@@ -50,7 +54,6 @@ export default function CreateDeckPage() {
         </header>
 
         <form action={formAction} className="p-8 bg-neutral-900 rounded-lg border border-neutral-800 space-y-6">
-          {/* Nome do Deck */}
           <div className="space-y-2">
             <Label htmlFor="name" className="text-lg font-semibold">Nome do Deck</Label>
             <Input
@@ -63,10 +66,9 @@ export default function CreateDeckPage() {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Formato */}
             <div className="space-y-2">
               <Label htmlFor="format" className="text-lg font-semibold">Formato</Label>
-              <Select name="format" required>
+              <Select name="format" required onValueChange={setSelectedFormat}>
                 <SelectTrigger className="bg-neutral-800 border-neutral-700 focus:ring-amber-500">
                   <SelectValue placeholder="Selecione um formato" />
                 </SelectTrigger>
@@ -81,10 +83,9 @@ export default function CreateDeckPage() {
                 </SelectContent>
               </Select>
             </div>
-            {/* Seletor de Privacidade */}
             <div className="space-y-2">
                 <Label className="text-lg font-semibold">Visibilidade</Label>
-                <div className="flex items-center space-x-3 p-3 bg-neutral-800 border border-neutral-700 rounded-md">
+                <div className="flex items-center space-x-3 p-3 bg-neutral-800 border border-neutral-700 rounded-md h-full">
                     <Switch 
                         id="is_public" 
                         name="is_public" 
@@ -99,8 +100,19 @@ export default function CreateDeckPage() {
             </div>
           </div>
 
+          {/* Campo do Comandante - Renderizado Condicionalmente */}
+          {selectedFormat === 'commander' && (
+            <div className="space-y-2">
+              <Label htmlFor="commander" className="text-lg font-semibold">Comandante</Label>
+              <AutocompleteInput 
+                onSelect={setCommander} 
+                placeholder="Digite o nome do seu comandante..."
+              />
+              {/* Input escondido para enviar o valor do comandante com o formulário */}
+              <input type="hidden" name="commander" value={commander} />
+            </div>
+          )}
 
-          {/* Descrição / Estratégia */}
           <div className="space-y-2">
             <Label htmlFor="description" className="text-lg font-semibold">Descrição (Opcional)</Label>
             <Textarea
@@ -112,9 +124,10 @@ export default function CreateDeckPage() {
             />
           </div>
           
-          {/* Lista de Cartas */}
           <div className="space-y-2">
-            <Label htmlFor="decklist" className="text-lg font-semibold">Lista de Cartas</Label>
+            <Label htmlFor="decklist" className="text-lg font-semibold">
+              Lista de Cartas {selectedFormat === 'commander' && '(as 99, sem o comandante)'}
+            </Label>
             <Textarea
               id="decklist"
               name="decklist"
@@ -144,5 +157,5 @@ export default function CreateDeckPage() {
         </form>
       </div>
     </div>
-  )
+  );
 }

@@ -1,19 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
-// app/my-decks/page.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/app/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Loader2, PlusCircle, Swords } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import DeckCardItem from './DeckCardItem' // Importa o novo componente
 
 // Tipagem para os dados de um deck
 type Deck = {
@@ -31,32 +27,70 @@ export default function MyDecksPage() {
   const [decks, setDecks] = useState<Deck[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+  // Função para buscar os decks, agora num useCallback para ser reutilizável
+  const fetchDecks = useCallback(async (userId: string) => {
+    const { data: decksData, error } = await supabase
+      .from('decks')
+      .select('id, name, format, representative_card_image_url, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
 
+    if (error) {
+      console.error('Erro ao buscar decks:', error)
+    } else {
+      setDecks(decksData || [])
+    }
+  }, [supabase]);
+
+  // Função para lidar com a exclusão de um deck no estado local
+  const handleDeckDelete = useCallback((deckId: string) => {
+    setDecks((prevDecks) => prevDecks.filter((deck) => deck.id !== deckId));
+  }, []);
+
+  // Efeito para buscar os dados iniciais
+  useEffect(() => {
+    const initialize = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         setUser(user)
-        const { data: decksData, error } = await supabase
-          .from('decks')
-          .select('id, name, format, representative_card_image_url, created_at')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-
-        if (error) {
-          console.error('Erro ao buscar decks:', error)
-        } else {
-          setDecks(decksData || [])
-        }
+        await fetchDecks(user.id)
       } else {
         router.push('/login')
       }
       setLoading(false)
     }
-    fetchData()
-  }, [supabase, router])
+    initialize()
+  }, [supabase, router, fetchDecks])
 
-  if (loading) {
+  // Efeito para ouvir atualizações em tempo real (exclusão de decks)
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('realtime-decks')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // O.med Ouve inserções, atualizações e exclusões
+          schema: 'public',
+          table: 'decks',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('Alteração recebida nos decks, atualizando a lista...', payload);
+          // Busca a lista de decks novamente para refletir a alteração
+          fetchDecks(user.id);
+        }
+      )
+      .subscribe()
+
+    // Limpa a subscrição quando o componente é desmontado
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, user, fetchDecks])
+
+  if ( loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-950">
         <Loader2 className="h-12 w-12 animate-spin text-amber-500" />
@@ -87,31 +121,7 @@ export default function MyDecksPage() {
         {decks.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {decks.map((deck) => (
-              // --- CORREÇÃO AQUI ---
-              // O link agora aponta para a rota correta: /my-deck/[format]/[id]
-              <Link href={`/my-deck/${deck.format}/${deck.id}`} key={deck.id}>
-                <Card className="bg-neutral-900 border-neutral-800 hover:border-amber-500 transition-all duration-300 group cursor-pointer h-full flex flex-col">
-                  <CardHeader className="p-0">
-                    <div className="relative w-full aspect-[5/3] rounded-t-lg overflow-hidden">
-                      <Image
-                        src={deck.representative_card_image_url || 'https://placehold.co/400x240/171717/EAB308?text=Deck'}
-                        alt={`Carta representativa do deck ${deck.name}`}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-4 flex flex-col flex-grow">
-                    <CardTitle className="text-xl text-amber-400 group-hover:text-amber-300 truncate">{deck.name}</CardTitle>
-                    <CardDescription className="capitalize text-neutral-400 mt-1">{deck.format}</CardDescription>
-                    <div className="flex-grow"></div>
-                    <p className="text-xs text-neutral-500 mt-4">
-                      Criado em: {new Date(deck.created_at).toLocaleDateString('pt-BR')}
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
+              <DeckCardItem key={deck.id} deck={deck} onDelete={handleDeckDelete} />
             ))}
           </div>
         ) : (
