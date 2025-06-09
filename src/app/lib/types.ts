@@ -1,8 +1,8 @@
-// app/lib/types.ts
+// src/app/lib/types.ts
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { ScryfallCard } from '@/app/lib/scryfall';
 
-// Tipos relacionados com Decks
+// Tipos para os dados do Deck vindos da base de dados
 export interface DeckCard {
   count: number;
   name: string;
@@ -24,16 +24,17 @@ export interface DeckFromDB {
   representative_card_image_url: string | null;
 }
 
-// Tipos para as props dos componentes
-export interface DeckDetailPageProps {
-  params: {
-    format: string;
-    id: string;
-  };
-};
+// Tipo para os dados do perfil do criador
+export interface CreatorProfile {
+  username: string | null;
+  avatar_url: string | null;
+  cover_image_url: string | null;
+}
 
+// Props para o componente de visualização do cliente
 export interface DeckDetailViewProps {
   initialDeck: DeckFromDB;
   initialScryfallMapArray: [string, ScryfallCard][];
   currentUser: SupabaseUser | null;
+  creatorProfile: CreatorProfile | null;
 }

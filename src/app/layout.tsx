@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y/iframe-has-title */
+import 'mana-font/css/mana.css'; // <-- ADICIONE ESTA LINHA
 import './globals.css';
 import type { Metadata } from 'next';
 import React from 'react';

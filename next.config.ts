@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'placehold.co', // Domínio adicionado para as imagens de fallback
+      },
+      {
+        protocol: 'https',
         hostname: 'irvppzfjscjphhnzxcxp.supabase.co', // Substitua se o ID do seu projeto for diferente
       },
       {

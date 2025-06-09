@@ -7,27 +7,33 @@ export async function middleware(request: NextRequest) {
   const { supabase, response } = createClient(request)
 
   // Atualiza a sessão do utilizador baseada nos cookies da requisição.
-  // Este passo é crucial para manter o estado de autenticação sincronizado.
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Lógica de Redirecionamento:
+  const { pathname } = request.nextUrl
+
+  // --- Lógica de Redirecionamento ---
+  
   // 1. Se o utilizador está logado e tenta aceder a páginas públicas como /login,
   //    redireciona-o para a página inicial.
-  if (user && ['/login', '/signup', '/forgot-password'].includes(request.nextUrl.pathname)) {
+  if (user && ['/login', '/signup', '/forgot-password'].includes(pathname)) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
   // 2. Se o utilizador não está logado e tenta aceder a uma página protegida,
   //    redireciona-o para a página de login.
-  //    Adicione aqui outros caminhos que devem ser protegidos.
-  if (!user && (request.nextUrl.pathname.startsWith('/profile') || request.nextUrl.pathname.startsWith('/favorites'))) {
+  //    Páginas como a lista "Meus Decks" ou "Criar Deck" devem ser protegidas.
+  const protectedRoutes = ['/profile', '/my-decks', '/my-deck/create', '/favorites']
+  if (!user && protectedRoutes.some(route => pathname.startsWith(route))) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Retorna a resposta. A função `createClient` no helper do middleware
-  // já trata de anexar os cookies atualizados à resposta, se a sessão tiver mudado.
+  // A rota de detalhe do deck (/my-deck/[format]/[id]) NÃO está na lista de rotas protegidas acima.
+  // Isto significa que o middleware irá permitir que qualquer pessoa (logada ou não) aceda a ela.
+  // A lógica de permissão para ver o deck (público vs. privado) será tratada na própria página.
+
+  // Retorna a resposta, permitindo que a requisição continue.
   return response
 }
 
@@ -38,8 +44,6 @@ export const config = {
      * - _next/static (ficheiros estáticos)
      * - _next/image (otimização de imagem)
      * - favicon.ico (ficheiro de ícone)
-     * Isto garante que o middleware corre em todas as páginas e rotas de API,
-     * mas não em recursos estáticos.
      */
     '/((?!_next/static|_next/image|favicon.ico).*)',
   ],

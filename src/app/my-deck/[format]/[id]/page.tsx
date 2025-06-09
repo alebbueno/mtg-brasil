@@ -1,41 +1,24 @@
 // app/my-deck/[format]/[id]/page.tsx
 import { notFound } from 'next/navigation';
 import { createClient } from '@/app/utils/supabase/server';
-import { fetchCardsByNames, ScryfallCard } from '@/app/lib/scryfall';
+import { fetchCardsByNames, type ScryfallCard } from '@/app/lib/scryfall';
 import DeckDetailView from './DeckDetailView'; 
-import type { ReactElement } from 'react';
+import type { DeckFromDB } from '@/app/lib/types'; // Assumindo que tem um ficheiro central de tipos
 
-// --- Tipos de Dados (mantidos para uso interno) ---
-export interface DeckCard {
-  count: number;
-  name: string;
-}
-export interface Decklist {
-  mainboard: DeckCard[];
-  sideboard?: DeckCard[];
-}
-export interface DeckFromDB {
-  id: string;
-  user_id: string;
-  name: string;
-  format: string;
-  description: string | null;
-  decklist: Decklist;
-  is_public: boolean;
-  representative_card_image_url: string | null;
-}
+// Definição de tipo correta e explícita para as props da página
+type DeckDetailPageProps = {
+  params: {
+    format: string;
+    id: string;
+  };
+};
 
-// *** ALTERAÇÃO PRINCIPAL: Usando 'any' para as props como passo de depuração ***
-// Isto diz ao TypeScript para não verificar os tipos das props, o que pode contornar
-// o erro de compilação se ele for causado por uma inferência de tipo incorreta.
-export default async function DeckDetailPage({ params }: any): Promise<ReactElement> { 
+export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
   const supabase = createClient();
-  // Extraímos os parâmetros de forma segura, mesmo com 'any'
-  const id = params?.id as string;
-  const format = params?.format as string;
+  // A desestruturação aqui é segura, pois os params já foram resolvidos pelo Next.js
+  const { id, format } = params;
 
   if (!id || !format) {
-    // Se os parâmetros não existirem, não podemos continuar
     notFound();
   }
 
@@ -52,8 +35,15 @@ export default async function DeckDetailPage({ params }: any): Promise<ReactElem
   if (error || !deckData) {
     notFound();
   }
+  
+  // 3. Busca o perfil do criador do deck (se necessário)
+  const { data: creatorProfile } = await supabase
+    .from('profiles')
+    .select('username, avatar_url, cover_image_url')
+    .eq('id', deckData.user_id)
+    .single();
 
-  // 3. Busca os dados detalhados das cartas no Scryfall
+  // 4. Busca os dados detalhados das cartas
   const allCardNames = [
     ...deckData.decklist.mainboard.map(c => c.name),
     ...(deckData.decklist.sideboard?.map(c => c.name) || []),
@@ -69,6 +59,7 @@ export default async function DeckDetailPage({ params }: any): Promise<ReactElem
       initialDeck={deckData}
       initialScryfallMapArray={scryfallCardMapArray} 
       currentUser={user}
+      creatorProfile={creatorProfile}
     />
   );
 }
