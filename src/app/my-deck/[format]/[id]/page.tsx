@@ -1,6 +1,7 @@
-/* eslint-disable no-console */
 /* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-vars */
+/* eslint-disable no-console */
 'use client'
 
 import { useState, useEffect, useCallback } from 'react';
@@ -13,7 +14,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Droplets, Globe, Lock, Loader2, Frown } from 'lucide-react';
 import { DeckPrivacyToggle } from '@/app/components/deck/DeckPrivacyToggle';
 import { Button } from '@/components/ui/button';
-import type { NextPage } from 'next';
 
 // --- Tipos de Dados ---
 interface DeckCard {
@@ -36,6 +36,13 @@ interface DeckFromDB {
   is_public: boolean;
   representative_card_image_url: string | null;
   created_at: string;
+}
+
+interface DeckDetailPageProps {
+  params: {
+    format: string;
+    id: string;
+  };
 }
 
 // --- Sub-componente para a Lista de Cartas ---
@@ -79,16 +86,7 @@ function CardListSection({
 }
 
 // --- Componente Principal da Página ---
-interface DeckDetailPageProps {
-  params: {
-    format: string;
-    id: string;
-  };
-}
-
-const DeckDetailPage: NextPage<DeckDetailPageProps> = ({
-  params,
-}: DeckDetailPageProps) => {
+export default function DeckDetailPage({ params }: DeckDetailPageProps) {
   const supabase = createClient();
   const router = useRouter();
   const { id } = params;
@@ -102,7 +100,7 @@ const DeckDetailPage: NextPage<DeckDetailPageProps> = ({
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   // Lógica para buscar os dados, agora dentro de um useEffect
-  const fetchDeckData = useCallback(async (_loggedInUser: User) => {
+  const fetchDeckData = useCallback(async (loggedInUser: User) => {
     const { data: deckData, error: deckError } = await supabase
       .from('decks')
       .select('*')
@@ -223,7 +221,7 @@ const DeckDetailPage: NextPage<DeckDetailPageProps> = ({
             )}
           </div>
         </header>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
           <div className="lg:col-span-3 sticky top-24 self-start">
             <Image
@@ -275,5 +273,3 @@ const DeckDetailPage: NextPage<DeckDetailPageProps> = ({
     </div>
   );
 }
-
-export default DeckDetailPage;
