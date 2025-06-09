@@ -3,9 +3,9 @@ import { notFound } from 'next/navigation';
 import { createClient } from '@/app/utils/supabase/server';
 import { fetchCardsByNames, ScryfallCard } from '@/app/lib/scryfall';
 import DeckDetailView from './DeckDetailView'; // Importa o novo componente de cliente
+import type { ReactElement } from 'react'; // Importa o tipo para o retorno da função
 
 // --- Tipos de Dados ---
-// É uma boa prática definir os tipos que serão usados em múltiplos locais
 export interface DeckCard {
   count: number;
   name: string;
@@ -25,15 +25,12 @@ export interface DeckFromDB {
   representative_card_image_url: string | null;
 }
 
-// Definição de tipo mais explícita para as props da página
-type DeckDetailPageProps = {
-  params: {
-    format: string;
-    id: string;
-  };
-};
-
-export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
+// Componente da página com tipagem explícita nas props e no retorno
+export default async function DeckDetailPage({
+  params,
+}: {
+  params: { format: string; id: string };
+}): Promise<ReactElement> { // Define explicitamente que a função retorna um elemento React
   const supabase = createClient();
   const { id } = params;
 
@@ -60,13 +57,11 @@ export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
   const scryfallCards = await fetchCardsByNames(uniqueCardNames);
   
   // Cria um array de arrays [key, value] que é serializável.
-  // Isto é mais seguro para passar para Componentes de Cliente do que um objeto Map.
   const scryfallCardMapArray = scryfallCards.map(card => [card.name, card] as [string, ScryfallCard]);
 
   return (
     <DeckDetailView 
       initialDeck={deckData}
-      // Passa o array serializável em vez de um objeto Map
       initialScryfallMapArray={scryfallCardMapArray} 
       currentUser={user}
     />
