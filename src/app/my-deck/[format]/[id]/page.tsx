@@ -6,14 +6,14 @@ import DeckDetailView from './DeckDetailView';
 import type { DeckFromDB } from '@/app/lib/types'; // Assumindo que tem um ficheiro central de tipos
 
 // Definição de tipo correta e explícita para as props da página
-type DeckDetailPageProps = {
+interface PageProps {
   params: {
     format: string;
     id: string;
   };
-};
+}
 
-export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
+export default async function DeckDetailPage({ params }: PageProps) {
   const supabase = createClient();
   // A desestruturação aqui é segura, pois os params já foram resolvidos pelo Next.js
   const { id, format } = params;
