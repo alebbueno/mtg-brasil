@@ -2,41 +2,21 @@
 // app/my-deck/[format]/[id]/DeckDetailView.tsx
 'use client'
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import type { User } from '@supabase/supabase-js';
 import type { ScryfallCard } from '@/app/lib/scryfall';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Droplets, Globe, Lock } from 'lucide-react';
 import { DeckPrivacyToggle } from '@/app/components/deck/DeckPrivacyToggle';
-
-// --- Tipos de Dados (copiados da sua página original) ---
-interface DeckCard {
-  count: number;
-  name: string;
-}
-interface Decklist {
-  mainboard: DeckCard[];
-  sideboard?: DeckCard[];
-}
-interface DeckData {
-  id: string;
-  user_id: string;
-  name: string;
-  format: string;
-  description: string | null;
-  decklist: Decklist;
-  is_public: boolean;
-  representative_card_image_url: string | null;
-}
+import type { DeckFromDB, DeckCard } from './page'; // Importa os tipos da página principal
 
 // --- Tipos para as Props deste componente ---
 interface DeckDetailViewProps {
-  initialDeck: DeckData;
-  initialScryfallMap: Map<string, ScryfallCard>;
+  initialDeck: DeckFromDB;
+  initialScryfallMapArray: [string, ScryfallCard][];
   currentUser: User | null;
 }
-
 
 // --- Sub-componente para a Lista de Cartas ---
 function CardListSection({ 
@@ -80,10 +60,12 @@ function CardListSection({
   );
 }
 
-
 // --- Componente Principal da Visualização (Cliente) ---
-export default function DeckDetailView({ initialDeck, initialScryfallMap, currentUser }: DeckDetailViewProps) {
+export default function DeckDetailView({ initialDeck, initialScryfallMapArray, currentUser }: DeckDetailViewProps) {
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(initialDeck.representative_card_image_url);
+
+  // Recria o Map a partir do array recebido, usando useMemo para performance
+  const scryfallCardMap = useMemo(() => new Map(initialScryfallMapArray), [initialScryfallMapArray]);
 
   const handleCardHover = (imageUrl: string) => {
     if(imageUrl) setPreviewImageUrl(imageUrl);
@@ -97,7 +79,7 @@ export default function DeckDetailView({ initialDeck, initialScryfallMap, curren
   const groupCardsByType = (deckCards: DeckCard[]) => {
     const grouped: Record<string, { card: ScryfallCard; count: number }[]> = {};
     deckCards.forEach(deckCard => {
-      const cardData = initialScryfallMap.get(deckCard.name);
+      const cardData = scryfallCardMap.get(deckCard.name);
       if (!cardData) return;
       let mainType = "Outros";
       if (cardData.type_line.includes("Creature")) mainType = "Criaturas";
@@ -177,7 +159,7 @@ export default function DeckDetailView({ initialDeck, initialScryfallMap, curren
                     <div className="prose prose-invert text-neutral-300 whitespace-pre-wrap">{initialDeck.description}</div>
                   </CardContent>
                 </Card>
-              )}
+            )}
             </aside>
             <div className="space-y-12">
               <CardListSection 

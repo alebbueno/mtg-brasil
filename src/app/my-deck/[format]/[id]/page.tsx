@@ -4,16 +4,17 @@ import { createClient } from '@/app/utils/supabase/server';
 import { fetchCardsByNames, ScryfallCard } from '@/app/lib/scryfall';
 import DeckDetailView from './DeckDetailView'; // Importa o novo componente de cliente
 
-// Tipos de dados necessários para a busca no servidor
-interface DeckCard {
+// --- Tipos de Dados ---
+// É uma boa prática definir os tipos que serão usados em múltiplos locais
+export interface DeckCard {
   count: number;
   name: string;
 }
-interface Decklist {
+export interface Decklist {
   mainboard: DeckCard[];
   sideboard?: DeckCard[];
 }
-interface DeckFromDB {
+export interface DeckFromDB {
   id: string;
   user_id: string;
   name: string;
@@ -24,14 +25,15 @@ interface DeckFromDB {
   representative_card_image_url: string | null;
 }
 
-export default async function DeckDetailPage({
-  params,
-}: {
+// Definição de tipo mais explícita para as props da página
+type DeckDetailPageProps = {
   params: {
     format: string;
     id: string;
   };
-}) {
+};
+
+export default async function DeckDetailPage({ params }: DeckDetailPageProps) {
   const supabase = createClient();
   const { id } = params;
 
@@ -45,8 +47,6 @@ export default async function DeckDetailPage({
     .eq('id', id)
     .single();
 
-  // A política de segurança (RLS) já filtra o acesso, então se houver um erro,
-  // significa que o deck não existe ou o utilizador não tem permissão.
   if (error || !deckData) {
     notFound();
   }
@@ -59,18 +59,15 @@ export default async function DeckDetailPage({
   const uniqueCardNames = Array.from(new Set(allCardNames));
   const scryfallCards = await fetchCardsByNames(uniqueCardNames);
   
-  // Cria um mapa para ser passado para o componente de cliente.
-  // Importante: Não podemos passar um `Map` diretamente para um componente de cliente.
-  // Precisamos de o converter num array de arrays ou num objeto.
-  const scryfallCardMapArray = Array.from(new Map<string, ScryfallCard>(
-    scryfallCards.map(card => [card.name, card])
-  ));
+  // Cria um array de arrays [key, value] que é serializável.
+  // Isto é mais seguro para passar para Componentes de Cliente do que um objeto Map.
+  const scryfallCardMapArray = scryfallCards.map(card => [card.name, card] as [string, ScryfallCard]);
 
   return (
     <DeckDetailView 
       initialDeck={deckData}
-      // Passa os dados como um array, para serem reconstruídos como um Map no cliente
-      initialScryfallMap={new Map(scryfallCardMapArray)}
+      // Passa o array serializável em vez de um objeto Map
+      initialScryfallMapArray={scryfallCardMapArray} 
       currentUser={user}
     />
   );
