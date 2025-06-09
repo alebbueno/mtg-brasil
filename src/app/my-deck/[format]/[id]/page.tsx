@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
-// app/my-deck/[format]/[id]/page.tsx
+/* eslint-disable no-unused-vars */
 'use client'
 
 import { useState, useEffect, useCallback } from 'react';
@@ -15,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Droplets, Globe, Lock, Loader2, Frown } from 'lucide-react';
 import { DeckPrivacyToggle } from '@/app/components/deck/DeckPrivacyToggle';
 import { Button } from '@/components/ui/button';
+import type { NextPage } from 'next';
 
 // --- Tipos de Dados ---
 interface DeckCard {
@@ -41,15 +40,15 @@ interface DeckFromDB {
 
 // --- Sub-componente para a Lista de Cartas ---
 function CardListSection({ 
-    title, 
-    cards, 
-    totalCount, 
-    onCardHover 
+  title, 
+  cards, 
+  totalCount, 
+  onCardHover 
 }: { 
-    title: string; 
-    cards: Record<string, { card: ScryfallCard; count: number }[]>; 
-    totalCount: number;
-    onCardHover: (imageUrl: string | null) => void;
+  title: string; 
+  cards: Record<string, { card: ScryfallCard; count: number }[]>; 
+  totalCount: number;
+  onCardHover: (imageUrl: string | null) => void;
 }) {
   if (totalCount === 0) return null;
 
@@ -80,14 +79,16 @@ function CardListSection({
 }
 
 // --- Componente Principal da Página ---
-export default function DeckDetailPage({
-  params,
-}: {
+interface DeckDetailPageProps {
   params: {
     format: string;
     id: string;
   };
-}) {
+}
+
+const DeckDetailPage: NextPage<DeckDetailPageProps> = ({
+  params,
+}: DeckDetailPageProps) => {
   const supabase = createClient();
   const router = useRouter();
   const { id } = params;
@@ -97,20 +98,20 @@ export default function DeckDetailPage({
   const [deck, setDeck] = useState<DeckFromDB | null>(null);
   const [scryfallCardMap, setScryfallCardMap] = useState<Map<string, ScryfallCard>>(new Map());
   const [loading, setLoading] = useState(true);
-  const [notFoundError, setNotFoundError] = useState(false); // Novo estado para o erro 404
+  const [notFoundError, setNotFoundError] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   // Lógica para buscar os dados, agora dentro de um useEffect
-  const fetchDeckData = useCallback(async (loggedInUser: User) => {
+  const fetchDeckData = useCallback(async (_loggedInUser: User) => {
     const { data: deckData, error: deckError } = await supabase
       .from('decks')
-      .select<"*", DeckFromDB>("*")
+      .select('*')
       .eq('id', id)
       .single();
     
     if (deckError || !deckData) {
       console.error(`Deck não encontrado ou sem permissão (ID: ${id}):`, deckError);
-      setNotFoundError(true); // Em vez de notFound(), definimos o estado de erro
+      setNotFoundError(true);
       setLoading(false);
       return;
     }
@@ -154,7 +155,6 @@ export default function DeckDetailPage({
     );
   }
 
-  // Se o estado notFoundError for verdadeiro, mostra uma mensagem de erro
   if (notFoundError) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-950 text-neutral-300">
@@ -167,7 +167,6 @@ export default function DeckDetailPage({
   }
 
   if (!deck) {
-    // Este caso não deve acontecer se a lógica estiver correta, mas é uma segurança
     return <div className="min-h-screen flex items-center justify-center bg-neutral-950">Deck não carregado.</div>;
   }
 
@@ -209,7 +208,7 @@ export default function DeckDetailPage({
               <h1 className="text-4xl font-bold text-amber-400">{deck.name}</h1>
               <div className="flex items-center gap-2 text-lg text-neutral-400 capitalize">
                 <span>{deck.format}</span>
-                <span className="text-neutral-600">&bull;</span>
+                <span className="text-neutral-600">•</span>
                 {deck.is_public ? (
                   <span className="flex items-center gap-1 text-green-400 text-sm"><Globe size={14}/> Público</span>
                 ) : (
@@ -224,16 +223,15 @@ export default function DeckDetailPage({
             )}
           </div>
         </header>
-
-        {/* Layout Principal: Imagem à Esquerda, Conteúdo à Direita */}
+        
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
           <div className="lg:col-span-3 sticky top-24 self-start">
             <Image
-                src={previewImageUrl || 'https://placehold.co/340x475/171717/EAB308?text=Passe+o+rato'}
-                alt="Pré-visualização da carta"
-                width={340}
-                height={475}
-                className="rounded-lg shadow-lg mx-auto transition-all duration-300"
+              src={previewImageUrl || 'https://placehold.co/340x475/171717/EAB308?text=Passe+o+rato'}
+              alt="Pré-visualização da carta"
+              width={340}
+              height={475}
+              className="rounded-lg shadow-lg mx-auto transition-all duration-300"
             />
           </div>
           <main className="lg:col-span-7 space-y-8">
@@ -255,7 +253,7 @@ export default function DeckDetailPage({
                     <div className="prose prose-invert text-neutral-300 whitespace-pre-wrap">{deck.description}</div>
                   </CardContent>
                 </Card>
-            )}
+              )}
             </aside>
             <div className="space-y-12">
               <CardListSection 
@@ -277,3 +275,5 @@ export default function DeckDetailPage({
     </div>
   );
 }
+
+export default DeckDetailPage;
