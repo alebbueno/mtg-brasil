@@ -13,8 +13,18 @@ export interface ScryfallCard {
   oracle_text?: string;
   colors?: string[];
   color_identity: string[];
-  rarity: string; // Campo adicionado para corrigir o erro de build
-  set_name: string; // Campo adicionado para corrigir o erro de build
+  rarity: string;
+  set_name: string;
+  legalities: { // Campo adicionado para corrigir o erro de build
+    standard: string;
+    modern: string;
+    pauper: string;
+    commander: string;
+    legacy: string;
+    vintage: string;
+    pioneer: string;
+    [key: string]: string; // Permite outros formatos
+  };
   image_uris?: {
     small: string;
     normal: string;
