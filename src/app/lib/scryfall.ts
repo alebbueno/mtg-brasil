@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
 // app/lib/scryfall.ts
@@ -14,6 +13,8 @@ export interface ScryfallCard {
   oracle_text?: string;
   colors?: string[];
   color_identity: string[];
+  rarity: string; // Campo adicionado para corrigir o erro de build
+  set_name: string; // Campo adicionado para corrigir o erro de build
   image_uris?: {
     small: string;
     normal: string;
@@ -57,7 +58,7 @@ export async function fetchCardByName(name: string, exact: boolean = true): Prom
   const param = exact ? 'exact' : 'fuzzy';
   const res = await fetch(`https://api.scryfall.com/cards/named?${param}=${encodeURIComponent(name)}`);
   if (!res.ok) {
-    throw new Error(`Erro ao buscar carta: ${res.status} - ${res.statusText}`);
+    throw new Error(`Erro ao buscar carta por nome: ${res.status} - ${res.statusText}`);
   }
   return res.json();
 }
@@ -102,7 +103,6 @@ export async function fetchFilteredSearchResults(
 
   let scryfallQuery = `oracle:"${query}"`; 
   
-  // ... (a sua lógica de construção de query continua igual) ...
   if (filters.types?.length) {
     scryfallQuery += ` ${filters.types.map((t) => `t:${t.toLowerCase()}`).join(' ')}`;
   }
@@ -164,26 +164,60 @@ export async function fetchFilteredSearchResults(
 
 // --- Funções para buscar coleções e cartas em lote ---
 
-export interface ScryfallSet { /* ... (interface como antes) ... */ }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface ScryfallApiListResponse<T> { /* ... (interface como antes) ... */ }
-export interface SetData { /* ... (interface como antes) ... */ }
+export interface ScryfallSet {
+  object: 'set';
+  id: string;
+  code: string;
+  name: string;
+  released_at: string;
+  set_type: string;
+  icon_svg_uri: string;
+  digital: boolean;
+}
 
-export async function fetchLatestSets(count: number = 3): Promise<SetData[]> {
-  const res = await fetch('https://api.scryfall.com/sets');
-  if (!res.ok) {
-    throw new Error(`Error fetching sets: ${res.status} - ${res.statusText}`);
+export interface ScryfallApiListResponse<T> {
+  object: 'list';
+  has_more: boolean;
+  data: T[];
+}
+
+export interface SetData {
+  name: string;
+  code: string;
+  iconUrl?: string;
+}
+
+const VALID_SET_TYPES = ['expansion', 'core', 'masters', 'draft_innovation', 'commander'];
+
+export async function fetchLatestSets(count: number = 5): Promise<SetData[]> {
+  try {
+    const response = await fetch("https://api.scryfall.com/sets");
+    if (!response.ok) {
+      throw new Error(`Erro na API Scryfall (sets): ${response.statusText}`);
+    }
+    
+    const result: ScryfallApiListResponse<ScryfallSet> = await response.json();
+    const latestValidSets = result.data
+      .filter(set => !set.digital && VALID_SET_TYPES.includes(set.set_type) && new Date(set.released_at) <= new Date())
+      .slice(0, count)
+      .map(set => ({
+        name: set.name,
+        code: set.code,
+        iconUrl: set.icon_svg_uri,
+      }));
+      
+    return latestValidSets;
+  } catch (error: any) {
+    console.error("Falha ao buscar últimas coleções:", error);
+    return []; 
   }
-  const data = await res.json();
-  return data.data.slice(0, count);
 }
 
 export async function fetchCardsByNames(names: string[]): Promise<ScryfallCard[]> {
   if (!names || !Array.isArray(names) || names.length === 0) {
-    return []; // Retorna array vazio em vez de lançar erro para não quebrar a UI
+    return [];
   }
 
-  // Divide em lotes de 75 (limite do endpoint /cards/collection)
   const batches = [];
   for (let i = 0; i < names.length; i += 75) {
     batches.push(names.slice(i, i + 75));
@@ -199,7 +233,7 @@ export async function fetchCardsByNames(names: string[]): Promise<ScryfallCard[]
         });
         if (!res.ok) {
             console.error(`Erro ao buscar lote de cartas: ${res.status} - ${await res.text()}`);
-            continue; // Pula para o próximo lote em caso de erro
+            continue;
         }
         const { data } = await res.json();
         if (data) {
