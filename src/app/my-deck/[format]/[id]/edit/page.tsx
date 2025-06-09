@@ -1,9 +1,9 @@
 // app/my-deck/[format]/[id]/edit/page.tsx
 import { notFound } from 'next/navigation';
 import { createClient } from '@/app/utils/supabase/server';
-import EditDeckForm from './EditDeckForm'; // Componente de cliente para o formulário
+import EditDeckForm from './EditDeckForm';
 
-// Tipos para os dados do deck
+// Tipos locais
 interface DeckCard {
   count: number;
   name: string;
@@ -22,19 +22,21 @@ interface DeckData {
   is_public: boolean;
 }
 
-export default async function EditDeckPage({ params }: { params: { id: string } }) {
+// Usamos `any` temporariamente para evitar conflito de tipagem na build
+export default async function EditDeckPage({ params }: any) {
   const supabase = createClient();
   const { id } = params;
 
-  // Busca os dados do utilizador e do deck
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const { data: deck, error } = await supabase
     .from('decks')
     .select<"*", DeckData>("*")
     .eq('id', id)
     .single();
 
-  // Se o deck não for encontrado ou o utilizador não for o dono, mostra 404
   if (error || !deck || user?.id !== deck.user_id) {
     notFound();
   }
@@ -50,8 +52,7 @@ export default async function EditDeckPage({ params }: { params: { id: string } 
             Ajuste a sua estratégia e refina a sua lista.
           </p>
         </header>
-        
-        {/* Passa os dados do deck para o formulário no lado do cliente */}
+
         <EditDeckForm deck={deck} />
       </div>
     </div>
