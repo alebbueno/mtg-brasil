@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
 // app/profile/page.tsx
@@ -11,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Check, Loader2, Upload } from 'lucide-react'
+import { Check, Image as ImageIcon, Loader2, Upload } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
@@ -24,6 +25,7 @@ type Profile = {
   bio: string | null
   birth_date: string | null
   cover_image_url: string | null
+  cover_position_y: number | null // Nova propriedade para a posição da capa
   favorite_colors: string[] | null
   favorite_formats: string[] | null
   social_links: { twitter?: string; instagram?: string; } | null
@@ -37,6 +39,10 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  // Estados para a funcionalidade de arrastar a imagem de capa
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ y: 0, position: 50 })
 
   // Função para buscar os dados do perfil do utilizador
   const getProfile = useCallback(async (user: User) => {
@@ -91,6 +97,7 @@ export default function ProfilePage() {
         full_name: profile.full_name,
         bio: profile.bio,
         birth_date: profile.birth_date,
+        cover_position_y: profile.cover_position_y, // Guardar a nova posição da capa
         favorite_colors: profile.favorite_colors,
         favorite_formats: profile.favorite_formats,
         social_links: profile.social_links,
@@ -129,21 +136,18 @@ export default function ProfilePage() {
 
       if (uploadError) throw uploadError
 
-      // Obtém o URL público da imagem recém-carregada
       const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(filePath)
 
       if (!publicUrl) {
         throw new Error('Não foi possível obter o URL público da imagem.')
       }
 
-      // Atualiza o campo correspondente na tabela 'profiles'
       const fieldToUpdate = type === 'avatar' ? 'avatar_url' : 'cover_image_url'
-      const { error: dbError } = await supabase.from('profiles').update({ [fieldToUpdate]: publicUrl }).eq('id', user.id)
+      const { error: dbError } = await supabase.from('profiles').update({ [fieldToUpdate]: publicUrl, cover_position_y: 50 }).eq('id', user.id)
       
       if (dbError) throw dbError
 
-      // Atualiza o estado local para exibir a nova imagem imediatamente
-      setProfile(prev => prev ? { ...prev, [fieldToUpdate]: publicUrl } : null)
+      setProfile(prev => prev ? { ...prev, [fieldToUpdate]: publicUrl, cover_position_y: 50 } : null)
       setMessage({ type: 'success', text: `Imagem de ${type} atualizada!` })
 
     } catch (error: any) {
@@ -151,10 +155,36 @@ export default function ProfilePage() {
         setMessage({ type: 'error', text: `Erro ao fazer upload da imagem de ${type}.` })
     } finally {
         setUpdating(false)
-        // Limpa o valor do input de ficheiro para permitir o upload do mesmo ficheiro novamente
         event.target.value = ''
     }
   }
+  
+  // --- Funções para arrastar a imagem de capa ---
+  const handleDragStart = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!profile?.cover_image_url) return;
+    e.preventDefault();
+    setIsDragging(true);
+    setDragStart({
+        y: e.clientY,
+        position: profile.cover_position_y || 50
+    });
+  };
+
+  const handleDragMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !profile) return;
+    const deltaY = e.clientY - dragStart.y;
+    const containerHeight = e.currentTarget.clientHeight;
+    const percentageChange = (deltaY / containerHeight) * 100;
+    let newPosition = dragStart.position + percentageChange;
+    newPosition = Math.max(0, Math.min(100, newPosition));
+    setProfile({ ...profile, cover_position_y: newPosition });
+  };
+  
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+  // ---------------------------------------------
+
 
   if (loading) {
     return (
@@ -167,22 +197,54 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
       {/* Imagem de Capa e Avatar */}
-      <div className="relative h-48 sm:h-64 bg-neutral-800">
+      <div 
+        className={`group relative h-48 sm:h-64 bg-neutral-800 select-none ${profile?.cover_image_url ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''}`}
+        onMouseDown={handleDragStart}
+        onMouseMove={handleDragMove}
+        onMouseUp={handleDragEnd}
+        onMouseLeave={handleDragEnd} // Termina o arraste se o rato sair da área
+      >
         {profile?.cover_image_url ? (
-          <Image src={profile.cover_image_url} alt="Imagem de capa" layout="fill" objectFit="cover" />
+          <Image 
+            src={profile.cover_image_url} 
+            alt="Imagem de capa" 
+            fill
+            className="object-cover pointer-events-none" // pointer-events-none para evitar que a imagem intercete os eventos do rato
+            style={{ objectPosition: `50% ${profile.cover_position_y || 50}%` }}
+            priority
+          />
         ) : (
           <div className="w-full h-full bg-gradient-to-r from-neutral-800 to-neutral-700"></div>
         )}
         <div className="absolute inset-0 bg-black/40"></div>
-        <label htmlFor="cover-upload" className="absolute top-4 right-4 bg-black/50 p-2 rounded-full cursor-pointer hover:bg-black/70 transition">
-          <Upload className="h-5 w-5 text-white" />
-          <input id="cover-upload" type="file" className="hidden" accept="image/*" onChange={(e) => uploadImage(e, 'cover')} disabled={updating} />
-        </label>
+        
+        <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <label htmlFor="cover-upload" className="bg-black/50 p-2 rounded-full cursor-pointer hover:bg-black/70 transition" title="Carregar nova capa">
+            <Upload className="h-5 w-5 text-white" />
+            <input id="cover-upload" type="file" className="hidden" accept="image/*" onChange={(e) => uploadImage(e, 'cover')} disabled={updating} />
+          </label>
+        </div>
+
+        {/* Slider de Posição da Capa - AJUSTADO */}
+        {profile?.cover_image_url && (
+          <div className="absolute bottom-4 right-4 w-1/3 max-w-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-3">
+              <ImageIcon className="h-5 w-5 text-white/70" />
+              <input 
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={profile.cover_position_y || 50}
+                  onChange={(e) => setProfile(p => p ? { ...p, cover_position_y: parseInt(e.target.value) } : null)}
+                  className="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                  disabled={updating}
+              />
+          </div>
+        )}
         
         <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
           <div className="relative h-32 w-32 rounded-full border-4 border-neutral-950 bg-neutral-700">
             {profile?.avatar_url && (
-              <Image src={profile.avatar_url} alt="Avatar" layout="fill" objectFit="cover" className="rounded-full" />
+              <Image src={profile.avatar_url} alt="Avatar" fill className="object-cover rounded-full" />
             )}
             <label htmlFor="avatar-upload" className="absolute bottom-1 right-1 bg-black/50 p-2 rounded-full cursor-pointer hover:bg-black/70 transition">
               <Upload className="h-4 w-4 text-white" />
