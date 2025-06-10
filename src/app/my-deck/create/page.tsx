@@ -105,7 +105,7 @@ export default function CreateDeckPage() {
             <div className="space-y-2">
               <Label htmlFor="commander" className="text-lg font-semibold">Comandante</Label>
               <AutocompleteInput 
-                onSelect={setCommander} 
+                onSelect={(card) => card ? setCommander(card.name) : setCommander('')} 
                 placeholder="Digite o nome do seu comandante..."
               />
               {/* Input escondido para enviar o valor do comandante com o formulário */}
