@@ -4,14 +4,23 @@ import { createClient } from '@/app/utils/supabase/server';
 import { fetchCardsByNames } from '@/app/lib/scryfall';
 import DeckEditView from './DeckEditView';
 
-export default async function Page({ params }: { params: { id: string; format: string } }) {
+type Props = {
+  params: {
+    format: string;
+    id: string;
+  };
+};
+
+export default async function DeckEditPage({ params }: Props) {
   const supabase = createClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return notFound();
+  if (!user) {
+    notFound();
+  }
 
   const { data: deck, error } = await supabase
     .from('decks')
@@ -19,11 +28,13 @@ export default async function Page({ params }: { params: { id: string; format: s
     .eq('id', params.id)
     .single();
 
-  if (error || !deck || deck.user_id !== user.id) return notFound();
+  if (error || !deck || deck.user_id !== user.id) {
+    notFound();
+  }
 
   const cardNames = [
-    ...(deck.decklist.mainboard?.map((c) => c.name) || []),
-    ...(deck.decklist.sideboard?.map((c) => c.name) || []),
+    ...(deck.decklist.mainboard?.map((c: any) => c.name) || []),
+    ...(deck.decklist.sideboard?.map((c: any) => c.name) || []),
   ].filter((name): name is string => typeof name === 'string' && name.trim() !== '');
 
   const uniqueCardNames = Array.from(new Set(cardNames));
