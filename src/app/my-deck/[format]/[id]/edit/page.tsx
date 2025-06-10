@@ -1,22 +1,14 @@
-// app/my-deck/[format]/[id]/edit/page.tsx
 import { notFound } from 'next/navigation';
 import { createClient } from '@/app/utils/supabase/server';
 import { fetchCardsByNames } from '@/app/lib/scryfall';
 import type { DeckFromDB } from '@/app/lib/types';
-import DeckEditView from './DeckEditView'; // Importa o seu componente de cliente
+import DeckEditView from './DeckEditView';
 
-export default async function DeckEditPage({
-  params,
-}: {
-  params: {
-    format: string;
-    id: string;
-  };
-}) {
+export default async function DeckEditPage(props: any) {
+  const { params } = props as { params: { format: string; id: string } };
   const supabase = createClient();
   const { id } = params;
 
-  // 1. Busca os dados do utilizador e do deck numa única chamada, se possível
   const { data: { user } } = await supabase.auth.getUser();
   const { data: deck, error } = await supabase
     .from('decks')
@@ -24,12 +16,10 @@ export default async function DeckEditPage({
     .eq('id', id)
     .single();
 
-  // 2. Valida se o deck existe e se o utilizador é o dono
   if (error || !deck || !user || user.id !== deck.user_id) {
     notFound();
   }
 
-  // 3. Busca os dados detalhados das cartas no deck para passar para o cliente
   const allCardNames = [
     ...deck.decklist.mainboard.map((c) => c.name),
     ...(deck.decklist.sideboard?.map((c) => c.name) || []),
@@ -48,11 +38,10 @@ export default async function DeckEditPage({
             Ajuste a sua estratégia e refina a sua lista.
           </p>
         </header>
-        
-        {/* Renderiza o componente de cliente, passando os dados necessários */}
-        <DeckEditView 
-          initialDeck={deck} 
-          initialScryfallCards={scryfallCards} 
+
+        <DeckEditView
+          initialDeck={deck}
+          initialScryfallCards={scryfallCards}
         />
       </div>
     </div>
