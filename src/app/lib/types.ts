@@ -39,7 +39,10 @@ export interface DeckFromDB {
   name: string;
   format: string;
   description: string | null;
-  decklist: Decklist;
+  decklist: {
+    mainboard: { name: string; count: number }[];
+    sideboard?: { name: string; count: number }[];
+  };
   is_public: boolean;
   representative_card_image_url: string | null;
 }
