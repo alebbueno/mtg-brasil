@@ -1,23 +1,14 @@
-// app/my-deck/[format]/[id]/edit/page.tsx
-import { notFound } from "next/navigation";
-
-type Params = {
-  id: string;
-  format: string;
-};
-
 type Props = {
-  params: Params;
+  params: {
+    id: string;
+    format: string;
+  };
 };
 
-export default async function DeckEditPage({ params }: Props) {
-  if (!params.id || !params.format) {
-    notFound();
-  }
-
+export default async function Page({ params }: Props) {
   return (
     <div>
-      Editar Deck {params.id} no formato {params.format}
+      <h1>Editar deck {params.id} no formato {params.format}</h1>
     </div>
   );
 }
