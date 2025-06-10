@@ -8,6 +8,7 @@ import DeckEditView from './DeckEditView'; // Importa o seu componente de client
 // Define o tipo das props para a página de forma segura
 type DeckEditPageProps = {
   params: {
+    format: string;
     id: string;
   };
 };
