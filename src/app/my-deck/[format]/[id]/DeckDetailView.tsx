@@ -56,7 +56,7 @@ export default function DeckDetailView({
   creatorProfile,
 }: DeckDetailViewProps) {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  const scryfallCardMap = useMemo(() => new Map<string, ScryfallCard>(initialScryfallMapArray), [initialScryfallMapArray]);
+  const scryfallCardMap = useMemo(() => new Map<string, ScryfallCard>(initialScryfallMapArray as unknown as readonly [string, ScryfallCard][]), [initialScryfallMapArray]);
   const router = useRouter();
 
   const {
@@ -138,8 +138,18 @@ export default function DeckDetailView({
       return Object.fromEntries(order.map((type) => [type, grouped[type] || []]));
     };
 
-    const mainboardList = initialDeck.decklist.mainboard.filter((c) => c.name !== commander?.name);
-    const sideboardList = initialDeck.decklist.sideboard || [];
+    const mainboardList = initialDeck.decklist.mainboard
+      .filter((c) => c.name !== commander?.name)
+      .map(card => ({
+        ...card,
+        id: scryfallCardMap.get(card.name)?.id || '',
+        scryfall_id: scryfallCardMap.get(card.name)?.id || ''
+      }));
+    const sideboardList = (initialDeck.decklist.sideboard || []).map(card => ({
+      ...card,
+      id: scryfallCardMap.get(card.name)?.id || '',
+      scryfall_id: scryfallCardMap.get(card.name)?.id || ''
+    }));
 
     return {
       commanderCard: commander,
