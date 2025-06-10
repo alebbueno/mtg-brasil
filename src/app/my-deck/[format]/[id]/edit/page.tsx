@@ -1,16 +1,10 @@
 // app/my-deck/[format]/[id]/edit/page.tsx
+
 import { notFound } from 'next/navigation';
 import { createClient } from '@/app/utils/supabase/server';
 import { fetchCardsByNames } from '@/app/lib/scryfall';
 import type { DeckFromDB } from '@/app/lib/types';
 import DeckEditView from './DeckEditView';
-
-interface PageProps {
-  params: {
-    id: string;
-    format: string;
-  };
-}
 
 async function getDeckDataForEdit(deckId: string) {
   const supabase = createClient();
@@ -37,7 +31,7 @@ async function getDeckDataForEdit(deckId: string) {
   return { deck, scryfallCards };
 }
 
-export default async function DeckEditPage({ params }: PageProps) {
+export default async function Page({ params }: { params: { id: string; format: string } }) {
   const data = await getDeckDataForEdit(params.id);
 
   if (!data) notFound();
