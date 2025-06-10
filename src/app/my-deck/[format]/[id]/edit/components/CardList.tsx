@@ -1,0 +1,103 @@
+/* eslint-disable no-unused-vars */
+// app/my-deck/[format]/[id]/edit/components/CardList.tsx
+'use client';
+
+import { useMemo } from 'react';
+import type { EditableCard } from '../DeckEditView';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import ManaCost from '@/components/ui/ManaCost';
+import { Minus, Plus } from 'lucide-react';
+
+function CardRow({ card, onCountChange }: { card: EditableCard; onCountChange: (name: string, newCount: number) => void; }) {
+  return (
+    <div className="flex items-center justify-between py-1 px-2 rounded-md hover:bg-neutral-800 text-sm">
+      <span className="flex-grow truncate pr-4">{card.name}</span>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <ManaCost cost={card.mana_cost || ''} />
+        <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => onCountChange(card.name, card.count - 1)}><Minus size={16} /></Button>
+        <span className="w-4 text-center font-medium">{card.count}</span>
+        <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => onCountChange(card.name, card.count + 1)}><Plus size={16} /></Button>
+      </div>
+    </div>
+  );
+}
+
+type CardListProps = {
+  cards: EditableCard[];
+  commanderName?: string;
+  onCountChange: (name: string, newCount: number) => void;
+};
+
+const TYPE_ORDER = ["Planeswalkers", "Criaturas", "Mágicas Instantâneas", "Feitiços", "Encantamentos", "Artefatos", "Terrenos", "Outros"];
+
+function CardSection({ cardList, onCountChange }: { cardList: EditableCard[]; onCountChange: (name: string, newCount: number) => void; }) {
+  const groupedCards = useMemo(() => {
+    return cardList.reduce((acc, card) => {
+      if (!card.type_line) return acc;
+      let mainType = "Outros";
+      if (card.type_line.includes("Planeswalker")) mainType = "Planeswalkers";
+      else if (card.type_line.includes("Creature")) mainType = "Criaturas";
+      else if (card.type_line.includes("Land")) mainType = "Terrenos";
+      else if (card.type_line.includes("Instant")) mainType = "Mágicas Instantâneas";
+      else if (card.type_line.includes("Sorcery")) mainType = "Feitiços";
+      else if (card.type_line.includes("Artifact")) mainType = "Artefatos";
+      else if (card.type_line.includes("Enchantment")) mainType = "Encantamentos";
+      
+      if (!acc[mainType]) acc[mainType] = [];
+      acc[mainType].push(card);
+      return acc;
+    }, {} as Record<string, EditableCard[]>);
+  }, [cardList]);
+
+  return TYPE_ORDER.map(type => {
+    const cardsOfType = groupedCards[type];
+    if (!cardsOfType || cardsOfType.length === 0) return null;
+    
+    const typeCount = cardsOfType.reduce((sum, card) => sum + card.count, 0);
+
+    return (
+      <div key={type}>
+        <h4 className="font-semibold text-amber-400/80 mt-2">{type} ({typeCount})</h4>
+        {cardsOfType.sort((a, b) => a.name.localeCompare(b.name)).map(card => (
+          <CardRow key={card.id} card={card} onCountChange={onCountChange} />
+        ))}
+      </div>
+    );
+  });
+}
+
+export default function CardList({ cards, commanderName, onCountChange }: CardListProps) {
+  const { mainboardCards, sideboardCards, mainboardCount, sideboardCount } = useMemo(() => {
+    const main = cards.filter(c => !c.is_sideboard && c.name !== commanderName);
+    const side = cards.filter(c => c.is_sideboard);
+    
+    const mainCount = main.reduce((s, c) => s + c.count, 0);
+    const sideCount = side.reduce((s, c) => s + c.count, 0);
+
+    // ✨ CORREÇÃO DEFINITIVA APLICADA AQUI ✨
+    return { 
+      mainboardCards: main, 
+      sideboardCards: side, 
+      mainboardCount: mainCount, 
+      sideboardCount: sideCount 
+    };
+  }, [cards, commanderName]);
+
+  return (
+    <Card className="bg-neutral-900 border-neutral-800">
+      <CardHeader><CardTitle>Lista de Cartas</CardTitle></CardHeader>
+      <CardContent className="space-y-4">
+        <h3 className="text-xl font-bold text-amber-500 mb-2">Mainboard ({mainboardCount})</h3>
+        <CardSection cardList={mainboardCards} onCountChange={onCountChange} />
+
+        {sideboardCards.length > 0 && (
+          <div className="mt-6 pt-4 border-t border-neutral-700">
+            <h3 className="text-xl font-bold text-amber-500 mb-2">Sideboard ({sideboardCount})</h3>
+            <CardSection cardList={sideboardCards} onCountChange={onCountChange} />
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

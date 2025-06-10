@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-// app/components/deck/DeckListView.tsx
 'use client'
 
 import type { ScryfallCard } from '@/app/lib/scryfall';
@@ -30,9 +29,9 @@ function CardListSection({
           <div key={type} className="break-inside-avoid mb-6">
             <h3 className="text-lg font-semibold text-neutral-300 mb-2">{type} ({cardList.reduce((acc, c) => acc + c.count, 0)})</h3>
             <ul className="space-y-1">
-              {cardList.sort((a,b) => a.card.name.localeCompare(b.card.name)).map(({ card, count }) => (
+              {cardList.sort((a, b) => a.card.name.localeCompare(b.card.name)).map(({ card, count }, index) => (
                 <li 
-                  key={card.id} 
+                  key={`${card.id}-${index}`} // Chave única combinando card.id e índice
                   className="text-neutral-200 hover:bg-neutral-800 p-1 rounded-md cursor-pointer flex justify-between items-center text-sm"
                   onMouseEnter={() => onCardHover(card.image_uris?.normal || '')}
                   onMouseLeave={onCardLeave}

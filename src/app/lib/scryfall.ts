@@ -263,3 +263,57 @@ export async function fetchCardsByNames(names: string[]): Promise<ScryfallCard[]
 
   return results;
 }
+
+
+// Em app/lib/scryfall.ts
+export async function searchCards(query: string, filters: { type_line?: string } = {}) {
+  const params = new URLSearchParams({ q: `${query} ${filters.type_line || ''}` });
+  const response = await fetch(`https://api.scryfall.com/cards/search?${params}`);
+  return response.json();
+}
+
+// Agrupa cartas por tipo de linha (type_line)
+export function groupCardsByType(cards: (ScryfallCard & { count: number })[]) {
+  return cards.reduce<Record<string, (ScryfallCard & { count: number })[]>>((acc, card) => {
+    const typeKey = extractCardTypes(card.type_line || "Outros");
+    if (!acc[typeKey]) acc[typeKey] = [];
+    acc[typeKey].push(card);
+    return acc;
+  }, {});
+}
+
+// Extrai o tipo primário da carta para agrupamento
+function extractCardTypes(typeLine: string): string {
+  const parts = typeLine.split("—")[0].trim().split(" ");
+  const types = ["Creature", "Instant", "Sorcery", "Enchantment", "Artifact", "Land", "Planeswalker", "Battle"];
+  return types.find(t => parts.includes(t)) || "Outros";
+}
+
+// Simula atualização do nome do deck (você pode adaptar para Supabase, localStorage, etc.)
+export async function updateDeckName(deckId: string, newName: string): Promise<void> {
+  // Simulação: no app real, você poderia salvar no Supabase, Firestore ou outro backend
+  console.log(`Atualizando nome do deck ${deckId} para "${newName}"`);
+  return new Promise((resolve) => setTimeout(resolve, 300)); // Simula atraso
+}
+
+/**
+ * Busca por cartas na API do Scryfall usando o endpoint de busca geral.
+ * Retorna uma lista de objetos de carta completos.
+ */
+export async function searchScryfallCards(searchQuery: string): Promise<ScryfallCard[]> {
+  if (!searchQuery) return [];
+
+  try {
+    // Usamos o endpoint /cards/search que retorna objetos completos
+    const response = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(searchQuery)}`);
+    if (!response.ok) {
+      // Se a resposta não for OK (ex: 404 Not Found), retorna um array vazio.
+      return [];
+    }
+    const data = await response.json();
+    return data.data || []; // A lista de cartas está na propriedade 'data'
+  } catch (error) {
+    console.error('Erro ao buscar cartas no Scryfall:', error);
+    return []; // Retorna vazio em caso de erro de rede
+  }
+}

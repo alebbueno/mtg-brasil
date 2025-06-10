@@ -1,15 +1,15 @@
 /* eslint-disable no-unused-labels */
-// app/my-deck/[format]/[id]/DeckDetailView.tsx
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { ScryfallCard } from '@/app/lib/scryfall';
 import type { DeckDetailViewProps, DeckCard } from '@/app/lib/types';
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Globe, Lock, BarChart, Droplets, List, LayoutGrid } from 'lucide-react';
+import { Globe, Lock, BarChart, Droplets, List, LayoutGrid, Pencil } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DeckPrivacyToggle } from '@/app/components/deck/DeckPrivacyToggle';
 import DeckListView from '@/app/components/deck/DeckListView';
@@ -57,6 +57,7 @@ export default function DeckDetailView({
 }: DeckDetailViewProps) {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const scryfallCardMap = useMemo(() => new Map<string, ScryfallCard>(initialScryfallMapArray), [initialScryfallMapArray]);
+  const router = useRouter();
 
   const {
     commanderCard,
@@ -167,7 +168,7 @@ export default function DeckDetailView({
               <h1 className="text-4xl font-bold text-amber-400">{initialDeck.name}</h1>
               <div className="flex items-center gap-2 text-lg text-neutral-400 capitalize">
                 <span>{initialDeck.format}</span>
-                <span className="text-neutral-600">&bull;</span>
+                <span className="text-neutral-600">•</span>
                 {initialDeck.is_public ? (
                   <span className="flex items-center gap-1 text-green-400 text-sm">
                     <Globe size={14} /> Público
@@ -180,9 +181,19 @@ export default function DeckDetailView({
               </div>
             </div>
             {isOwner && (
-              <Card className="bg-neutral-800 p-3">
-                <DeckPrivacyToggle deckId={initialDeck.id} initialIsPublic={initialDeck.is_public} />
-              </Card>
+              <div className="flex gap-4">
+                <Card className="bg-neutral-800 p-3">
+                  <DeckPrivacyToggle deckId={initialDeck.id} initialIsPublic={initialDeck.is_public} />
+                </Card>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => router.push(`/my-deck/${initialDeck.format}/${initialDeck.id}/edit`)}
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Editar Deck
+                </Button>
+              </div>
             )}
           </div>
         </header>
