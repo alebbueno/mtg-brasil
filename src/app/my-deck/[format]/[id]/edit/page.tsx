@@ -2,21 +2,20 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/app/utils/supabase/server';
 import { fetchCardsByNames } from '@/app/lib/scryfall';
-import type { DeckFromDB } from '@/app/lib/types'; // Assumindo que ScryfallCard também está em types
+import type { DeckFromDB } from '@/app/lib/types';
 import DeckEditView from './DeckEditView';
 
-type DeckEditPageProps = {
-  params: { id: string };
-};
+interface PageProps {
+  params: {
+    id: string;
+    format: string;
+  };
+}
 
-/**
- * Função de servidor para buscar todos os dados necessários para a página de edição.
- * Encapsula a lógica de autenticação, posse e busca de dados das cartas.
- */
 async function getDeckDataForEdit(deckId: string) {
   const supabase = createClient();
-
   const { data: { user } } = await supabase.auth.getUser();
+
   if (!user) return null;
 
   const { data: deck, error } = await supabase
@@ -25,10 +24,7 @@ async function getDeckDataForEdit(deckId: string) {
     .eq('id', deckId)
     .single();
 
-  // Validação de erro, posse do deck ou se o deck não foi encontrado
-  if (error || !deck || user.id !== deck.user_id) {
-    return null;
-  }
+  if (error || !deck || user.id !== deck.user_id) return null;
 
   const cardNames = [
     ...deck.decklist.mainboard?.map((c) => c.name) || [],
@@ -41,12 +37,10 @@ async function getDeckDataForEdit(deckId: string) {
   return { deck, scryfallCards };
 }
 
-export default async function DeckEditPage({ params }: DeckEditPageProps) {
+export default async function DeckEditPage({ params }: PageProps) {
   const data = await getDeckDataForEdit(params.id);
 
-  if (!data) {
-    notFound();
-  }
+  if (!data) notFound();
 
   const { deck, scryfallCards } = data;
 
@@ -58,13 +52,13 @@ export default async function DeckEditPage({ params }: DeckEditPageProps) {
             Editar Deck
           </h1>
           <p className="text-lg text-neutral-300 mt-2">
-            Ajuste a sua estratégia e refina a sua lista.
+            Ajuste a sua estratégia e refine sua lista.
           </p>
         </header>
-        
-        <DeckEditView 
-          initialDeck={deck} 
-          initialScryfallCards={scryfallCards} 
+
+        <DeckEditView
+          initialDeck={deck}
+          initialScryfallCards={scryfallCards}
         />
       </div>
     </div>
