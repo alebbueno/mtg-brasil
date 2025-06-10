@@ -37,15 +37,11 @@ export default function DeckCardItem({ deck, onDelete }: { deck: Deck; onDelete?
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const result = await deleteDeck(deck.id);
-      if (result.success) {
-        toast.success(result.message);
-        // Notifica o componente pai para remover o deck do estado
-        if (onDelete) {
-          onDelete(deck.id);
-        }
-      } else {
-        toast.error(result.message);
+      await deleteDeck(deck.id);
+      toast.success("Deck excluído com sucesso!");
+      // Notifica o componente pai para remover o deck do estado
+      if (onDelete) {
+        onDelete(deck.id);
       }
     } catch (error: any) {
       toast.error(error.message || "Não foi possível excluir o deck.");
