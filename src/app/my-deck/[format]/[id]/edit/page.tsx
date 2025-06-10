@@ -1,4 +1,3 @@
-// @ts-nocheck
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-vars */
 // app/my-deck/[format]/[id]/edit/page.tsx
@@ -8,32 +7,30 @@ import { fetchCardsByNames } from '@/app/lib/scryfall';
 import type { DeckFromDB } from '@/app/lib/types';
 import DeckEditView from './DeckEditView';
 
-// Define o tipo das props para a página
-type DeckEditPageProps = {
-  params: {
-    format: string;
-    id: string;
-  };
-};
+// Define o tipo das props explicitamente
+interface DeckEditPageProps {
+  params: Promise<{ format: string; id: string }>;
+}
 
 export default async function DeckEditPage({ params }: DeckEditPageProps) {
-  const supabase = createClient();
-  const { id, format } = params;
+  const { format, id } = await params; // Resolve a Promise explicitamente
 
-  // 1. Busca os dados do utilizador e do deck numa única chamada, se possível
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: deck, error } = await supabase
+  const supabase = createClient();
+
+  // 1. Busca os dados do utilizador e do deck
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const { data: deck, error: deckError } = await supabase
     .from('decks')
     .select<"*", DeckFromDB>("*")
     .eq('id', id)
     .single();
 
   // 2. Valida se o deck existe e se o utilizador é o dono
-  if (error || !deck || !user || user.id !== deck.user_id) {
+  if (deckError || !deck || userError || !user || user.id !== deck.user_id) {
     notFound();
   }
 
-  // 3. Busca os dados detalhados das cartas no deck para passar para o cliente
+  // 3. Busca os dados detalhados das cartas no deck
   const allCardNames = [
     ...deck.decklist.mainboard.map((c) => c.name),
     ...(deck.decklist.sideboard?.map((c) => c.name) || []),
@@ -53,7 +50,6 @@ export default async function DeckEditPage({ params }: DeckEditPageProps) {
           </p>
         </header>
         
-        {/* Renderiza o componente de cliente, passando os dados necessários */}
         <DeckEditView 
           initialDeck={deck} 
           initialScryfallCards={scryfallCards} 
