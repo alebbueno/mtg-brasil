@@ -5,15 +5,14 @@ import { fetchCardsByNames } from '@/app/lib/scryfall';
 import type { DeckFromDB } from '@/app/lib/types';
 import DeckEditView from './DeckEditView'; // Importa o seu componente de cliente
 
-// Define o tipo das props para a página de forma segura
-type DeckEditPageProps = {
+export default async function DeckEditPage({
+  params,
+}: {
   params: {
     format: string;
     id: string;
   };
-};
-
-export default async function DeckEditPage({ params }: DeckEditPageProps) {
+}) {
   const supabase = createClient();
   const { id } = params;
 
