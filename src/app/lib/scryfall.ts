@@ -303,41 +303,45 @@ export async function updateDeckName(deckId: string, newName: string): Promise<v
  * Retorna uma lista de objetos de carta completos.
  */
 
+export async function fetchAutocompleteNames(query: string): Promise<string[]> {
+  if (!query || query.length < 2) return [];
+  try {
+    const res = await fetch(`https://api.scryfall.com/cards/autocomplete?q=${encodeURIComponent(query)}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.data || [];
+  } catch (error) {
+    console.error("Erro na busca de autocomplete do Scryfall:", error);
+    return [];
+  }
+}
+
+/**
+ * FUNÇÃO ATUALIZADA: Agora busca com uma query mais flexível.
+ */
 export async function searchScryfallCards(query: string): Promise<ScryfallCard[]> {
-  if (!query || query.length < 3) {
+  if (!query || query.length < 2) {
     return [];
   }
 
-  // Constrói a query para o Scryfall:
-  // - !"{query}" busca pelo nome impresso na carta em QUALQUER idioma.
-  // - name:"{query}" busca pelo nome em INGLÊS.
-  // - include:extras=true garante que versões em outros idiomas sejam incluídas.
-  // - unique:cards agrupa todas as impressões de uma mesma carta num único resultado.
-  const scryfallQuery = `!"${query}" or name:"${query}"`;
-  
+  // A query agora espera termos exatos, que vamos construir no frontend
   const params = new URLSearchParams({
-    q: scryfallQuery,
-    unique: 'cards', // Agrupa por nome de carta para evitar duplicados
-    include_extras: 'true', // Inclui versões em outros idiomas
+    q: query,
+    unique: 'cards',
   });
 
   try {
     const response = await fetch(`https://api.scryfall.com/cards/search?${params.toString()}`);
-
     if (!response.ok) {
-      // Se não encontrar nada (404), retorna um array vazio silenciosamente.
       if (response.status === 404) return [];
-      // Para outros erros, loga e lança uma exceção.
-      const errorDetails = await response.json();
+      const errorDetails = await response.json().catch(() => ({}));
       console.error('Scryfall search API error:', errorDetails);
-      throw new Error(`Erro na busca do Scryfall: ${response.statusText}`);
+      return [];
     }
-
     const result = await response.json();
-    // A API de busca retorna um objeto com uma propriedade 'data' que contém o array de cartas.
     return result.data || [];
   } catch (error) {
     console.error("Falha ao buscar cartas no Scryfall:", error);
-    return []; // Retorna um array vazio em caso de erro na rede ou outra exceção.
+    return [];
   }
 }
