@@ -9,7 +9,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { searchScryfallCards } from '@/app/lib/scryfall'; // Importa ambas as funções
+import { searchScryfallCards } from '@/app/lib/scryfall';
 import type { ScryfallCard } from '@/app/lib/scryfall';
 import { Search, Loader2 } from 'lucide-react';
 import ManaCost from '@/components/ui/ManaCost';
@@ -27,7 +27,6 @@ export default function AutocompleteInput({ onSelect, placeholder, onClear }: Au
   const [showSuggestions, setShowSuggestions] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Lógica de busca refatorada para usar IA na tradução
   const handleSearch = useCallback(async () => {
     if (query.length < 2) return;
 
@@ -35,9 +34,7 @@ export default function AutocompleteInput({ onSelect, placeholder, onClear }: Au
     setSuggestions([]);
 
     try {
-      // Passo 1: Usa a sua API com OpenAI para traduzir o termo de busca.
-      // O tipo 'query' aciona o prompt especializado em termos de Magic.
-      let searchTerm = query; // Usa o termo original como fallback
+      let searchTerm = query;
       try {
         const translateResponse = await fetch('/api/translate-search', {
             method: 'POST',
@@ -48,17 +45,13 @@ export default function AutocompleteInput({ onSelect, placeholder, onClear }: Au
         if(translateResponse.ok) {
             const data = await translateResponse.json();
             if (data.translation) {
-                searchTerm = data.translation; // Usa o termo traduzido se a IA o retornar
+                searchTerm = data.translation;
             }
         }
-        console.log(`Termo original: "${query}" | Termo enviado para busca: "${searchTerm}"`);
-
       } catch (e) {
           console.error("Falha ao contatar a API de tradução. A usar o termo original.", e);
       }
 
-      // Passo 2: Busca no Scryfall usando o termo (traduzido ou original).
-      // A query `name:"..."` é flexível o suficiente para encontrar a carta correta.
       const finalScryfallQuery = `name:"${searchTerm}"`;
       const results = await searchScryfallCards(finalScryfallQuery);
       
@@ -108,25 +101,27 @@ export default function AutocompleteInput({ onSelect, placeholder, onClear }: Au
 
   return (
     <div className="relative" ref={containerRef}>
-      <Input
-        type="text"
-        value={query}
-        onChange={handleInputChange}
-        onFocus={() => query.length > 2 && suggestions.length > 0 && setShowSuggestions(true)}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        className="bg-neutral-800 border-neutral-700 focus:ring-amber-500 pr-10"
-      />
-      <Button
-        type="button"
-        size="icon"
-        variant="ghost"
-        className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-        onClick={handleSearch}
-        disabled={isLoading}
-      >
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-      </Button>
+      <div className="relative">
+        <Input
+          type="text"
+          value={query}
+          onChange={handleInputChange}
+          onFocus={() => query.length > 2 && suggestions.length > 0 && setShowSuggestions(true)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className="bg-neutral-800 border-neutral-700 focus:ring-amber-500 pr-10"
+        />
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+          onClick={handleSearch}
+          disabled={isLoading}
+        >
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+        </Button>
+      </div>
 
       {showSuggestions && (
         <ul className="absolute z-10 w-full bg-neutral-800 border border-neutral-700 rounded-md mt-1 shadow-lg max-h-80 overflow-y-auto">
@@ -141,6 +136,9 @@ export default function AutocompleteInput({ onSelect, placeholder, onClear }: Au
                 <div className="flex-grow">
                     <div className="text-sm font-medium text-neutral-100">{card.name}</div>
                     <div className="text-xs text-neutral-400">{card.type_line}</div>
+                    <div className="text-xs text-neutral-500 mt-1">
+                      {card.set_name} ({card.set.toUpperCase()})
+                    </div>
                 </div>
                 <div className="flex-shrink-0">
                   <ManaCost cost={card.mana_cost} />

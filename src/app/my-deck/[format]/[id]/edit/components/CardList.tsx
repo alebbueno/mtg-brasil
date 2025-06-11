@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 // app/my-deck/[format]/[id]/edit/components/CardList.tsx
 'use client';
@@ -8,10 +9,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import ManaCost from '@/components/ui/ManaCost';
 import { Minus, Plus } from 'lucide-react';
+// import type { ScryfallCard } from '@/app/lib/types';
 
-function CardRow({ card, onCountChange }: { card: EditableCard; onCountChange: (name: string, newCount: number) => void; }) {
+// O componente CardRow agora recebe a assinatura correta para onCardHover
+function CardRow({ card, onCountChange, onCardHover, onCardLeave }: { 
+  card: EditableCard; 
+  onCountChange: (name: string, newCount: number) => void;
+  onCardHover: (event: React.MouseEvent, imageUrl: string | null) => void;
+  onCardLeave: () => void;
+}) {
   return (
-    <div className="flex items-center justify-between py-1 px-2 rounded-md hover:bg-neutral-800 text-sm">
+    <div 
+      className="flex items-center justify-between py-1 px-2 rounded-md hover:bg-neutral-800 text-sm"
+      // ✨ CORREÇÃO: Passa o evento (e) para o manipulador de hover
+      onMouseEnter={(e) => onCardHover(e, card.image_uris?.normal || null)}
+      onMouseLeave={onCardLeave}
+    >
       <span className="flex-grow truncate pr-4">{card.name}</span>
       <div className="flex items-center gap-2 flex-shrink-0">
         <ManaCost cost={card.mana_cost || ''} />
@@ -23,15 +36,23 @@ function CardRow({ card, onCountChange }: { card: EditableCard; onCountChange: (
   );
 }
 
+// O tipo das props foi atualizado para corresponder ao componente pai
 type CardListProps = {
   cards: EditableCard[];
   commanderName?: string;
   onCountChange: (name: string, newCount: number) => void;
+  onCardHover: (event: React.MouseEvent, imageUrl: string | null) => void;
+  onCardLeave: () => void;
 };
 
 const TYPE_ORDER = ["Planeswalkers", "Criaturas", "Mágicas Instantâneas", "Feitiços", "Encantamentos", "Artefatos", "Terrenos", "Outros"];
 
-function CardSection({ cardList, onCountChange }: { cardList: EditableCard[]; onCountChange: (name: string, newCount: number) => void; }) {
+function CardSection({ cardList, onCountChange, onCardHover, onCardLeave }: { 
+  cardList: EditableCard[]; 
+  onCountChange: (name: string, newCount: number) => void;
+  onCardHover: (event: React.MouseEvent, imageUrl: string | null) => void;
+  onCardLeave: () => void;
+}) {
   const groupedCards = useMemo(() => {
     return cardList.reduce((acc, card) => {
       if (!card.type_line) return acc;
@@ -60,14 +81,14 @@ function CardSection({ cardList, onCountChange }: { cardList: EditableCard[]; on
       <div key={type}>
         <h4 className="font-semibold text-amber-400/80 mt-2">{type} ({typeCount})</h4>
         {cardsOfType.sort((a, b) => a.name.localeCompare(b.name)).map(card => (
-          <CardRow key={card.id} card={card} onCountChange={onCountChange} />
+          <CardRow key={card.id} card={card} onCountChange={onCountChange} onCardHover={onCardHover} onCardLeave={onCardLeave} />
         ))}
       </div>
     );
   });
 }
 
-export default function CardList({ cards, commanderName, onCountChange }: CardListProps) {
+export default function CardList({ cards, commanderName, onCountChange, onCardHover, onCardLeave }: CardListProps) {
   const { mainboardCards, sideboardCards, mainboardCount, sideboardCount } = useMemo(() => {
     const main = cards.filter(c => !c.is_sideboard && c.name !== commanderName);
     const side = cards.filter(c => c.is_sideboard);
@@ -75,7 +96,6 @@ export default function CardList({ cards, commanderName, onCountChange }: CardLi
     const mainCount = main.reduce((s, c) => s + c.count, 0);
     const sideCount = side.reduce((s, c) => s + c.count, 0);
 
-    // ✨ CORREÇÃO DEFINITIVA APLICADA AQUI ✨
     return { 
       mainboardCards: main, 
       sideboardCards: side, 
@@ -89,12 +109,12 @@ export default function CardList({ cards, commanderName, onCountChange }: CardLi
       <CardHeader><CardTitle>Lista de Cartas</CardTitle></CardHeader>
       <CardContent className="space-y-4">
         <h3 className="text-xl font-bold text-amber-500 mb-2">Mainboard ({mainboardCount})</h3>
-        <CardSection cardList={mainboardCards} onCountChange={onCountChange} />
+        <CardSection cardList={mainboardCards} onCountChange={onCountChange} onCardHover={onCardHover} onCardLeave={onCardLeave} />
 
         {sideboardCards.length > 0 && (
           <div className="mt-6 pt-4 border-t border-neutral-700">
             <h3 className="text-xl font-bold text-amber-500 mb-2">Sideboard ({sideboardCount})</h3>
-            <CardSection cardList={sideboardCards} onCountChange={onCountChange} />
+            <CardSection cardList={sideboardCards} onCountChange={onCountChange} onCardHover={onCardHover} onCardLeave={onCardLeave} />
           </div>
         )}
       </CardContent>

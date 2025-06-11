@@ -5,6 +5,7 @@
 // --- INTERFACE PRINCIPAL PARA CARTAS ---
 // Esta interface define a estrutura de dados de uma carta da API Scryfall.
 export interface ScryfallCard {
+  set: any;
   id: string;
   name: string;
   printed_name?: string; // Nome impresso na carta (pode ser em português)

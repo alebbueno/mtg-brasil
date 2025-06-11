@@ -16,12 +16,14 @@ type CommanderEditorProps = {
   setCards: React.Dispatch<React.SetStateAction<EditableCard[]>>;
   commanderName: string;
   setCommanderName: (name: string) => void;
+  // ✨ CORREÇÃO: A assinatura da prop agora espera o evento do rato
+  onCardHover: (event: React.MouseEvent, imageUrl: string | null) => void;
+  onCardLeave: () => void;
 };
 
-export default function CommanderEditor({ cards, setCards, commanderName, setCommanderName }: CommanderEditorProps) {
+export default function CommanderEditor({ cards, setCards, commanderName, setCommanderName, onCardHover, onCardLeave }: CommanderEditorProps) {
   
   const handleCommanderChange = (newCommander: ScryfallCard) => {
-    // 1. Validação da regra de negócio
     if (!newCommander.type_line?.includes('Legendary') || !newCommander.type_line?.includes('Creature')) {
       toast.error("Apenas criaturas lendárias podem ser comandantes.");
       return;
@@ -29,39 +31,31 @@ export default function CommanderEditor({ cards, setCards, commanderName, setCom
 
     const oldCommanderName = commanderName;
 
-    // 2. Atualização atômica do estado das cartas
     setCards(prevCards => {
-      // Verifica se a carta já está no deck (excluindo o antigo comandante da verificação)
       const isAlreadyInList = prevCards.some(
         c => c.name === newCommander.name && c.name !== oldCommanderName
       );
 
       if (isAlreadyInList) {
         toast.error(`${newCommander.name} já está no deck. Remova-o primeiro para defini-lo como comandante.`);
-        return prevCards; // Retorna o estado anterior sem modificação
+        return prevCards;
       }
-
-      // Remove o comandante antigo da lista
+      
       const withoutOldCommander = prevCards.filter(c => c.name !== oldCommanderName);
       
-      // Adiciona o novo comandante ao início da lista
       const newCardList: EditableCard[] = [
         { ...newCommander, count: 1, is_sideboard: false }, 
         ...withoutOldCommander
       ];
 
-      // Atualiza o nome do comandante fora do loop de estado
-      // para garantir que a UI reaja à mudança.
-      setCommanderName(newCommander.name); 
-
       return newCardList;
     });
+
+    setCommanderName(newCommander.name); 
   };
 
   const handleRemoveCommander = () => {
     if (!commanderName) return;
-
-    // Remove a carta do estado e limpa o nome do comandante
     setCards(prev => prev.filter(c => c.name !== commanderName));
     setCommanderName('');
     toast.info(`${commanderName} removido da posição de comandante.`);
@@ -76,7 +70,12 @@ export default function CommanderEditor({ cards, setCards, commanderName, setCom
       </CardHeader>
       <CardContent>
         {commanderCard ? (
-          <div className="flex items-center justify-between p-2 rounded-md bg-neutral-800">
+          <div 
+            className="flex items-center justify-between p-2 rounded-md bg-neutral-800"
+            // ✨ CORREÇÃO: Passa o evento (e) para o manipulador de hover
+            onMouseEnter={(e) => onCardHover(e, commanderCard.image_uris?.normal || null)}
+            onMouseLeave={onCardLeave}
+          >
             <span className="font-semibold">{commanderName}</span>
             <Button 
               type="button" 
