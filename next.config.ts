@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'via.placeholder.com', // ✨ Domínio adicionado para placeholders
+      },
+      {
+        protocol: 'https',
         hostname: 'placehold.co', // Domínio adicionado para as imagens de fallback
       },
       {

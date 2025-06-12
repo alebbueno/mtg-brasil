@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
+// import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import AutocompleteInput from '@/app/components/deck/AutocompleteInput';
 import type { ScryfallCard } from '@/app/lib/types';
@@ -29,8 +29,8 @@ type DeckInfoFormProps = {
 export default function DeckInfoForm({ 
   description, 
   onDescriptionChange, 
-  isPublic,
-  onIsPublicChange,
+  // isPublic,
+  // onIsPublicChange,
   coverImageUrl, 
   onCoverImageSelect,
   onCoverImageUpload,
@@ -88,10 +88,10 @@ export default function DeckInfoForm({
               </Button>
           </div>
         </div>
-        <div className="flex items-center justify-between pt-2">
+        {/* <div className="flex items-center justify-between pt-2">
             <Label htmlFor="is_public">Deck Público</Label>
             <Switch id="is_public" checked={isPublic} onCheckedChange={onIsPublicChange} disabled={isUploading} />
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );
