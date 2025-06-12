@@ -1,11 +1,14 @@
+/* eslint-disable no-console */
+/* eslint-disable no-undef */
 /* eslint-disable no-unused-labels */
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { ScryfallCard } from '@/app/lib/scryfall';
 import type { DeckDetailViewProps, DeckCard } from '@/app/lib/types';
+import { createClient } from '@/app/utils/supabase/client'; // Importa o cliente
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +19,7 @@ import DeckListView from '@/app/components/deck/DeckListView';
 import DeckGridView from '@/app/components/deck/DeckGridView';
 import DeckViewActions from '@/app/components/deck/DeckViewActions'; // ✨ Importa o novo componente
 import type { GridCardData } from '@/app/components/deck/DeckGridView';
+import SaveDeckButton from '@/app/components/deck/SaveDeckButton';
 
 
 type Profile = {
@@ -57,9 +61,30 @@ export default function DeckDetailView({
   currentUser,
   creatorProfile,
 }: DeckDetailViewProps) {
+  const supabase = createClient(); // Cria a instância do cliente
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const scryfallCardMap = useMemo(() => new Map<string, ScryfallCard>(initialScryfallMapArray as unknown as readonly [string, ScryfallCard][]), [initialScryfallMapArray]);
   const router = useRouter();
+
+  // ✨ NOVO: Efeito para incrementar a contagem de visualizações ✨
+  useEffect(() => {
+    // Garante que a função só corre uma vez no lado do cliente
+    // e apenas para o deck que foi carregado.
+    if (initialDeck?.id) {
+      const incrementView = async () => {
+        try {
+          // Chama a função RPC que criámos no Supabase
+          await supabase.rpc('increment_deck_view', {
+            deck_id_to_update: initialDeck.id,
+          });
+          console.log('teste');
+        } catch (error) {
+          console.error("Falha ao incrementar a visualização do deck:", error);
+        }
+      };
+      incrementView();
+    }
+  }, [initialDeck?.id, supabase]);
 
   const {
     commanderCard,
@@ -196,7 +221,7 @@ export default function DeckDetailView({
             <div className="flex items-center gap-4">
               {/* As ações de partilha estão agora no seu próprio componente */}
               <DeckViewActions deck={initialDeck} />
-              
+              <SaveDeckButton deckId={initialDeck.id} initialIsSaved={false} />
               {/* Ações do dono do deck */}
               {isOwner && (
                 <div className="flex gap-2">

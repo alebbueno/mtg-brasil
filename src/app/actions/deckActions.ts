@@ -350,3 +350,58 @@ export async function deleteDeck(deckId: string) {
     revalidatePath('/my-decks');
     redirect('/my-decks');
 }
+
+
+// ============================================================================
+// --- NOVA AÇÃO PARA GUARDAR / REMOVER UM DECK ---
+// ============================================================================
+export async function toggleSaveDeck(deckId: string): Promise<{ saved: boolean, message: string }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('Apenas utilizadores autenticados podem guardar decks.');
+  }
+
+  // Verifica se o utilizador já guardou este deck
+  const { data: existingSave, error: fetchError } = await supabase
+    .from('saved_decks')
+    .select('deck_id')
+    .eq('user_id', user.id)
+    .eq('deck_id', deckId)
+    .maybeSingle();
+  
+  if (fetchError) {
+    console.error("Erro ao verificar deck guardado:", fetchError);
+    throw new Error("Não foi possível realizar a operação.");
+  }
+
+  // Se já existe um registo, remove-o (unsave)
+  if (existingSave) {
+    const { error: deleteError } = await supabase
+      .from('saved_decks')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('deck_id', deckId);
+    
+    if (deleteError) {
+      console.error("Erro ao remover deck guardado:", deleteError);
+      throw new Error("Não foi possível remover o deck dos seus guardados.");
+    }
+
+    return { saved: false, message: "Deck removido dos guardados." };
+  } 
+  // Se não existe, insere um novo registo (save)
+  else {
+    const { error: insertError } = await supabase
+      .from('saved_decks')
+      .insert({ user_id: user.id, deck_id: deckId });
+
+    if (insertError) {
+      console.error("Erro ao guardar deck:", insertError);
+      throw new Error("Não foi possível guardar o deck.");
+    }
+    
+    return { saved: true, message: "Deck guardado com sucesso!" };
+  }
+}
