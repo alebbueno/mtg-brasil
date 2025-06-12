@@ -329,28 +329,33 @@ export async function updateDeckCoverImage(deckId: string, imageUrl: string) {
 /**
  * Exclui um deck.
  */
-export async function deleteDeck(deckId: string) {
-    'use server'
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        throw new Error('Utilizador não autenticado.');
-    }
+export async function deleteDeck(deckId: string): Promise<{ success: boolean; message: string }> {
+  const supabase = createClient()
 
-    const { error } = await supabase
-        .from('decks')
-        .delete()
-        .eq('id', deckId)
-        .eq('user_id', user.id);
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    // Retorna um erro que pode ser apanhado pelo `catch` no lado do cliente
+    return { success: false, message: 'Utilizador não autenticado.' };
+  }
 
-    if (error) {
-        throw new Error('Não foi possível excluir o deck.');
-    }
+  const { error } = await supabase
+    .from('decks')
+    .delete()
+    .eq('id', deckId)
+    .eq('user_id', user.id); // Garantia de segurança
 
-    revalidatePath('/my-decks');
-    redirect('/my-decks');
+  if (error) {
+    console.error('Erro ao excluir deck:', error);
+    return { success: false, message: 'Não foi possível excluir o deck.' };
+  }
+
+  // Revalida o cache para garantir que a lista estará atualizada no próximo carregamento
+  revalidatePath('/my-decks');
+  
+  // Em vez de redirecionar aqui, informamos o cliente do sucesso.
+  // O cliente pode então decidir se quer ou não redirecionar.
+  return { success: true, message: 'Deck excluído com sucesso!' };
 }
-
 
 // ============================================================================
 // --- NOVA AÇÃO PARA GUARDAR / REMOVER UM DECK ---

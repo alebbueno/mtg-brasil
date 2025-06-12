@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-vars */
+// app/my-decks/components/DeckCardItem.tsx
 'use client'
 
 import { useState } from 'react';
@@ -6,7 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, User as UserIcon } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +23,7 @@ import {
 import { deleteDeck } from '@/app/actions/deckActions';
 import { toast } from 'sonner';
 
-// Tipo de dados para o deck
+// Tipagem para os dados de um deck
 type Deck = {
   id: string;
   name: string;
@@ -30,22 +32,29 @@ type Deck = {
   created_at: string;
 };
 
-export default function DeckCardItem({ deck, onDelete }: { deck: Deck; onDelete?: (deckId: string) => void }) {
+// As props agora incluem o nome do criador (opcional)
+interface DeckCardItemProps {
+  deck: Deck;
+  creatorUsername?: string | null;
+  onDelete?: (deckId: string) => void;
+}
+
+export default function DeckCardItem({ deck, creatorUsername, onDelete }: DeckCardItemProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  // Determina se o utilizador é o dono (se não houver um nome de criador, assume-se que é)
+  const isOwner = !creatorUsername;
 
   // Função para lidar com a exclusão do deck
   const handleDelete = async () => {
     setIsDeleting(true);
-    try {
-      await deleteDeck(deck.id);
-      toast.success("Deck excluído com sucesso!");
-      // Notifica o componente pai para remover o deck do estado
-      if (onDelete) {
-        onDelete(deck.id);
-      }
-    } catch (error: any) {
-      toast.error(error.message || "Não foi possível excluir o deck.");
-    } finally {
+    // A ação de exclusão agora retorna um resultado de sucesso/erro
+    const result = await deleteDeck(deck.id);
+
+    if (result.success) {
+      toast.success(result.message);
+      // A página "Meus Decks" irá tratar da atualização da UI
+    } else {
+      toast.error(result.message);
       setIsDeleting(false);
     }
   };
@@ -72,38 +81,48 @@ export default function DeckCardItem({ deck, onDelete }: { deck: Deck; onDelete?
         </Link>
         <div className="flex-grow"></div>
         <div className="flex justify-between items-center mt-4">
-          <p className="text-xs text-neutral-500">
-            Criado em: {new Date(deck.created_at).toLocaleDateString('pt-BR')}
-          </p>
-          {/* Botões de Ação */}
-          <div className="flex gap-2">
-            <Link href={`/my-deck/${deck.format}/${deck.id}/edit`}>
-              <Button variant="outline" size="icon" className="h-8 w-8">
-                <Edit className="h-4 w-4" />
-              </Button>
-            </Link>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="icon" className="h-8 w-8" disabled={isDeleting}>
-                  <Trash2 className="h-4 w-4" />
+          {/* Exibe a data de criação ou o nome do criador */}
+          {isOwner ? (
+             <p className="text-xs text-neutral-500">
+              Criado em: {new Date(deck.created_at).toLocaleDateString('pt-BR')}
+            </p>
+          ) : (
+            <p className="text-xs text-neutral-400 flex items-center gap-1.5">
+              <UserIcon size={12} /> Por @{creatorUsername}
+            </p>
+          )}
+          
+          {/* Mostra os botões de editar/excluir apenas para o dono */}
+          {isOwner && (
+            <div className="flex gap-2">
+              <Link href={`/my-deck/${deck.format}/${deck.id}/edit`}>
+                <Button variant="outline" size="icon" className="h-8 w-8">
+                  <Edit className="h-4 w-4" />
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="bg-neutral-900 border-neutral-700">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Tem a certeza absoluta?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Esta ação não pode ser desfeita. Isto irá apagar permanentemente o seu deck.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-red-600 hover:bg-red-700">
-                    {isDeleting ? "A excluir..." : "Sim, excluir"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+              </Link>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="icon" className="h-8 w-8" disabled={isDeleting}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-neutral-900 border-neutral-700">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Tem a certeza absoluta?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Esta ação não pode ser desfeita. Isto irá apagar permanentemente o seu deck.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-red-600 hover:bg-red-700">
+                      {isDeleting ? "A excluir..." : "Sim, excluir"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
