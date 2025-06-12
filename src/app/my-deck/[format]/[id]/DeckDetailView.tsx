@@ -14,7 +14,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DeckPrivacyToggle } from '@/app/components/deck/DeckPrivacyToggle';
 import DeckListView from '@/app/components/deck/DeckListView';
 import DeckGridView from '@/app/components/deck/DeckGridView';
+import DeckViewActions from '@/app/components/deck/DeckViewActions'; // ✨ Importa o novo componente
 import type { GridCardData } from '@/app/components/deck/DeckGridView';
+
 
 type Profile = {
   username: string | null;
@@ -190,21 +192,28 @@ export default function DeckDetailView({
                 )}
               </div>
             </div>
-            {isOwner && (
-              <div className="flex gap-4">
-                <Card className="bg-neutral-800 p-3">
-                  <DeckPrivacyToggle deckId={initialDeck.id} initialIsPublic={initialDeck.is_public} />
-                </Card>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => router.push(`/my-deck/${initialDeck.format}/${initialDeck.id}/edit`)}
-                >
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Editar Deck
-                </Button>
-              </div>
-            )}
+            {/* ✨ ÁREA DE AÇÕES ATUALIZADA ✨ */}
+            <div className="flex items-center gap-4">
+              {/* As ações de partilha estão agora no seu próprio componente */}
+              <DeckViewActions deck={initialDeck} />
+              
+              {/* Ações do dono do deck */}
+              {isOwner && (
+                <div className="flex gap-2">
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    onClick={() => router.push(`/my-deck/${initialDeck.format}/${initialDeck.id}/edit`)}
+                  >
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Editar
+                  </Button>
+                  <Card className="bg-neutral-800 p-2">
+                    <DeckPrivacyToggle deckId={initialDeck.id} initialIsPublic={initialDeck.is_public} />
+                  </Card>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
