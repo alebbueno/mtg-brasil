@@ -19,6 +19,7 @@ import CardList from './components/CardList';
 import DeckActions from './components/DeckActions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
+import { createClient } from '@/app/utils/supabase/client';
 
 // Tipos
 export interface EditableCard extends ScryfallCard {
@@ -42,6 +43,9 @@ export default function DeckEditView({ initialDeck, initialScryfallCards }: Deck
   const [description, setDescription] = useState(initialDeck.description || '');
   const [isPublic, setIsPublic] = useState(initialDeck.is_public);
   const [coverImageUrl, setCoverImageUrl] = useState(initialDeck.representative_card_image_url || '');
+
+  // ✨ NOVO: Estado para gerir o loading do upload da imagem de capa ✨
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   
   // ✨ NOVO: Estado para gerir o popup da imagem, incluindo a sua posição ✨
   const [hoveredCard, setHoveredCard] = useState<{ imageUrl: string; x: number; y: number } | null>(null);
@@ -132,6 +136,51 @@ export default function DeckEditView({ initialDeck, initialScryfallCards }: Deck
   const handleCardLeave = () => {
     setHoveredCard(null);
   };
+
+  // ✨ FUNÇÃO ATUALIZADA: Lida com o upload da imagem de capa do utilizador ✨
+  const handleCoverImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user || !event.target.files || event.target.files.length === 0) {
+      toast.error("É preciso estar logado para carregar imagens.");
+      return;
+    }
+
+    const file = event.target.files[0];
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${user.id}/${initialDeck.id}-cover-${Date.now()}.${fileExt}`;
+    const bucket = 'covers';
+
+    setIsUploadingCover(true);
+
+    try {
+        const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: true, // Substitui o ficheiro se já existir com o mesmo nome
+        });
+
+        if (uploadError) {
+            throw uploadError;
+        }
+
+        const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(filePath);
+
+        if (!publicUrl) {
+            throw new Error("Não foi possível obter o URL público da imagem.");
+        }
+
+        await updateDeckCoverImage(initialDeck.id, publicUrl);
+        setCoverImageUrl(publicUrl);
+        toast.success("Imagem de capa carregada com sucesso!");
+
+    } catch (error: any) {
+        toast.error(`Erro no upload: ${error.message}`);
+    } finally {
+        setIsUploadingCover(false);
+        if (event.target) event.target.value = '';
+    }
+  };
   
   return (
     <>
@@ -170,6 +219,8 @@ export default function DeckEditView({ initialDeck, initialScryfallCards }: Deck
               onIsPublicChange={setIsPublic}
               coverImageUrl={coverImageUrl}
               onCoverImageSelect={handleCoverImageSelect}
+              onCoverImageUpload={handleCoverImageUpload} // Passa a nova função
+              isUploading={isUploadingCover} // ✨ Passa o estado de loading ✨
             />
             <Card className="bg-neutral-900 border-neutral-800">
               <CardHeader>

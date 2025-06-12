@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-// app/my-deck/[format]/[id]/edit/components/CardAdder.tsx
+// app/components/deck/CardAdder.tsx
 'use client';
 
 import { useState } from 'react';
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import AutocompleteInput from '@/app/components/deck/AutocompleteInput';
 import { Plus } from 'lucide-react';
 import type { ScryfallCard } from '@/app/lib/types';
+import { toast } from 'sonner'; // Importa a função de toast
 
 type CardAdderProps = {
   onAddCard: (card: ScryfallCard) => void;
@@ -20,6 +21,8 @@ export default function CardAdder({ onAddCard, placeholder }: CardAdderProps) {
     // Só executa a ação se uma carta válida foi selecionada
     if (selectedCard) {
       onAddCard(selectedCard);
+      // ✨ NOVO: Exibe uma notificação de sucesso ✨
+      toast.success(`"${selectedCard.name}" adicionado ao deck.`);
       setSelectedCard(null); // Limpa o estado interno para a próxima busca
     }
   };

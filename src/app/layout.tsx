@@ -6,6 +6,7 @@ import React from 'react';
 import Header from '@/app/components/Header';
 import Footer from '@/app/components/Footer';
 import Script from 'next/script';
+import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
   title: 'MTG Brasil - Busque e Traduza Cartas de Magic',
@@ -58,6 +59,7 @@ export default function RootLayout({
         <main className="flex-grow">{children}</main>
         <Footer />
       </body>
+      <Toaster />
     </html>
   );
 }

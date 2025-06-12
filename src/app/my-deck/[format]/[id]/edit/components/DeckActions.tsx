@@ -46,7 +46,7 @@ export default function DeckActions({ deckId, deckName, onNameChange }: DeckActi
         <SubmitButton />
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" type="button"><Trash2 className="mr-2 h-4 w-4"/>Excluir</Button>
+            <Button size="lg" variant="destructive" type="button"><Trash2 className="mr-2 h-4 w-4"/>Excluir</Button>
           </AlertDialogTrigger>
           <AlertDialogContent className="bg-neutral-900 border-neutral-700">
             <AlertDialogHeader>
