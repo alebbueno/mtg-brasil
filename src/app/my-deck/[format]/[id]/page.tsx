@@ -49,7 +49,7 @@ export default async function DeckDetailPage({ params }: any) {
       initialDeck={deckData}
       initialScryfallMapArray={scryfallCardMapArray}
       currentUser={user}
-      creatorProfile={creatorProfile}
-    />
+      creatorProfile={creatorProfile} 
+      isInitiallySaved={false}    />
   );
 }
