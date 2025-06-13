@@ -60,6 +60,7 @@ export interface DeckDetailViewProps {
   initialScryfallMapArray: [string, ScryfallCard][];
   currentUser: SupabaseUser | null;
   creatorProfile: CreatorProfile | null;
+  isInitiallySaved: boolean;
 }
 
 

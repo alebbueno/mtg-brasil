@@ -1,91 +1,33 @@
-/* eslint-disable no-console */
-/* eslint-disable no-undef */
 /* eslint-disable no-unused-labels */
+// app/my-deck/[format]/[id]/DeckDetailView.tsx
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import type { ScryfallCard } from '@/app/lib/scryfall';
 import type { DeckDetailViewProps, DeckCard } from '@/app/lib/types';
-import { createClient } from '@/app/utils/supabase/client'; // Importa o cliente
 
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Globe, Lock, BarChart, Droplets, List, LayoutGrid, Pencil } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { DeckPrivacyToggle } from '@/app/components/deck/DeckPrivacyToggle';
+// Importando os novos componentes filhos
+import CreatorHeader from './components/CreatorHeader';
+import DeckHeader from './components/DeckHeader';
 import DeckListView from '@/app/components/deck/DeckListView';
 import DeckGridView from '@/app/components/deck/DeckGridView';
-import DeckViewActions from '@/app/components/deck/DeckViewActions'; // ✨ Importa o novo componente
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { BarChart, Droplets, List, LayoutGrid } from 'lucide-react';
 import type { GridCardData } from '@/app/components/deck/DeckGridView';
-import SaveDeckButton from '@/app/components/deck/SaveDeckButton';
-
-
-type Profile = {
-  username: string | null;
-  avatar_url: string | null;
-  cover_image_url: string | null;
-};
-
-function CreatorHeader({ profile }: { profile: Profile | null }) {
-  if (!profile) return null;
-  const fallbackInitial = profile.username?.charAt(0).toUpperCase() || '?';
-
-  return (
-    <div className="mb-8 p-4 bg-neutral-900 rounded-lg border border-neutral-800">
-      <div className="relative h-24 sm:h-32 rounded-md overflow-hidden">
-        {profile.cover_image_url ? (
-          <Image src={profile.cover_image_url} alt="Capa do criador" fill className="object-cover" />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-r from-neutral-800 to-neutral-700" />
-        )}
-      </div>
-      <div className="flex items-center -mt-8 ml-4 sm:-mt-10 sm:ml-6">
-        <Avatar className="h-16 w-16 sm:h-20 sm:w-20 border-4 border-neutral-900">
-          <AvatarImage src={profile.avatar_url || ''} alt={`Avatar de ${profile.username}`} />
-          <AvatarFallback className="text-2xl bg-neutral-700 text-amber-500">{fallbackInitial}</AvatarFallback>
-        </Avatar>
-        <div className="ml-4">
-          <p className="text-xs text-neutral-400">Criado por</p>
-          <h3 className="text-lg font-bold text-amber-500">@{profile.username || 'Anônimo'}</h3>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function DeckDetailView({
   initialDeck,
   initialScryfallMapArray,
   currentUser,
   creatorProfile,
+  isInitiallySaved,
 }: DeckDetailViewProps) {
-  const supabase = createClient(); // Cria a instância do cliente
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  const scryfallCardMap = useMemo(() => new Map<string, ScryfallCard>(initialScryfallMapArray as unknown as readonly [string, ScryfallCard][]), [initialScryfallMapArray]);
-  const router = useRouter();
+  const scryfallCardMap = useMemo(() => new Map<string, ScryfallCard>(initialScryfallMapArray as any), [initialScryfallMapArray]);
 
-  // ✨ NOVO: Efeito para incrementar a contagem de visualizações ✨
-  useEffect(() => {
-    // Garante que a função só corre uma vez no lado do cliente
-    // e apenas para o deck que foi carregado.
-    if (initialDeck?.id) {
-      const incrementView = async () => {
-        try {
-          // Chama a função RPC que criámos no Supabase
-          await supabase.rpc('increment_deck_view', {
-            deck_id_to_update: initialDeck.id,
-          });
-          console.log('teste');
-        } catch (error) {
-          console.error("Falha ao incrementar a visualização do deck:", error);
-        }
-      };
-      incrementView();
-    }
-  }, [initialDeck?.id, supabase]);
-
+  // A sua lógica `useMemo` para processar as cartas permanece a mesma
   const {
     commanderCard,
     planeswalkerCards,
@@ -198,49 +140,8 @@ export default function DeckDetailView({
     <div className="min-h-screen bg-neutral-950 text-neutral-100 p-4 sm:p-8">
       <div className="max-w-screen-xl mx-auto">
         {!isOwner && <CreatorHeader profile={creatorProfile} />}
-
-        <header className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-4xl font-bold text-amber-500">{initialDeck.name}</h1>
-              <div className="flex items-center gap-2 text-lg text-neutral-400 capitalize">
-                <span>{initialDeck.format}</span>
-                <span className="text-neutral-600">•</span>
-                {initialDeck.is_public ? (
-                  <span className="flex items-center gap-1 text-green-400 text-sm">
-                    <Globe size={14} /> Público
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-red-400 text-sm">
-                    <Lock size={14} /> Privado
-                  </span>
-                )}
-              </div>
-            </div>
-            {/* ✨ ÁREA DE AÇÕES ATUALIZADA ✨ */}
-            <div className="flex items-center gap-4">
-              {/* As ações de partilha estão agora no seu próprio componente */}
-              <DeckViewActions deck={initialDeck} />
-              <SaveDeckButton deckId={initialDeck.id} initialIsSaved={false} />
-              {/* Ações do dono do deck */}
-              {isOwner && (
-                <div className="flex gap-2">
-                  <Button
-                    size="lg"
-                    variant="secondary"
-                    onClick={() => router.push(`/my-deck/${initialDeck.format}/${initialDeck.id}/edit`)}
-                  >
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Editar
-                  </Button>
-                  <Card className="bg-neutral-800 p-2">
-                    <DeckPrivacyToggle deckId={initialDeck.id} initialIsPublic={initialDeck.is_public} />
-                  </Card>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
+        
+        <DeckHeader deck={initialDeck} isOwner={isOwner} isInitiallySaved={isInitiallySaved} />
 
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
           <div className="lg:col-span-3 sticky top-24 self-start">
@@ -284,31 +185,15 @@ export default function DeckDetailView({
             <div className="flex justify-end items-center gap-4">
               <span className="text-sm text-neutral-400">Visualizar como:</span>
               <div className="flex gap-1 bg-neutral-800 p-1 rounded-md">
-                <Button
-                  variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                >
-                  <List className="mr-2 h-4 w-4" />
-                  Lista
-                </Button>
-                <Button
-                  variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                >
-                  <LayoutGrid className="mr-2 h-4 w-4" />
-                  Grelha
-                </Button>
+                <Button variant={viewMode === 'list' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('list')}><List className="mr-2 h-4 w-4" />Lista</Button>
+                <Button variant={viewMode === 'grid' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('grid')}><LayoutGrid className="mr-2 h-4 w-4" />Grelha</Button>
               </div>
             </div>
 
             {viewMode === 'list' ? (
               <DeckListView
                 commanderCard={
-                  commanderCard
-                    ? { card: scryfallCardMap.get(commanderCard.name)!, count: commanderCard.count }
-                    : null
+                  commanderCard ? { card: scryfallCardMap.get(commanderCard.name)!, count: commanderCard.count } : null
                 }
                 mainboardGrouped={mainboardGroupedForList}
                 mainboardTotalCount={mainboardListTotalCount}
