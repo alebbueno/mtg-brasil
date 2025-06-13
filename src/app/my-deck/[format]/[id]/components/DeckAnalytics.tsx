@@ -49,13 +49,11 @@ export default function DeckAnalytics({ decklist, scryfallCardMap, description }
         landCount += count;
         // ✨ LÓGICA CORRIGIDA: Analisa o texto do terreno para ver que mana ele produz
         const oracleText = card.oracle_text || '';
-        const producedSymbols = oracleText.match(/{[WUBRGC]}/g) || [];
+        const producedSymbols = (oracleText.match(/{[WUBRGC]}/g) || []) as string[];
         producedSymbols.forEach((symbolWithBraces) => {
-          if (typeof symbolWithBraces === 'string') { // Garante que é string
-            const type = symbolWithBraces.replace(/[{}]/g, '');
-            if (Object.prototype.hasOwnProperty.call(landManaProduction, type)) {
-              landManaProduction[type] += count;
-            }
+          const type = symbolWithBraces.replace(/[{}]/g, '');
+          if (Object.prototype.hasOwnProperty.call(landManaProduction, type)) {
+            landManaProduction[type] += count;
           }
         });
       } else {
