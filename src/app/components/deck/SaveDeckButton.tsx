@@ -35,14 +35,14 @@ export default function SaveDeckButton({ deckId, initialIsSaved }: SaveDeckButto
       onClick={handleToggleSave} 
       disabled={isPending}
       variant={isSaved ? "secondary" : "default"}
-      className="bg-amber-500 text-black hover:bg-amber-600"
+      className="bg-amber-500 align-center text-black hover:bg-amber-600"
     >
       {isPending ? (
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        <Loader2 className=" h-4 w-4 animate-spin" />
       ) : isSaved ? (
-        <BookmarkCheck className="mr-2 h-4 w-4" />
+        <BookmarkCheck className=" h-4 w-4" />
       ) : (
-        <Bookmark className="mr-2 h-4 w-4" />
+        <Bookmark className=" h-4 w-4" />
       )}
     </Button>
   );

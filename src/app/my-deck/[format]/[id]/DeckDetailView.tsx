@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-labels */
-// app/my-deck/[format]/[id]/DeckDetailView.tsx
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -12,6 +13,7 @@ import CreatorHeader from './components/CreatorHeader';
 import DeckHeader from './components/DeckHeader';
 import DeckListView from '@/app/components/deck/DeckListView';
 import DeckGridView from '@/app/components/deck/DeckGridView';
+import DeckAnalytics from './components/DeckAnalytics'; // Novo componente
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BarChart, Droplets, List, LayoutGrid } from 'lucide-react';
@@ -155,33 +157,6 @@ export default function DeckDetailView({
           </div>
 
           <main className="lg:col-span-7 space-y-8">
-            <aside className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="bg-neutral-900 border-neutral-800">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-amber-500">
-                    <BarChart /> Estatísticas
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-neutral-400 text-sm">Gráfico da Curva de Mana aqui.</p>
-                </CardContent>
-              </Card>
-              {initialDeck.description && (
-                <Card className="bg-neutral-900 border-neutral-800">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-amber-500">
-                      <Droplets /> Primer / Estratégia
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="prose prose-invert text-neutral-300 whitespace-pre-wrap">
-                      {initialDeck.description}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </aside>
-
             <div className="flex justify-end items-center gap-4">
               <span className="text-sm text-neutral-400">Visualizar como:</span>
               <div className="flex gap-1 bg-neutral-800 p-1 rounded-md">
@@ -213,6 +188,28 @@ export default function DeckDetailView({
               />
             )}
           </main>
+        </div>
+      </div>
+
+      {/* Deck Analytics */}
+      <div className="max-w-screen-xl pt-[100px] mx-auto">
+        <div className="container">
+          <DeckAnalytics
+            decklist={{
+              mainboard: initialDeck.decklist.mainboard.map(card => ({
+                ...card,
+                id: scryfallCardMap.get(card.name)?.id || '',
+                scryfall_id: scryfallCardMap.get(card.name)?.id || ''
+              })),
+              sideboard: initialDeck.decklist.sideboard?.map(card => ({
+                ...card,
+                id: scryfallCardMap.get(card.name)?.id || '',
+                scryfall_id: scryfallCardMap.get(card.name)?.id || ''
+              }))
+            }}
+            scryfallCardMap={scryfallCardMap}
+            description={initialDeck.description}
+          />
         </div>
       </div>
     </div>
