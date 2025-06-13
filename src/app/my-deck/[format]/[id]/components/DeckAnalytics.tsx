@@ -49,11 +49,13 @@ export default function DeckAnalytics({ decklist, scryfallCardMap, description }
       if (card.type_line.includes('Land')) {
         landCount += count;
         if (card.mana_cost) {
-          const symbols: string[] = card.mana_cost.match(/{[WUBRGC]\}/g) || [];
-          symbols.forEach((symbol: string) => {
-            const type = symbol.replace(/[{}]/g, '');
-            if (landManaProduction[type] !== undefined) {
-              landManaProduction[type] += count;
+          const symbols = card.mana_cost?.match(/{[WUBRGC]}/g) ?? [];
+          symbols.forEach((symbol) => {
+            if (typeof symbol === 'string') {
+              const type = symbol.replace(/[{}]/g, '');
+              if (manaSymbols[type] !== undefined) {
+                manaSymbols[type] += count;
+              }
             }
           });
         }
@@ -72,11 +74,13 @@ export default function DeckAnalytics({ decklist, scryfallCardMap, description }
 
         // Contar símbolos de mana apenas de cartas não-terrenos
         if (card.mana_cost) {
-          const symbols = card.mana_cost.match(/{[WUBRGC]\}/g) || [];
+          const symbols = card.mana_cost?.match(/{[WUBRGC]}/g) ?? [];
           symbols.forEach((symbol) => {
-            const type = symbol.replace(/[{}]/g, '');
-            if (manaSymbols[type] !== undefined) {
-              manaSymbols[type] += count;
+            if (typeof symbol === 'string') {
+              const type = symbol.replace(/[{}]/g, '');
+              if (manaSymbols[type] !== undefined) {
+                manaSymbols[type] += count;
+              }
             }
           });
         }
