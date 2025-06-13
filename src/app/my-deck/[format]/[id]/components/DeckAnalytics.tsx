@@ -51,9 +51,11 @@ export default function DeckAnalytics({ decklist, scryfallCardMap, description }
         const oracleText = card.oracle_text || '';
         const producedSymbols = oracleText.match(/{[WUBRGC]}/g) || [];
         producedSymbols.forEach((symbolWithBraces) => {
-          const type = symbolWithBraces.replace(/[{}]/g, '');
-          if (Object.prototype.hasOwnProperty.call(landManaProduction, type)) {
-            landManaProduction[type] += count;
+          if (typeof symbolWithBraces === 'string') { // Garante que é string
+            const type = symbolWithBraces.replace(/[{}]/g, '');
+            if (Object.prototype.hasOwnProperty.call(landManaProduction, type)) {
+              landManaProduction[type] += count;
+            }
           }
         });
       } else {
