@@ -55,7 +55,7 @@ export default function SignupPage() {
     <div className="min-h-screen bg-neutral-950 text-neutral-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full p-8 bg-neutral-900 rounded-lg shadow-lg border border-neutral-700">
         <header className="mb-8 text-center">
-          <h1 className="text-4xl font-extrabold text-amber-400">
+          <h1 className="text-4xl font-extrabold text-amber-500">
             Criar Conta
           </h1>
           <p className="text-neutral-300 mt-2">
@@ -119,7 +119,7 @@ export default function SignupPage() {
         <div className="mt-6 text-center text-sm">
           <p className="text-neutral-400">
             Já tem uma conta?{' '}
-            <Link href="/login" className="font-medium text-amber-400 hover:underline">
+            <Link href="/login" className="font-medium text-amber-500 hover:underline">
               Faça login
             </Link>
           </p>

@@ -79,7 +79,7 @@ function CardSection({ cardList, onCountChange, onCardHover, onCardLeave }: {
 
     return (
       <div key={type}>
-        <h4 className="font-semibold text-amber-400/80 mt-2">{type} ({typeCount})</h4>
+        <h4 className="font-semibold text-amber-500/80 mt-2">{type} ({typeCount})</h4>
         {cardsOfType.sort((a, b) => a.name.localeCompare(b.name)).map(card => (
           <CardRow key={card.id} card={card} onCountChange={onCountChange} onCardHover={onCardHover} onCardLeave={onCardLeave} />
         ))}

@@ -28,7 +28,7 @@ export default async function Header() {
   return (
     <header className="w-full p-4 bg-gradient-to-r from-black via-neutral-900 to-black shadow-lg sticky top-0 z-50">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
-        <Link href="/" className="text-2xl font-bold text-amber-400 hover:text-amber-500 transition-colors">
+        <Link href="/" className="text-2xl font-bold text-amber-500 hover:text-amber-500 transition-colors">
           🧙 MTG Translate
         </Link>
         

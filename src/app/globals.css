@@ -117,9 +117,24 @@
   }
   body {
     @apply bg-background text-foreground;
+    
   }
   button,
   [role="button"] {
     @apply cursor-pointer;
+    
+  }
+  /* ✨ ATUALIZAÇÃO: Efeito de hover e transição para botões E links (a) ✨ */
+  button,
+  [role="button"],
+  a {
+    @apply cursor-pointer transition-all duration-200 ease-in-out;
+  }
+  
+  /* Aplica o efeito de sombra ao passar o rato */
+  button:hover,
+  [role="button"]:hover {
+    @apply brightness-110; /* Mantém um brilho subtil no próprio elemento */
+    filter: drop-shadow(0 0 8px var(--button-gradient--dark, #eb2c06)) /* Efeito de glow com a cor primária */
   }
 }

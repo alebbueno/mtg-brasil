@@ -23,7 +23,7 @@ export default function FeaturedCardsSection({ cards }: FeaturedCardsSectionProp
   return (
     <section className="py-12 md:py-20 bg-neutral-950">
       <div className="container mx-auto px-6">
-        <h2 className="text-3xl font-bold text-center text-amber-400 mb-12">Cartas em Destaque</h2>
+        <h2 className="text-3xl font-bold text-center text-amber-500 mb-12">Cartas em Destaque</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {cards.map(card => (
             // Removido legacyBehavior e a tag <a> interna.
@@ -44,7 +44,7 @@ export default function FeaturedCardsSection({ cards }: FeaturedCardsSectionProp
                   />
                 </CardContent>
                 <div className="p-4 bg-neutral-800">
-                  <h3 className="text-lg font-semibold text-amber-400 group-hover:text-amber-300 truncate">{card.name}</h3>
+                  <h3 className="text-lg font-semibold text-amber-500 group-hover:text-amber-300 truncate">{card.name}</h3>
                   <p className="text-sm text-neutral-400 uppercase">{card.set}</p>
                 </div>
               </Card>
@@ -53,7 +53,7 @@ export default function FeaturedCardsSection({ cards }: FeaturedCardsSectionProp
         </div>
         <div className="text-center mt-12">
           <Link href="/search?sort=popularity">
-            <Button variant="outline" className="text-amber-400 border-amber-400 hover:bg-amber-400 hover:text-black">
+            <Button variant="outline" className="text-amber-500 border-amber-400 hover:bg-amber-400 hover:text-black">
               Ver Mais Cartas Populares
             </Button>
           </Link>

@@ -258,7 +258,7 @@ export default function ProfilePage() {
       <div className="max-w-4xl mx-auto pt-24 pb-12 px-4 space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold">{profile?.full_name || 'Nome do Utilizador'}</h1>
-          <p className="text-amber-400">@{profile?.username || 'username'}</p>
+          <p className="text-amber-500">@{profile?.username || 'username'}</p>
         </div>
         
         <div className="p-8 bg-neutral-900 rounded-lg border border-neutral-800 space-y-6">

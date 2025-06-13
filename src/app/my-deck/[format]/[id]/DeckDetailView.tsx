@@ -44,11 +44,11 @@ function CreatorHeader({ profile }: { profile: Profile | null }) {
       <div className="flex items-center -mt-8 ml-4 sm:-mt-10 sm:ml-6">
         <Avatar className="h-16 w-16 sm:h-20 sm:w-20 border-4 border-neutral-900">
           <AvatarImage src={profile.avatar_url || ''} alt={`Avatar de ${profile.username}`} />
-          <AvatarFallback className="text-2xl bg-neutral-700 text-amber-400">{fallbackInitial}</AvatarFallback>
+          <AvatarFallback className="text-2xl bg-neutral-700 text-amber-500">{fallbackInitial}</AvatarFallback>
         </Avatar>
         <div className="ml-4">
           <p className="text-xs text-neutral-400">Criado por</p>
-          <h3 className="text-lg font-bold text-amber-400">@{profile.username || 'Anônimo'}</h3>
+          <h3 className="text-lg font-bold text-amber-500">@{profile.username || 'Anônimo'}</h3>
         </div>
       </div>
     </div>
@@ -202,7 +202,7 @@ export default function DeckDetailView({
         <header className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-amber-400">{initialDeck.name}</h1>
+              <h1 className="text-4xl font-bold text-amber-500">{initialDeck.name}</h1>
               <div className="flex items-center gap-2 text-lg text-neutral-400 capitalize">
                 <span>{initialDeck.format}</span>
                 <span className="text-neutral-600">•</span>

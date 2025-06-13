@@ -67,7 +67,7 @@ export default function FloatingFeedback() {
       >
         <div className="space-y-4">
           <div className="space-y-1">
-            <h4 className="font-medium leading-none text-amber-400 text-lg">Envie o seu Feedback</h4>
+            <h4 className="font-medium leading-none text-amber-500 text-lg">Envie o seu Feedback</h4>
             <p className="text-sm text-neutral-400">
               A sua opinião é muito importante! Ajude-nos a melhorar.
             </p>

@@ -18,7 +18,7 @@ export default function TermDefinition({ displayTerm, definition }: TermDefiniti
       <AccordionTrigger
         className="hover:bg-neutral-800/50 px-4 rounded-md data-[state=open]:bg-neutral-700/60"
       >
-        <span className="text-lg font-medium text-amber-400">{displayTerm}</span>
+        <span className="text-lg font-medium text-amber-500">{displayTerm}</span>
       </AccordionTrigger>
       <AccordionContent className="px-4 pt-2 pb-4 text-neutral-300 leading-relaxed">
         {definition ? (

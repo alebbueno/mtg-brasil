@@ -41,7 +41,7 @@ export default async function DeckEditPage(props: any) {
             </Button>
           </Link>
           <div className="title">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-amber-400">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-amber-500">
               Editar Deck
             </h1>
             <p className="text-lg text-neutral-300 mt-2">

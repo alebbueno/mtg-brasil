@@ -1,26 +1,33 @@
 // app/components/home/ManaColorLink.tsx
+'use client';
+
 import Link from 'next/link';
-import React from 'react';
 
 interface ManaColorLinkProps {
-  color: string;
+  symbol: string;
   name: string;
-  bgColor: string;
-  textColor: string;
-  symbolChar: string;
+  gradient: string; // Classes de gradiente do Tailwind CSS
 }
 
-export default function ManaColorLink({ color, name, bgColor, textColor, symbolChar }: ManaColorLinkProps) {
+export default function ManaColorLink({ symbol, name, gradient }: ManaColorLinkProps) {
+  // Gera a classe correta do mana-font a partir do símbolo
+  // ex: 'W' -> 'ms-w', 'U' -> 'ms-u', etc.
+  const manaClass = `ms ms-${symbol.toLowerCase()} ms-5x`;
+
   return (
-    // Removido legacyBehavior e a tag <a> interna.
-    // As classes foram para o Link, que passará para o div filho.
-    <Link 
-      href={`/search?colors=${color.toUpperCase()}`} 
-      className={`p-4 rounded-lg border border-neutral-700 hover:border-amber-500 transition flex flex-col items-center justify-center aspect-square ${bgColor} ${textColor} hover:shadow-lg group`}
-    >
-      {/* O conteúdo que estava na tag <a> agora é filho direto do Link */}
-      <span className="text-4xl font-bold group-hover:scale-110 transition-transform">{symbolChar}</span>
-      <span className="mt-1 text-sm font-semibold">{name}</span>
+    <Link href={`/search?colors=${symbol}`} className="block group">
+      <div 
+        className={`relative flex flex-col items-center justify-center p-6 aspect-square rounded-xl border border-neutral-800 overflow-hidden transition-all duration-300 hover:border-amber-400 hover:shadow-2xl hover:-translate-y-1`}
+      >
+        {/* Fundo com Gradiente */}
+        <div className={`absolute inset-0 ${gradient} opacity-20 group-hover:opacity-30 transition-opacity`} />
+        
+        {/* Ícone de Mana da biblioteca mana-font */}
+        <i className={`${manaClass} text-white/80 group-hover:text-white transition-colors drop-shadow-lg`} />
+        
+        {/* Nome da Cor */}
+        <span className="mt-2 text-base font-semibold text-neutral-200">{name}</span>
+      </div>
     </Link>
   );
 }

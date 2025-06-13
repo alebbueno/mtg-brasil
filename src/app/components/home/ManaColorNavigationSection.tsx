@@ -1,38 +1,45 @@
 // app/components/home/ManaColorNavigationSection.tsx
 import ManaColorLink from './ManaColorLink';
+import { Palette } from 'lucide-react'; // Ícone para o título
 
-// Defina as cores e símbolos de mana como uma constante
+// Dados para os links de navegação por cor, incluindo Incolor e Multicolor
 const manaColorsData = [
-  { color: "W", name: "Branco", bgColor: "bg-mana-white", textColor: "text-black", symbolChar: "W" },
-  { color: "U", name: "Azul", bgColor: "bg-mana-blue", textColor: "text-black", symbolChar: "U" },
-  { color: "B", name: "Preto", bgColor: "bg-mana-black", textColor: "text-white", symbolChar: "B" },
-  { color: "R", name: "Vermelho", bgColor: "bg-mana-red", textColor: "text-black", symbolChar: "R" },
-  { color: "G", name: "Verde", bgColor: "bg-mana-green", textColor: "text-black", symbolChar: "G" },
-  // { color: "C", name: "Incolor", bgColor: "bg-gray-400", textColor: "text-black", symbolChar: "C" }, // Exemplo para Incolor
+  { symbol: "W", name: "Branco", gradient: "from-yellow-100 to-gray-200" },
+  { symbol: "U", name: "Azul", gradient: "from-blue-300 to-cyan-400" },
+  { symbol: "B", name: "Preto", gradient: "from-gray-600 to-black" },
+  { symbol: "R", name: "Vermelho", gradient: "from-red-500 to-orange-400" },
+  { symbol: "G", name: "Verde", gradient: "from-green-400 to-lime-500" },
+  { symbol: "C", name: "Incolor", gradient: "from-gray-400 to-gray-500" },
+  { symbol: "M", name: "Multicolor", gradient: "from-amber-400 to-fuchsia-500" },
 ];
 
 export default function ManaColorNavigationSection() {
   return (
-    <div>
-      <h2 className="text-3xl font-bold text-amber-400 mb-8">Navegue por Cor</h2>
-      <div className="grid grid-cols-3 sm:grid-cols-5 gap-4">
-        {manaColorsData.map(mana => (
-          <ManaColorLink
-            key={mana.color}
-            color={mana.color}
-            name={mana.name}
-            bgColor={mana.bgColor}
-            textColor={mana.textColor}
-            symbolChar={mana.symbolChar}
-          />
-        ))}
+    <section className="py-16 sm:py-20 ">
+      <div className="container mx-auto px-4">
+        {/* Cabeçalho da Secção */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-amber-500 flex items-center justify-center gap-3">
+            <Palette />
+            Navegue por Cor
+          </h2>
+          <p className="mt-3 text-lg text-neutral-400 max-w-2xl mx-auto">
+            Explore cartas com base na sua identidade de cor e descubra novas sinergias.
+          </p>
+        </div>
+
+        {/* Grelha de Navegação Responsiva */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 max-w-5xl mx-auto">
+          {manaColorsData.map(mana => (
+            <ManaColorLink
+              key={mana.symbol}
+              symbol={mana.symbol}
+              name={mana.name}
+              gradient={mana.gradient}
+            />
+          ))}
+        </div>
       </div>
-      <p className="mt-8 text-neutral-400">
-        Descubra cartas e estratégias associadas a cada cor icônica do Magic.
-      </p>
-    </div>
+    </section>
   );
 }
-
-// Lembre-se de definir as cores bg-mana-* em seu tailwind.config.js
-// ex: mana: { white: '#F8F6D8', blue: '#AAE0FA', black: '#231F20', red: '#F9AA8F', green: '#9CD4A1' }

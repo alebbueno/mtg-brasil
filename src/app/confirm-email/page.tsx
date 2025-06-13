@@ -20,7 +20,7 @@ export default function ConfirmEmailPage() {
         </div>
 
         <header className="mb-6">
-          <h1 className="text-4xl font-extrabold text-amber-400">
+          <h1 className="text-4xl font-extrabold text-amber-500">
             Verifique o seu e-mail
           </h1>
           <p className="text-neutral-300 mt-3 text-lg">
@@ -41,7 +41,7 @@ export default function ConfirmEmailPage() {
           <Link href="/login">
             <Button
               variant="outline"
-              className="w-full sm:w-auto text-amber-400 border-amber-400 hover:bg-amber-400 hover:text-black px-8 py-6 text-base"
+              className="w-full sm:w-auto text-amber-500 border-amber-400 hover:bg-amber-400 hover:text-black px-8 py-6 text-base"
             >
               Voltar para o Login
             </Button>

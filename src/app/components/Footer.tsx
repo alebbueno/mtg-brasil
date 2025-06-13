@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto text-center text-neutral-400">
         <div className="grid md:grid-cols-3 gap-8 mb-8 text-left md:text-center">
           <div>
-            <h3 className="text-lg font-semibold text-amber-400 mb-3">Navegação</h3>
+            <h3 className="text-lg font-semibold text-amber-500 mb-3">Navegação</h3>
             <ul className="space-y-2">
               <li><Link href="/" className="hover:text-amber-500 transition">Página Inicial</Link></li>
               <li><Link href="/collections" className="hover:text-amber-500 transition">Coleções</Link></li>
@@ -17,7 +17,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-amber-400 mb-3">Recursos</h3>
+            <h3 className="text-lg font-semibold text-amber-500 mb-3">Recursos</h3>
             <ul className="space-y-2">
               <li><Link href="/about" className="hover:text-amber-500 transition">Sobre o MTG Translate</Link></li>
               <li><a href="https://magic.wizards.com" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition">Site Oficial do Magic</a></li>
@@ -26,7 +26,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-amber-400 mb-3">Comunidade</h3>
+            <h3 className="text-lg font-semibold text-amber-500 mb-3">Comunidade</h3>
             <ul className="space-y-2">
               <li><a href="https://github.com/SEU_USUARIO/SEU_REPOSITORIO" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition">GitHub do Projeto</a></li>
               <li><a href="https://x.com/SEU_USUARIO" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition">Nosso X (Twitter)</a></li>

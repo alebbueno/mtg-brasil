@@ -110,7 +110,7 @@ export default function SearchBar() {
                       key={suggestion}
                       value={suggestion}
                       onSelect={() => handleSelect(suggestion)}
-                      className="px-3 py-2 text-white hover:bg-amber-500 hover:text-black cursor-pointer"
+                      className="px-3 py-2 text-white border-0 hover:bg-amber-500 hover:text-black cursor-pointer"
                     >
                       {suggestion}
                     </CommandItem>
@@ -123,6 +123,7 @@ export default function SearchBar() {
       </div>
       <Button
         type="submit"
+         size="lg"
         disabled={isSubmitting}
         className="bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >

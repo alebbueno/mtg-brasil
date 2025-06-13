@@ -22,10 +22,10 @@ export function SetHeader({ name, released_at, card_count, icon }: SetHeaderProp
     <header className="p-4 flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div>
-          <Link href="/collections" className="text-amber-400 text-sm">
+          <Link href="/collections" className="text-amber-500 text-sm">
             ← Voltar para Coleções
           </Link>
-          <h1 className="text-2xl md:text-4xl text-amber-400">{name}</h1>
+          <h1 className="text-2xl md:text-4xl text-amber-500">{name}</h1>
           <p className="text-sm text-neutral-400">
             Lançado em {released_at} — {card_count} cartas
           </p>
@@ -36,7 +36,7 @@ export function SetHeader({ name, released_at, card_count, icon }: SetHeaderProp
           title="Favoritar"
         >
           {favorite ? (
-            <Star className="text-amber-400" />
+            <Star className="text-amber-500" />
           ) : (
             <StarOff className="text-neutral-500" />
           )}

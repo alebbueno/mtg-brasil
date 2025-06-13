@@ -84,7 +84,7 @@ export default function LoginPage() {
     >
       <div className="w-full max-w-md p-8 space-y-8 bg-neutral-900/80 backdrop-blur-sm rounded-xl shadow-2xl border border-neutral-700/60">
         <header className="text-center">
-          <h1 className="text-4xl font-extrabold text-amber-400">
+          <h1 className="text-4xl font-extrabold text-amber-500">
             Bem-vindo de volta!
           </h1>
           <p className="text-neutral-300 mt-2">
@@ -125,7 +125,7 @@ export default function LoginPage() {
               <Label htmlFor="password" className="text-neutral-400">Senha</Label>
               <Link
                 href="/forgot-password"
-                className="text-xs font-medium text-amber-400 hover:underline"
+                className="text-xs font-medium text-amber-500 hover:underline"
               >
                 Esqueceu a senha?
               </Link>
@@ -161,7 +161,7 @@ export default function LoginPage() {
         <div className="mt-6 text-center text-sm">
           <p className="text-neutral-400">
             Não tem uma conta?{' '}
-            <Link href="/signup" className="font-medium text-amber-400 hover:underline">
+            <Link href="/signup" className="font-medium text-amber-500 hover:underline">
               Registe-se
             </Link>
           </p>

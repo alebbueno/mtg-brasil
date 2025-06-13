@@ -38,7 +38,7 @@ export default function AuthCodeErrorPage() {
           <Link href="/login">
             <Button
               variant="outline"
-              className="w-full sm:w-auto text-amber-400 border-amber-400 hover:bg-amber-400 hover:text-black px-8 py-6 text-base"
+              className="w-full sm:w-auto text-amber-500 border-amber-400 hover:bg-amber-400 hover:text-black px-8 py-6 text-base"
             >
               Ir para o Login
             </Button>

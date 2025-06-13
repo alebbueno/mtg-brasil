@@ -9,7 +9,7 @@ import { createClient } from '@/app/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { ScryfallCard } from '@/app/lib/scryfall'
-import { fetchCardByName } from '@/app/lib/scryfall'
+import { fetchCardByName, fetchCardsByNames } from '@/app/lib/scryfall'
 
 // --- Tipos e Interfaces ---
 interface DeckCard {
@@ -55,7 +55,9 @@ export async function updateDeckPrivacy(deckId: string, isPublic: boolean) {
   revalidatePath('/my-decks')
 }
 
-// --- Ação para CRIAR um Novo Deck ---
+// ============================================================================
+// --- AÇÃO PARA CRIAR UM DECK (AJUSTADA) ---
+// ============================================================================
 export async function createDeck(prevState: FormState, formData: FormData): Promise<FormState> {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -99,15 +101,22 @@ export async function createDeck(prevState: FormState, formData: FormData): Prom
 
     if (decklist.mainboard.length === 0) return { message: "Erro: Não foi possível encontrar cartas no mainboard." }
 
+    // ✨ LÓGICA ATUALIZADA: Calcular a identidade de cor ✨
+    const allCardNames = [...new Set([...decklist.mainboard.map(c => c.name), ...(decklist.sideboard || []).map(c => c.name)])];
+    const scryfallData = await fetchCardsByNames(allCardNames);
+    
+    const colorIdentitySet = new Set<string>();
+    scryfallData.forEach(card => {
+        card.color_identity.forEach(color => colorIdentitySet.add(color));
+    });
+    const color_identity = Array.from(colorIdentitySet);
+
+
     let representativeCardImageUrl = null;
     const firstCardName = decklist.mainboard[0]?.name;
     if (firstCardName) {
-        try {
-            const cardData: ScryfallCard = await fetchCardByName(firstCardName, false);
-            representativeCardImageUrl = cardData?.image_uris?.art_crop || cardData?.image_uris?.normal;
-        } catch (e) {
-            console.warn(`Não foi possível buscar a carta representativa: ${firstCardName}`);
-        }
+        const cardData = scryfallData.find(c => c.name === firstCardName);
+        representativeCardImageUrl = cardData?.image_uris?.art_crop || cardData?.image_uris?.normal;
     }
 
     const { data: newDeck, error } = await supabase
@@ -116,6 +125,7 @@ export async function createDeck(prevState: FormState, formData: FormData): Prom
             user_id: user.id, name, format, description, decklist,
             representative_card_image_url: representativeCardImageUrl,
             is_public: isPublic,
+            color_identity, // Guarda a identidade de cor
         })
         .select('id, format')
         .single();
@@ -245,38 +255,50 @@ export async function updateDeckName(deckId: string, newName: string) {
 // --- AÇÕES DO DECK ---
 // ============================================================================
 
-/**
- * Atualiza o conteúdo principal de um deck (nome, descrição, lista de cartas, privacidade).
- */
+// ============================================================================
+// --- AÇÃO PARA EDITAR UM DECK (ATUALIZADA) ---
+// ============================================================================
 export async function updateDeckContent(deckId: string, prevState: FormState, formData: FormData): Promise<FormState> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
 
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return { success: false, message: 'Erro: Utilizador não autenticado.' };
+    return { message: "Erro: Utilizador não autenticado.", success: false };
   }
 
   const name = formData.get('name') as string;
   const description = formData.get('description') as string;
   const isPublic = formData.get('is_public') === 'on';
   const cardsJSON = formData.get('cards') as string;
-  
+
   if (!name || !cardsJSON) {
-    return { success: false, message: "Nome do deck e lista de cartas são obrigatórios." };
+    return { message: "Nome do deck e lista de cartas são obrigatórios.", success: false };
   }
 
   let parsedCards: { name: string; count: number; is_sideboard: boolean }[];
   try {
     parsedCards = JSON.parse(cardsJSON);
   } catch (error) {
-    return { success: false, message: "Erro ao processar a lista de cartas." };
+    return { message: "Erro ao processar a lista de cartas.", success: false };
   }
-  
+
   const decklist: Decklist = {
     mainboard: parsedCards.filter(c => !c.is_sideboard).map(({ name, count }) => ({ name, count })),
     sideboard: parsedCards.filter(c => c.is_sideboard).map(({ name, count }) => ({ name, count }))
   };
 
+  // ✨ LÓGICA ATUALIZADA: Calcular a identidade de cor para a edição ✨
+  const allCardNames = [...new Set([...decklist.mainboard.map(c => c.name), ...(decklist.sideboard || []).map(c => c.name)])];
+  const scryfallData = await fetchCardsByNames(allCardNames);
+  
+  const colorIdentitySet = new Set<string>();
+  scryfallData.forEach(card => {
+      card.color_identity.forEach(color => colorIdentitySet.add(color));
+  });
+  const color_identity = Array.from(colorIdentitySet);
+
+  const { data: originalDeck } = await supabase.from('decks').select('format').eq('id', deckId).single();
+  
   const { error } = await supabase
     .from('decks')
     .update({
@@ -284,20 +306,20 @@ export async function updateDeckContent(deckId: string, prevState: FormState, fo
       description,
       decklist,
       is_public: isPublic,
+      color_identity, // Guarda a nova identidade de cor
       updated_at: new Date().toISOString(),
     })
     .eq('id', deckId)
     .eq('user_id', user.id);
 
   if (error) {
-    console.error("Erro ao atualizar o deck:", error);
-    return { success: false, message: "Não foi possível guardar as alterações." };
+    console.error("Erro ao editar deck:", error);
+    return { message: "Erro na base de dados: não foi possível guardar as alterações.", success: false };
   }
 
   revalidatePath('/my-decks');
-  revalidatePath(`/my-deck/.*`, 'layout');
-  
-  return { success: true, message: "Deck guardado com sucesso!" };
+  revalidatePath(`/my-deck/${originalDeck?.format}/${deckId}`);
+  return { message: "Deck guardado com sucesso!", success: true };
 }
 
 /**
@@ -355,6 +377,33 @@ export async function deleteDeck(deckId: string): Promise<{ success: boolean; me
   // Em vez de redirecionar aqui, informamos o cliente do sucesso.
   // O cliente pode então decidir se quer ou não redirecionar.
   return { success: true, message: 'Deck excluído com sucesso!' };
+}
+
+export async function deleteDecEdit(deckId: string) {
+  const supabase = createClient()
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error('Utilizador não autenticado.');
+  }
+
+  const { error } = await supabase
+    .from('decks')
+    .delete()
+    .eq('id', deckId)
+    .eq('user_id', user.id); // Garantia de segurança
+
+  if (error) {
+    console.error('Erro ao excluir deck:', error);
+    // Lança um erro para que o cliente possa apanhá-lo se necessário
+    throw new Error('Não foi possível excluir o deck.');
+  }
+
+  // Revalida o cache da página de lista de decks para garantir que ela será atualizada
+  revalidatePath('/my-decks');
+  
+  // ✨ CORREÇÃO PRINCIPAL: Redireciona o utilizador após a exclusão bem-sucedida ✨
+  redirect('/my-decks');
 }
 
 // ============================================================================

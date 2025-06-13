@@ -51,7 +51,7 @@ export default function CardKanbanView({ cards }: CardKanbanViewProps) {
         <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
           {columns.map((columnKey) => (
             <div key={columnKey} className="min-w-[100px]">
-              <h3 className="text-lg font-semibold text-amber-400 mb-3 text-center border-b border-neutral-700 pb-1">
+              <h3 className="text-lg font-semibold text-amber-500 mb-3 text-center border-b border-neutral-700 pb-1">
                 {columnKey === 'Terrenos' ? 'Terrenos' : `CMC ${columnKey}`}
               </h3>
               <div className="relative min-h-[400px] space-y-[-120px]"> {/* Empilhamento negativo */}

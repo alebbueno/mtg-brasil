@@ -261,7 +261,7 @@ export default function SearchClientContent() {
                       </Skeleton>
                     )}
                     <div className="mt-2">
-                      <h2 className="text-base font-semibold truncate group-hover:text-amber-400">{card.name}</h2>
+                      <h2 className="text-base font-semibold truncate group-hover:text-amber-500">{card.name}</h2>
                       <p className="text-neutral-400 text-sm truncate">{card.type_line}</p>
                     </div>
                   </CardContent>

@@ -69,7 +69,7 @@ function CardGridSection({ title, cards, onCardHover, onCardLeave, icon }: {
 
   return (
     <div>
-      <h3 className="text-xl font-bold text-amber-400 mb-4 border-b border-neutral-800 pb-2 flex items-center gap-2">
+      <h3 className="text-xl font-bold text-amber-500 mb-4 border-b border-neutral-800 pb-2 flex items-center gap-2">
         {icon} {title} ({totalCount})
       </h3>
       {/* Container em grelha que quebra a linha automaticamente */}
@@ -127,7 +127,7 @@ export default function DeckGridView({ commanderCard, planeswalkerCards, mainboa
       <div className="flex flex-col xl:flex-row gap-8 items-start">
           {commanderCard && (
               <div className="flex-shrink-0">
-                  <h3 className="text-xl font-bold text-amber-400 mb-4 flex items-center gap-2"><Crown /> Comandante</h3>
+                  <h3 className="text-xl font-bold text-amber-500 mb-4 flex items-center gap-2"><Crown /> Comandante</h3>
                   <div className="w-[150px]">
                       <GridCardDisplay card={commanderCard} onCardHover={onCardHover} onCardLeave={onCardLeave} />
                   </div>
@@ -135,7 +135,7 @@ export default function DeckGridView({ commanderCard, planeswalkerCards, mainboa
           )}
           {planeswalkerCards.length > 0 && (
               <div className="flex-1">
-                  <h3 className="text-xl font-bold text-amber-400 mb-4 flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-amber-500 mb-4 flex items-center gap-2">
                       <Star /> Planeswalkers ({planeswalkerCards.reduce((sum, card) => sum + card.count, 0)})
                   </h3>
                   <div className="flex flex-wrap gap-4">

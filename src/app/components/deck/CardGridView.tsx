@@ -54,7 +54,7 @@ export default function CardGridView({ cards, onCardHover, onCardLeave }: CardGr
 
         return (
           <div key={type}>
-            <h3 className="text-xl font-bold text-amber-400 mb-4 border-b border-neutral-800 pb-2">
+            <h3 className="text-xl font-bold text-amber-500 mb-4 border-b border-neutral-800 pb-2">
               {type} ({totalCount})
             </h3>
             {/* Grelha responsiva para as imagens das cartas */}

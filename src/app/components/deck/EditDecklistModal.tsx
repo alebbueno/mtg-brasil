@@ -87,7 +87,7 @@ export function EditDecklistModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] bg-neutral-900 text-neutral-100 border-neutral-800">
         <DialogHeader>
-          <DialogTitle className="text-amber-400 flex items-center gap-2">
+          <DialogTitle className="text-amber-500 flex items-center gap-2">
             <TextIcon /> Editar Lista de Cartas
           </DialogTitle>
           <DialogDescription className="text-neutral-300">

@@ -22,6 +22,9 @@ type OwnDeck = {
   format: string;
   representative_card_image_url: string | null;
   created_at: string;
+  view_count?: number;
+  save_count?: number;
+  color_identity?: string[];
 }
 
 // Tipagem para um deck guardado, que inclui o perfil do criador
@@ -44,7 +47,8 @@ export default function MyDecksPage() {
   const fetchMyDecks = useCallback(async (userId: string) => {
     const { data, error } = await supabase
       .from('decks')
-      .select('id, name, format, representative_card_image_url, created_at')
+      // ✨ CORREÇÃO: Adiciona 'color_identity' à busca ✨
+      .select('id, name, format, representative_card_image_url, created_at, view_count, save_count, color_identity')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
 
@@ -75,7 +79,8 @@ export default function MyDecksPage() {
       // 2. Busca os detalhes desses decks, incluindo o user_id do criador
       const { data: decksData, error: decksError } = await supabase
         .from('decks')
-        .select(`id, name, format, representative_card_image_url, created_at, user_id`)
+        // ✨ CORREÇÃO: Adiciona 'color_identity' à busca ✨
+        .select(`id, name, format, representative_card_image_url, created_at, view_count, save_count, color_identity, user_id, profiles(username, full_name)`)
         .in('id', savedDeckIds);
         
       if (decksError) throw new Error(`Falha ao buscar detalhes dos decks: ${decksError.message}`);
@@ -151,7 +156,7 @@ export default function MyDecksPage() {
       <div className="container mx-auto max-w-7xl">
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10">
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-amber-400 mb-2">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-amber-500 mb-2">
               Meus Decks
             </h1>
             <p className="text-lg text-neutral-300">
@@ -167,7 +172,7 @@ export default function MyDecksPage() {
         </header>
 
         {/* Secção para decks criados pelo utilizador */}
-        <h2 className="text-3xl font-bold text-amber-400 mb-6 border-b border-neutral-700 pb-2 flex items-center gap-2">
+        <h2 className="text-3xl font-bold text-amber-500 mb-6 border-b border-neutral-700 pb-2 flex items-center gap-2">
           <Swords /> Decks Criados por Si
         </h2>
         {myDecks.length > 0 ? (
@@ -184,7 +189,7 @@ export default function MyDecksPage() {
         
         {/* NOVA SECÇÃO: Decks Guardados */}
         <div className="mt-16">
-          <h2 className="text-3xl font-bold text-amber-400 mb-6 border-b border-neutral-700 pb-2 flex items-center gap-2">
+          <h2 className="text-3xl font-bold text-amber-500 mb-6 border-b border-neutral-700 pb-2 flex items-center gap-2">
             <Bookmark /> Decks Guardados 
           </h2>
           {savedDecks.length > 0 ? (

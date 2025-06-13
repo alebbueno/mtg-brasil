@@ -34,7 +34,7 @@ export default function LatestSetItem({ set }: LatestSetItemProps) {
           </div>
         )}
         <div>
-          <h3 className="text-lg font-semibold text-neutral-100 group-hover:text-amber-400">{set.name}</h3>
+          <h3 className="text-lg font-semibold text-neutral-100 group-hover:text-amber-500">{set.name}</h3>
           <p className="text-sm text-neutral-400 uppercase">{set.code}</p>
         </div>
       </Card>

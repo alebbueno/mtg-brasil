@@ -24,7 +24,7 @@ function CardListSection({
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-amber-400 mb-4">{title} ({totalCount})</h2>
+      <h2 className="text-2xl font-bold text-amber-500 mb-4">{title} ({totalCount})</h2>
       <div className="columns-1 sm:columns-2 lg:columns-3 gap-x-6">
         {Object.entries(cards).map(([type, cardList]) => (
           <div key={type} className="break-inside-avoid mb-6">
@@ -65,7 +65,7 @@ export default function DeckListView({ commanderCard, mainboardGrouped, mainboar
     <div className="space-y-12">
       {commanderCard && (
         <div>
-          <h2 className="text-2xl font-bold text-amber-400 mb-4 flex items-center gap-2"><Crown /> Comandante</h2>
+          <h2 className="text-2xl font-bold text-amber-500 mb-4 flex items-center gap-2"><Crown /> Comandante</h2>
           <ul className="space-y-1">
             <li 
               className="text-neutral-200 hover:bg-neutral-800 p-1 rounded-md cursor-pointer flex justify-between items-center text-sm"

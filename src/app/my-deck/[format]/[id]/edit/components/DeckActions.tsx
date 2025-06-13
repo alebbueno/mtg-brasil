@@ -6,7 +6,7 @@ import { useFormStatus } from 'react-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { deleteDeck } from '@/app/actions/deckActions';
+import { deleteDecEdit } from '@/app/actions/deckActions';
 import { Loader2, Save, Trash2 } from 'lucide-react';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 
@@ -27,7 +27,7 @@ type DeckActionsProps = {
 
 export default function DeckActions({ deckId, deckName, onNameChange }: DeckActionsProps) {
   const handleDelete = async () => {
-    toast.promise(deleteDeck(deckId), {
+    toast.promise(deleteDecEdit(deckId), {
       loading: 'A excluir deck...',
       success: 'Deck excluído com sucesso! A redirecionar...',
       error: (err) => err.message || 'Não foi possível excluir o deck.',

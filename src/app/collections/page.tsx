@@ -11,7 +11,7 @@ export default async function CollectionsPage() {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col">
       <header className="p-4">
-        <h1 className="text-4xl text-amber-400 mb-4">Coleções</h1>
+        <h1 className="text-4xl text-amber-500 mb-4">Coleções</h1>
       </header>
       <main className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
         {sets.map((set: any) => (
@@ -22,7 +22,7 @@ export default async function CollectionsPage() {
                 alt={set.name}
                 className="w-16 h-16 mb-2"
               />
-              <h2 className="text-lg text-amber-400 text-center">{set.name}</h2>
+              <h2 className="text-lg text-amber-500 text-center">{set.name}</h2>
               <p className="text-xs text-neutral-400">{set.released_at}</p>
             </div>
           </Link>

@@ -45,7 +45,7 @@ export default function CreateDeckPage() {
     <div className="min-h-screen bg-neutral-950 text-neutral-100 py-8 px-4 md:px-6">
       <div className="container mx-auto max-w-2xl">
         <header className="mb-10 text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-amber-400">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-amber-500">
             Criar Novo Deck
           </h1>
           <p className="text-lg text-neutral-300 mt-2">

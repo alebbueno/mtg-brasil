@@ -51,16 +51,16 @@ export default function UserMenu({ user, fallbackInitial, profile }: UserMenuPro
 
   return (
     <nav className="flex items-center gap-4 md:gap-6 text-neutral-200">
-      <Link href="/" className="hover:text-amber-400 transition-colors text-sm sm:text-base">
+      <Link href="/" className="hover:text-amber-500 transition-colors text-sm sm:text-base">
         Buscar
       </Link>
-      <Link href="/collections" className="hover:text-amber-400 transition-colors text-sm sm:text-base">
+      <Link href="/collections" className="hover:text-amber-500 transition-colors text-sm sm:text-base">
         Coleções
       </Link>
-      <Link href="/glossary" className="hover:text-amber-400 transition-colors text-sm sm:text-base flex items-center gap-1">
+      <Link href="/glossary" className="hover:text-amber-500 transition-colors text-sm sm:text-base flex items-center gap-1">
         <BookOpen size={16} /> Glossário
       </Link>
-      <Link href="/deck-analyzer" className="hover:text-amber-400 transition-colors text-sm sm:text-base flex items-center gap-1">
+      <Link href="/deck-analyzer" className="hover:text-amber-500 transition-colors text-sm sm:text-base flex items-center gap-1">
         <Star size={16} /> Analise de Deck IA
       </Link>
       
@@ -70,7 +70,7 @@ export default function UserMenu({ user, fallbackInitial, profile }: UserMenuPro
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-10 w-10 border-2 border-neutral-600 hover:border-amber-400 transition-colors">
                 <AvatarImage src={profile.avatar_url ?? undefined} alt="Avatar do utilizador" />
-                <AvatarFallback className="bg-neutral-700 text-amber-400 font-bold">
+                <AvatarFallback className="bg-neutral-700 text-amber-500 font-bold">
                   {fallbackInitial.toUpperCase()}
                   
                 </AvatarFallback>
