@@ -11,6 +11,12 @@ import { redirect } from 'next/navigation'
 import type { ScryfallCard } from '@/app/lib/scryfall'
 import { fetchCardByName, fetchCardsByNames } from '@/app/lib/scryfall'
 
+import OpenAI from 'openai';
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+
 // --- Tipos e Interfaces ---
 interface DeckCard {
   count: number;
@@ -457,5 +463,78 @@ export async function toggleSaveDeck(deckId: string): Promise<{ saved: boolean, 
     }
     
     return { saved: true, message: "Deck guardado com sucesso!" };
+  }
+}
+
+
+// ============================================================================
+// --- NOVA AÇÃO PARA ANÁLISE DE DECK COM IA ---
+// ============================================================================
+
+interface AnalysisState {
+  analysis?: {
+    strengths: string[];
+    weaknesses: string[];
+    suggestions: string[];
+  };
+  error?: string;
+}
+
+// ✨ A função agora recebe o deckId para saber onde guardar a análise ✨
+export async function analyzeDeckWithAI(deckId: string, decklistText: string): Promise<AnalysisState> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'Apenas utilizadores autenticados podem analisar decks.' };
+  }
+
+  const prompt = `
+    Analise a seguinte decklist de Magic: The Gathering.
+    Decklist:
+    ${decklistText}
+
+    Forneça a sua análise no seguinte formato JSON, com 2-3 itens em cada array, em português do Brasil:
+    {
+      "strengths": ["Ponto forte 1", "Ponto forte 2"],
+      "weaknesses": ["Ponto fraco 1", "Ponto fraco 2"],
+      "suggestions": ["Sugestão de carta/estratégia 1", "Sugestão de carta/estratégia 2"]
+    }
+  `;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: "json_object" },
+    });
+
+    const analysisJSON = completion.choices[0]?.message?.content;
+    if (!analysisJSON) {
+      return { error: "A IA não conseguiu gerar uma análise." };
+    }
+
+    const analysisData = JSON.parse(analysisJSON);
+
+    // ✨ NOVO: Guarda a análise na base de dados ✨
+    const { error: updateError } = await supabase
+      .from('decks')
+      .update({ ai_analysis: analysisData })
+      .eq('id', deckId)
+      .eq('user_id', user.id); // Garante que apenas o dono do deck pode guardar a análise
+
+    if (updateError) {
+      // Loga o erro, mas não o retorna ao utilizador, pois ele já tem a análise
+      console.error("Erro ao guardar a análise do deck:", updateError);
+    }
+    
+    // Revalida o cache para que a análise apareça se a página for recarregada
+    revalidatePath(`/my-deck/.*`, 'layout');
+
+    return { analysis: analysisData };
+
+  } catch (error) {
+    console.error("Erro na análise da IA:", error);
+    return { error: "Ocorreu um erro ao comunicar com a IA." };
   }
 }

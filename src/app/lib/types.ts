@@ -45,6 +45,11 @@ export interface DeckFromDB {
   };
   is_public: boolean;
   representative_card_image_url: string | null;
+  ai_analysis: {
+    strengths: string[];
+    weaknesses: string[];
+    suggestions: string[];
+  }
 }
 
 // Tipo para os dados do perfil do criador

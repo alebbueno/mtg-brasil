@@ -13,6 +13,7 @@ import CreatorHeader from './components/CreatorHeader';
 import DeckHeader from './components/DeckHeader';
 import DeckListView from '@/app/components/deck/DeckListView';
 import DeckGridView from '@/app/components/deck/DeckGridView';
+import DeckMana from './components/DeckMana'; // Novo componente
 import DeckAnalytics from './components/DeckAnalytics'; // Novo componente
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -194,7 +195,7 @@ export default function DeckDetailView({
       {/* Deck Analytics */}
       <div className="max-w-screen-xl pt-[100px] mx-auto">
         <div className="container">
-          <DeckAnalytics
+          <DeckMana
             decklist={{
               mainboard: initialDeck.decklist.mainboard.map(card => ({
                 ...card,
@@ -209,6 +210,7 @@ export default function DeckDetailView({
             }}
             scryfallCardMap={scryfallCardMap}
             description={initialDeck.description}
+            deck={initialDeck}
           />
         </div>
       </div>

@@ -5,7 +5,6 @@ import { fetchCardsByNames, type ScryfallCard } from '@/app/lib/scryfall';
 import DeckDetailView from './DeckDetailView';
 import type { DeckFromDB, CreatorProfile } from '@/app/lib/types';
 
-// O tipo das props para referência interna
 interface PageProps {
   params: {
     id: string;
@@ -13,11 +12,7 @@ interface PageProps {
   };
 }
 
-// ✨ CORREÇÃO DEFINITIVA: Recebe as props como 'any' para evitar o erro de build,
-// mas depois trata-as com o tipo correto internamente.
-export default async function DeckDetailPage(props: any) {
-  // Garante que estamos a usar os parâmetros da forma correta
-  const { params } = props as PageProps;
+export default async function DeckDetailPage({ params }: PageProps) {
   const supabase = createClient();
   const { id } = params;
 
@@ -42,7 +37,7 @@ export default async function DeckDetailPage(props: any) {
     .eq('id', deckData.user_id)
     .single();
 
-  // 4. Verifica se o utilizador atual já guardou este deck
+  // ✨ NOVO: Verifica se o utilizador atual já guardou este deck ✨
   let isSavedByCurrentUser = false;
   if (user) {
     const { data: savedDeck } = await supabase
@@ -55,12 +50,11 @@ export default async function DeckDetailPage(props: any) {
     isSavedByCurrentUser = !!savedDeck;
   }
 
-  // 5. Busca os dados detalhados das cartas
+  // 4. Busca os dados detalhados das cartas
   const allCardNames = [
     ...deckData.decklist.mainboard.map(c => c.name),
     ...(deckData.decklist.sideboard?.map(c => c.name) || []),
-  ].filter(Boolean); // Filtra quaisquer nomes nulos ou vazios
-  
+  ];
   const uniqueCardNames = Array.from(new Set(allCardNames));
   const scryfallCards = await fetchCardsByNames(uniqueCardNames);
   
@@ -72,6 +66,7 @@ export default async function DeckDetailPage(props: any) {
       initialScryfallMapArray={scryfallCardMapArray} 
       currentUser={user}
       creatorProfile={creatorProfile}
+      // Passa a nova informação para o componente de visualização
       isInitiallySaved={isSavedByCurrentUser} 
     />
   );
