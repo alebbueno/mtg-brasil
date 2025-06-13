@@ -1,4 +1,3 @@
-// ajuste vercel
 // app/my-deck/[format]/[id]/page.tsx
 import { notFound } from 'next/navigation';
 import { createClient } from '@/app/utils/supabase/server';
@@ -6,6 +5,7 @@ import { fetchCardsByNames, type ScryfallCard } from '@/app/lib/scryfall';
 import DeckDetailView from './DeckDetailView';
 import type { DeckFromDB, CreatorProfile } from '@/app/lib/types';
 
+// Definindo a interface PageProps sem alterar a estrutura
 interface PageProps {
   params: {
     id: string;
@@ -13,6 +13,7 @@ interface PageProps {
   };
 }
 
+// Função assíncrona mantendo a estrutura original
 export default async function DeckDetailPage({ params }: PageProps) {
   const supabase = createClient();
   const { id } = params;
