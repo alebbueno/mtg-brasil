@@ -48,10 +48,9 @@ export default function DeckAnalytics({ decklist, scryfallCardMap, description }
 
       if (card.type_line.includes('Land')) {
         landCount += count;
-        // Contar produção de mana de terrenos
         if (card.mana_cost) {
-          const symbols = card.mana_cost.match(/{[WUBRGC]\}/g) || [];
-          symbols.forEach((symbol) => {
+          const symbols: string[] = card.mana_cost.match(/{[WUBRGC]\}/g) || [];
+          symbols.forEach((symbol: string) => {
             const type = symbol.replace(/[{}]/g, '');
             if (landManaProduction[type] !== undefined) {
               landManaProduction[type] += count;
