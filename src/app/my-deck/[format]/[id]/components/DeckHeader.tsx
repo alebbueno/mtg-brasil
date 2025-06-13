@@ -4,11 +4,12 @@
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Globe, Lock, Pencil } from 'lucide-react';
+import { ArrowLeft, Globe, Lock, Pencil } from 'lucide-react';
 import { DeckPrivacyToggle } from '@/app/components/deck/DeckPrivacyToggle';
 import DeckViewActions from '@/app/components/deck/DeckViewActions';
 import SaveDeckButton from '@/app/components/deck/SaveDeckButton';
 import type { DeckFromDB } from '@/app/lib/types';
+import Link from 'next/link';
 
 interface DeckHeaderProps {
   deck: DeckFromDB;
@@ -22,22 +23,30 @@ export default function DeckHeader({ deck, isOwner, isInitiallySaved }: DeckHead
   return (
     <header className="mb-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-bold text-amber-500">{deck.name}</h1>
-          <div className="flex items-center gap-2 text-lg text-neutral-400 capitalize">
-            <span>{deck.format}</span>
-            <span className="text-neutral-600">•</span>
-            {deck.is_public ? (
-              <span className="flex items-center gap-1 text-green-400 text-sm">
-                <Globe size={14} /> Público
-              </span>
-            ) : (
-              <span className="flex items-center gap-1 text-red-400 text-sm">
-                <Lock size={14} /> Privado
-              </span>
-            )}
+        <header className="flex flex-row gap-4">
+          <Link href="/my-decks">
+            <Button variant="outline" size="icon" className="h-12 w-12">
+                <ArrowLeft className="h-6 w-6" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-4xl font-bold text-amber-500">{deck.name}</h1>
+            <div className="flex items-center gap-2 text-lg text-neutral-400 capitalize">
+              <span>{deck.format}</span>
+              <span className="text-neutral-600">•</span>
+              {deck.is_public ? (
+                <span className="flex items-center gap-1 text-green-400 text-sm">
+                  <Globe size={14} /> Público
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-red-400 text-sm">
+                  <Lock size={14} /> Privado
+                </span>
+              )}
+            </div>
           </div>
-        </div>
+        </header>
+        
         
         <div className="flex items-center gap-4">
           <DeckViewActions deck={deck} />

@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
 // app/my-decks/page.tsx
 'use client'
 
@@ -31,7 +31,7 @@ type OwnDeck = {
 type SavedDeck = OwnDeck & {
   profiles: {
     username: string | null;
-    full_name: string | null; // Adicionado
+    full_name: string | null;
   } | null;
 }
 
@@ -47,7 +47,6 @@ export default function MyDecksPage() {
   const fetchMyDecks = useCallback(async (userId: string) => {
     const { data, error } = await supabase
       .from('decks')
-      // ✨ CORREÇÃO: Adiciona 'color_identity' à busca ✨
       .select('id, name, format, representative_card_image_url, created_at, view_count, save_count, color_identity')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
@@ -79,8 +78,8 @@ export default function MyDecksPage() {
       // 2. Busca os detalhes desses decks, incluindo o user_id do criador
       const { data: decksData, error: decksError } = await supabase
         .from('decks')
-        // ✨ CORREÇÃO: Adiciona 'color_identity' à busca ✨
-        .select(`id, name, format, representative_card_image_url, created_at, view_count, save_count, color_identity, user_id, profiles(username, full_name)`)
+        // CORREÇÃO: Remove a busca aninhada `profiles(...)`
+        .select(`id, name, format, representative_card_image_url, created_at, view_count, save_count, color_identity, user_id`)
         .in('id', savedDeckIds);
         
       if (decksError) throw new Error(`Falha ao buscar detalhes dos decks: ${decksError.message}`);
@@ -93,7 +92,7 @@ export default function MyDecksPage() {
       const creatorIds = [...new Set(decksData.map(d => d.user_id))];
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, username, full_name')
+        .select('id, username, full_name') // Busca também o full_name
         .in('id', creatorIds);
 
       if (profilesError) throw new Error(`Falha ao buscar perfis dos criadores: ${profilesError.message}`);
@@ -106,7 +105,6 @@ export default function MyDecksPage() {
         profiles: profilesMap.get(deck.user_id) || null
       }));
 
-      // Ordena os decks pela data de criação
       finalSavedDecks.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
       setSavedDecks(finalSavedDecks as SavedDeck[]);
@@ -164,7 +162,7 @@ export default function MyDecksPage() {
             </p>
           </div>
           <Link href="/my-deck/create" passHref>
-            <Button className="mt-4 sm:mt-0 bg-amber-500 text-black hover:bg-amber-600">
+            <Button className="mt-4 sm:mt-0 bg-primary text-primary-foreground hover:bg-primary/90">
               <PlusCircle className="mr-2 h-5 w-5" />
               Criar Novo Deck
             </Button>
@@ -172,7 +170,7 @@ export default function MyDecksPage() {
         </header>
 
         {/* Secção para decks criados pelo utilizador */}
-        <h2 className="text-3xl font-bold text-amber-500 mb-6 border-b border-neutral-700 pb-2 flex items-center gap-2">
+        <h2 className="text-3xl font-bold text-primary mb-6 border-b border-neutral-700 pb-2 flex items-center gap-2">
           <Swords /> Decks Criados por Si
         </h2>
         {myDecks.length > 0 ? (
@@ -189,16 +187,17 @@ export default function MyDecksPage() {
         
         {/* NOVA SECÇÃO: Decks Guardados */}
         <div className="mt-16">
-          <h2 className="text-3xl font-bold text-amber-500 mb-6 border-b border-neutral-700 pb-2 flex items-center gap-2">
+          <h2 className="text-3xl font-bold text-primary mb-6 border-b border-neutral-700 pb-2 flex items-center gap-2">
             <Bookmark /> Decks Guardados 
           </h2>
           {savedDecks.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {savedDecks.map((deck) => {
-                // ✨ LÓGICA DE EXIBIÇÃO APLICADA AQUI ✨
                 const creatorDisplayName = deck.profiles?.username || deck.profiles?.full_name;
                 return (
-                  <DeckCardItemShared key={deck.id} deck={deck} creatorUsername={creatorDisplayName} onDelete={handleDeckDelete} />
+                  <DeckCardItemShared key={deck.id} deck={deck} creatorUsername={creatorDisplayName} onDelete={function (deckId: string): void {
+                    throw new Error('Function not implemented.')
+                  } } />
                 )
               })}
             </div>
@@ -210,4 +209,3 @@ export default function MyDecksPage() {
     </div>
   )
 }
-
