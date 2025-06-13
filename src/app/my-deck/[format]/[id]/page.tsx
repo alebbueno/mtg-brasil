@@ -1,3 +1,4 @@
+// ajuste vercel
 // app/my-deck/[format]/[id]/page.tsx
 import { notFound } from 'next/navigation';
 import { createClient } from '@/app/utils/supabase/server';
