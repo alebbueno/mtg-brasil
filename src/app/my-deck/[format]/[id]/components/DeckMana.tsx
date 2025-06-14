@@ -85,10 +85,11 @@ export default function DeckMana({ decklist, scryfallCardMap, deck }: DeckManaPr
         ? ((landCount / (totalNonLandCards + landCount)) * 100).toFixed(1)
         : '0.0';
 
+    const totalSymbols = Object.values(manaSymbols).reduce((sum, count) => sum + count, 0);
     const manaPercentages = Object.fromEntries(
       Object.entries(manaSymbols).map(([type, count]) => [
         type,
-        totalNonLandCards > 0 ? ((count / totalNonLandCards) * 100).toFixed(2) : '0.00',
+        totalSymbols > 0 ? ((count / totalSymbols) * 100).toFixed(2) : '0.00',
       ])
     );
 
