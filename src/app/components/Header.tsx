@@ -7,6 +7,8 @@ import UserMenu from './UserMenu';
 import { Menu, X } from 'lucide-react';
 // 1. IMPORTAR os componentes do Avatar que vamos usar no atalho
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Image from 'next/image';
+import DeckSageLogo from '../../../public/decksage.png'
 
 type HeaderProps = {
   user: any;
@@ -26,7 +28,13 @@ export default function Header({ user, profile, fallbackInitial }: HeaderProps) 
       <header className="w-full p-4 bg-gradient-to-r from-black via-neutral-900 to-black shadow-lg sticky top-0 z-50">
         <div className="flex justify-between items-center max-w-7xl mx-auto">
           <Link href="/" className="text-2xl font-bold text-amber-500 hover:text-amber-500 transition-colors">
-            🧙 MTG Translate
+            <Image
+              src={DeckSageLogo}
+              alt={'DeckSage'}
+              width={140}
+              className=""
+              priority={true}
+            />
           </Link>
           
           <div className="flex-1 px-4 hidden sm:block">
