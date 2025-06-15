@@ -186,7 +186,8 @@ export default function DeckMana({ decklist, scryfallCardMap, deck }: DeckManaPr
             <p>Valor Total de Mana: {manaStats.totalManaValue}</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full">
+          {/* AJUSTE: Grid alterado para ser 1 coluna no mobile, 2 em sm, e 3 em lg */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
             {['W', 'U', 'B', 'R', 'G', 'C'].map((symbol) => {
               const totalPercentage = manaStats.manaPercentages[symbol];
               const landPercentage = manaStats.landManaPercentages[symbol];
@@ -228,8 +229,7 @@ export default function DeckMana({ decklist, scryfallCardMap, deck }: DeckManaPr
             </div>
           </CardContent>
         </Card>
-
-        {/* ✨ NOVO: Componente de Análise com IA integrado ✨ */}
+        
         <DeckAIAnalysis deck={deck} initialAnalysis={deck.ai_analysis} />
       </div>
     </div>

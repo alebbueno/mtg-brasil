@@ -27,7 +27,8 @@ export default function DeckDetailView({
   creatorProfile,
   isInitiallySaved,
 }: DeckDetailViewProps) {
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  // AJUSTE: Visualização padrão alterada para 'grid'
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
   const scryfallCardMap = useMemo(() => new Map<string, ScryfallCard>(initialScryfallMapArray as any), [initialScryfallMapArray]);
 
   // A sua lógica `useMemo` para processar as cartas permanece a mesma
@@ -147,7 +148,8 @@ export default function DeckDetailView({
         <DeckHeader deck={initialDeck} isOwner={isOwner} isInitiallySaved={isInitiallySaved} />
 
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
-          <div className="lg:col-span-3 sticky top-24 self-start">
+          {/* AJUSTE: Esconde a barra lateral com a imagem em telas pequenas */}
+          <div className="hidden lg:block lg:col-span-3 sticky top-24 self-start">
             <Image
               src={previewImageUrl || 'https://placehold.co/340x475/171717/EAB308?text=Deck'}
               alt="Pré-visualização da carta"
@@ -158,6 +160,17 @@ export default function DeckDetailView({
           </div>
 
           <main className="lg:col-span-7 space-y-8">
+            {/* AJUSTE: Adiciona a imagem aqui, visível apenas no mobile */}
+            <div className="block lg:hidden w-full max-w-[280px] mx-auto">
+                 <Image
+                    src={previewImageUrl || 'https://placehold.co/340x475/171717/EAB308?text=Deck'}
+                    alt="Pré-visualização da carta"
+                    width={280}
+                    height={390}
+                    className="rounded-lg shadow-lg mx-auto"
+                />
+            </div>
+
             <div className="flex justify-end items-center gap-4">
               <span className="text-sm text-neutral-400">Visualizar como:</span>
               <div className="flex gap-1 bg-neutral-800 p-1 rounded-md">
