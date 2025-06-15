@@ -74,44 +74,68 @@ export async function buildDeckWithAI(prevState: BuildDeckState, formData: FormD
         const colors = commanderData.color_identity.join('');
         colorIdentityInfo = `A identidade de cor deste deck de Commander é ${colors}. Todas as cartas adicionadas DEVEM respeitar esta identidade de cor.`;
         commanderInfo = `O comandante é ${commanderName}.`;
-        // Adiciona o comandante à lista que será enviada para a IA
         fullInitialList = [{ name: commanderName, count: 1 }, ...initialCards];
       } catch (error) {
         return { error: `Não foi possível encontrar o comandante "${commanderName}". Verifique o nome.`, success: false };
       }
     } else {
-       return { error: `Para o formato Commander, por favor adicione um comandante à lista.`, success: false };
+      return { error: `Para o formato Commander, por favor adicione um comandante à lista.`, success: false };
     }
   }
 
   const prompt = `
-    Você é um especialista em construção de decks de Magic: The Gathering.
-    Um utilizador quer criar um deck do formato '${format}'. ${commanderInfo}
-    ${colorIdentityInfo}
+  Você é um especialista em construção de decks de Magic: The Gathering, com foco competitivo, técnico e criativo.
 
-    A lista de cartas base fornecida pelo utilizador é:
-    ${JSON.stringify(fullInitialList)}
+  Um utilizador deseja criar um deck no formato '${format}'.  
+  ${commanderInfo}  
+  ${colorIdentityInfo}
 
-    Sua tarefa é:
-    1.  ${cardCountRequirement}
-    2.  Com base na estratégia sugerida pelas cartas iniciais, adicione cartas que tenham boa sinergia.
-    3.  Construa uma base de mana sólida e consistente, com aproximadamente 36-38 terrenos para Commander.
-    4.  Crie um nome criativo e temático para o deck.
-    5.  Escreva um "primer" conciso (2-3 parágrafos) explicando a estratégia.
-    
-    Retorne sua resposta em um único objeto JSON estrito, sem nenhum texto ou formatação adicional:
-    {
-      "name": "Nome do Deck",
-      "description": "...",
-      "decklist": { "mainboard": [...], "sideboard": [] }
+  A lista de cartas base fornecida pelo usuário é:  
+  ${JSON.stringify(fullInitialList)}
+
+  ### Suas tarefas obrigatórias:
+
+  1. Regras de Construção:
+  ${cardCountRequirement}
+
+  2. Identidade de Cores:
+  ${colorIdentityInfo}
+
+  3. Base de Mana:
+  Inclua uma base de mana sólida e consistente.
+
+  4. Sinergia Estratégica:
+  Foque na estratégia central do deck.
+
+  5. Nome do Deck:
+  Crie um nome criativo.
+
+  6. Primer Explicativo:
+  Texto com 2 a 3 parágrafos.
+
+  7. Contagem Final:
+  O JSON de saída deve conter exatamente **${format === "commander" ? "100" : "60"} cartas no mainboard**.
+
+  8. Formato de Resposta (JSON estrito):
+  {
+    "name": "Nome do Deck",
+    "description": "Texto...",
+    "decklist": {
+      "mainboard": [
+        { "name": "Nome da Carta", "count": X }
+      ],
+      "sideboard": []
     }
+  }
   `;
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       messages: [{ role: 'user', content: prompt }],
-      response_format: { type: "json_object" },
+      response_format: { type: 'json_object' },
+      temperature: 0.7,
+      max_tokens: 4000,
     });
 
     const responseJSON = completion.choices[0]?.message?.content;
@@ -120,6 +144,46 @@ export async function buildDeckWithAI(prevState: BuildDeckState, formData: FormD
     }
 
     const responseData = JSON.parse(responseJSON);
+
+    const totalCartas = responseData.decklist.mainboard.reduce((acc: number, card: { count: number }) => acc + card.count, 0);
+    const targetCount = format.toLowerCase() === 'commander' ? 100 : 60;
+
+    if (totalCartas < targetCount) {
+      // ✅ Função para completar o deck com terrenos básicos
+      function completarDeck(deck: { name: string; count: number }[]): { name: string; count: number }[] {
+        const cartasFaltando = targetCount - totalCartas;
+        const island = deck.find((card) => card.name.toLowerCase() === "island");
+        const mountain = deck.find((card) => card.name.toLowerCase() === "mountain");
+
+        const qtdIsland = island ? island.count : 0;
+        const qtdMountain = mountain ? mountain.count : 0;
+
+        const totalBasicos = qtdIsland + qtdMountain;
+        const proporcaoIsland = totalBasicos > 0 ? qtdIsland / totalBasicos : 0.5;
+
+        const adicionaisIsland = Math.round(cartasFaltando * proporcaoIsland);
+        const adicionaisMountain = cartasFaltando - adicionaisIsland;
+
+        const novaDecklist = [...deck];
+
+        if (island) {
+          island.count += adicionaisIsland;
+        } else {
+          novaDecklist.push({ name: "Island", count: adicionaisIsland });
+        }
+
+        if (mountain) {
+          mountain.count += adicionaisMountain;
+        } else {
+          novaDecklist.push({ name: "Mountain", count: adicionaisMountain });
+        }
+
+        return novaDecklist;
+      }
+
+      responseData.decklist.mainboard = completarDeck(responseData.decklist.mainboard);
+    }
+
     return { deck: responseData, success: true };
 
   } catch (error: any) {
@@ -127,6 +191,7 @@ export async function buildDeckWithAI(prevState: BuildDeckState, formData: FormD
     return { error: `Ocorreu um erro ao comunicar com a IA: ${error.message || 'Erro desconhecido.'}`, success: false };
   }
 }
+
 // ============================================================================
 // --- AÇÃO PARA GUARDAR O DECK GERADO (ATUALIZADA E CORRIGIDA) ---
 // ============================================================================
