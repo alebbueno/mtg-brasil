@@ -14,6 +14,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import DeckCardItem from './componentes/DeckCardItem' 
 import DeckCardItemShared from './componentes/DeckCardItemShared' 
+// AJUSTE: Importar componentes do Card para o nosso novo botão
+import { Card, CardContent } from '@/components/ui/card';
 
 // Tipagem para os dados de um deck criado pelo utilizador
 type OwnDeck = {
@@ -58,10 +60,9 @@ export default function MyDecksPage() {
     }
   }, [supabase]);
 
-  // ✨ FUNÇÃO ATUALIZADA: Agora busca em etapas para maior robustez ✨
+  // Função para buscar decks guardados
   const fetchSavedDecks = useCallback(async (userId: string) => {
     try {
-      // 1. Obtém os IDs de todos os decks que o utilizador guardou
       const { data: savedRelations, error: savedError } = await supabase
         .from('saved_decks')
         .select('deck_id')
@@ -75,10 +76,8 @@ export default function MyDecksPage() {
 
       const savedDeckIds = savedRelations.map(r => r.deck_id);
 
-      // 2. Busca os detalhes desses decks, incluindo o user_id do criador
       const { data: decksData, error: decksError } = await supabase
         .from('decks')
-        // CORREÇÃO: Remove a busca aninhada `profiles(...)`
         .select(`id, name, format, representative_card_image_url, created_at, view_count, save_count, color_identity, user_id`)
         .in('id', savedDeckIds);
         
@@ -88,18 +87,16 @@ export default function MyDecksPage() {
         return;
       }
 
-      // 3. Extrai os IDs dos criadores e busca os seus perfis
       const creatorIds = [...new Set(decksData.map(d => d.user_id))];
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, username, full_name') // Busca também o full_name
+        .select('id, username, full_name')
         .in('id', creatorIds);
 
       if (profilesError) throw new Error(`Falha ao buscar perfis dos criadores: ${profilesError.message}`);
       
       const profilesMap = new Map(profilesData.map(p => [p.id, p]));
 
-      // 4. Combina os dados dos decks com os perfis dos criadores
       const finalSavedDecks = decksData.map(deck => ({
         ...deck,
         profiles: profilesMap.get(deck.user_id) || null
@@ -169,23 +166,30 @@ export default function MyDecksPage() {
           </Link>
         </header>
 
-        {/* Secção para decks criados pelo utilizador */}
         <h2 className="text-3xl font-bold text-primary mb-6 border-b border-neutral-700 pb-2 flex items-center gap-2">
           <Swords /> Decks Criados por Si
         </h2>
-        {myDecks.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {myDecks.map((deck) => (
-              <DeckCardItem key={deck.id} deck={deck} onDelete={handleDeckDelete} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-10 px-6 border-2 border-dashed border-neutral-700 rounded-lg">
-            <p className="text-neutral-500 mt-1">Quando criar um deck, ele aparecerá aqui.</p>
-          </div>
-        )}
+        {/* AJUSTE: Removida a condição de myDecks.length > 0 para sempre mostrar o grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* AJUSTE: Card de "Criar Novo Deck" adicionado como primeiro item */}
+          <Link href="/my-deck/create" passHref>
+            <Card className="bg-neutral-900 border-2 border-dashed border-neutral-700 h-full flex flex-col group transition-all duration-300 hover:border-amber-500 hover:bg-neutral-800 cursor-pointer">
+              <CardContent className="p-4 flex flex-col flex-grow items-center justify-center text-center">
+                <PlusCircle className="h-12 w-12 text-neutral-600 group-hover:text-amber-500 transition-colors" />
+                <p className="mt-4 font-semibold text-lg text-neutral-400 group-hover:text-amber-400 transition-colors">
+                  Criar Novo Deck
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* O map dos decks existentes continua igual, vindo logo após */}
+          {myDecks.map((deck) => (
+            <DeckCardItem key={deck.id} deck={deck} onDelete={handleDeckDelete} />
+          ))}
+        </div>
         
-        {/* NOVA SECÇÃO: Decks Guardados */}
+        {/* Secção Decks Guardados (sem alterações) */}
         <div className="mt-16">
           <h2 className="text-3xl font-bold text-primary mb-6 border-b border-neutral-700 pb-2 flex items-center gap-2">
             <Bookmark /> Decks Guardados 
@@ -195,14 +199,12 @@ export default function MyDecksPage() {
               {savedDecks.map((deck) => {
                 const creatorDisplayName = deck.profiles?.username || deck.profiles?.full_name;
                 return (
-                  <DeckCardItemShared key={deck.id} deck={deck} creatorUsername={creatorDisplayName} onDelete={function (deckId: string): void {
-                    throw new Error('Function not implemented.')
-                  } } />
+                  <DeckCardItemShared key={deck.id} deck={deck} creatorUsername={creatorDisplayName} onDelete={handleDeckDelete} />
                 )
               })}
             </div>
           ) : (
-             <p className="text-neutral-500">Quando guardar decks de outros criadores, eles aparecerão aqui.</p>
+             <p className="text-neutral-500 mt-2">Quando guardar decks de outros criadores, eles aparecerão aqui.</p>
           )}
         </div>
       </div>

@@ -31,7 +31,7 @@ export default function Header({ user, profile, fallbackInitial }: HeaderProps) 
             <Image
               src={DeckSageLogo}
               alt={'DeckSage'}
-              width={140}
+              width={110}
               className=""
               priority={true}
             />

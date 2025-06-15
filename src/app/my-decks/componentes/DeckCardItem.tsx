@@ -58,26 +58,39 @@ export default function DeckCardItem({ deck, onDelete }: DeckCardItemProps) {
     setIsDeleting(false);
   };
 
+  const placeholderStyle = {
+    backgroundColor: '#171717', // bg-neutral-900
+    backgroundImage: 'radial-gradient(rgba(234, 179, 8, 0.1) 1px, transparent 1px)',
+    backgroundSize: '12px 12px',
+  };
+
   return (
-    <Card className="bg-neutral-900 border-neutral-800 h-full flex flex-col group transition-all duration-300 hover:border-amber-500">
-      <CardHeader className="p-0">
-        <Link href={`/my-deck/${deck.format}/${deck.id}`}>
-          <div className="relative w-full aspect-[5/3] rounded-t-lg overflow-hidden">
+    <Card className="bg-neutral-900 py-0 border-neutral-800 h-full flex flex-col group transition-all duration-300 hover:border-amber-500 overflow-hidden">
+      {/* AJUSTE: O <CardHeader> foi removido. A imagem agora é filha direta do <Card> */}
+      <Link href={`/my-deck/${deck.format}/${deck.id}`} className="block">
+        <div className="relative w-full aspect-[5/3]">
+          {deck.representative_card_image_url ? (
             <Image
-              src={deck.representative_card_image_url || 'https://placehold.co/400x240/171717/EAB308?text=Deck'}
+              src={deck.representative_card_image_url}
               alt={`Carta representativa do deck ${deck.name}`}
               fill
-              className="object-cover group-hover:scale-105 transition-transform"
+              className="object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-            
-            {/* ✨ NOVO: Ícones de Mana no Topo ✨ */}
-            <div className="absolute top-2 right-2">
-                <ManaCost cost={manaCostString} />
-            </div>
+          ) : (
+            <div 
+              className="w-full h-full flex items-center justify-center" 
+              style={placeholderStyle}
+            />
+          )}
+          
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+          
+          <div className="absolute top-2 right-2">
+              <ManaCost cost={manaCostString} />
           </div>
-        </Link>
-      </CardHeader>
+        </div>
+      </Link>
+      
       <CardContent className="p-4 flex flex-col flex-grow">
         <Link href={`/my-deck/${deck.format}/${deck.id}`}>
           <CardTitle className="text-xl text-amber-400 group-hover:text-amber-300 truncate">{deck.name}</CardTitle>
@@ -85,7 +98,6 @@ export default function DeckCardItem({ deck, onDelete }: DeckCardItemProps) {
         </Link>
         <div className="flex-grow"></div>
 
-        {/* ✨ NOVO: Estatísticas de Views e Saves ✨ */}
         <div className="flex items-center gap-4 text-xs text-neutral-400 mt-3">
             <div className="flex items-center gap-1">
                 <Eye size={14} />

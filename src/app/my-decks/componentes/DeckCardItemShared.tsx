@@ -32,13 +32,13 @@ export default function DeckCardItemShared({ deck, creatorUsername }: DeckCardIt
 
   return (
     <Link href={`/my-deck/${deck.format}/${deck.id}`} className="block h-full">
-      <Card className="bg-neutral-900 border-neutral-800 h-full flex flex-col group transition-all duration-300 hover:border-amber-500 overflow-hidden">
+      <Card className="bg-neutral-900 py-0 border-neutral-800 h-full flex flex-col group transition-all duration-300 hover:border-amber-500 overflow-hidden">
         <div className="relative w-full aspect-[5/3]">
           <Image
             src={deck.representative_card_image_url || 'https://placehold.co/400x240/171717/EAB308?text=Deck'}
             alt={`Carta representativa do deck ${deck.name}`}
             fill
-            className="object-cover group-hover:scale-105 transition-transform"
+            className="object-cover "
           />
           {/* Sombra para garantir a legibilidade do texto */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
