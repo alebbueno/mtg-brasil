@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
   // 2. Se o utilizador não está logado e tenta aceder a uma página protegida,
   //    redireciona-o para a página de login.
   //    Páginas como a lista "Meus Decks" ou "Criar Deck" devem ser protegidas.
-  const protectedRoutes = ['/profile', '/my-decks', '/my-deck/create', '/favorites']
+  const protectedRoutes = ['/profile', '/my-decks', '/my-deck/create', '/favorites', '/ai-deck-builder']
   if (!user && protectedRoutes.some(route => pathname.startsWith(route))) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
