@@ -137,4 +137,19 @@
     @apply brightness-110; /* Mantém um brilho subtil no próprio elemento */
     filter: drop-shadow(0 0 8px var(--button-gradient--dark, #eb2c06)) /* Efeito de glow com a cor primária */
   }
+  /* Remove z-index e posicionamento problemático dos símbolos mana para o modal não ser coberto */
+  .ms {
+    position: static !important;
+    z-index: auto !important;
+  }
+
+  body.modal-open .ms {
+    pointer-events: none !important;
+    user-select: none !important;
+    opacity: 0.3 !important;
+    z-index: 0 !important;
+    position: static !important;
+  }
+
 }
+

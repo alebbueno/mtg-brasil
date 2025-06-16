@@ -5,6 +5,7 @@
 // --- INTERFACE PRINCIPAL PARA CARTAS ---
 // Esta interface define a estrutura de dados de uma carta da API Scryfall.
 export interface ScryfallCard {
+  collector_number: any;
   set: any;
   id: string;
   name: string;
@@ -48,15 +49,30 @@ export interface ScryfallCard {
 
 // --- Funções para buscar dados no Scryfall ---
 
-export async function fetchCardById(id: string): Promise<ScryfallCard> {
-  if (!id || typeof id !== 'string') {
-    throw new Error('ID da carta inválido');
+/**
+ * Busca os dados completos de uma carta pelo seu ID do Scryfall.
+ * @param scryfallId - O UUID da carta no Scryfall.
+ * @returns Um objeto ScryfallCard completo ou null.
+ */
+export async function fetchCardById(scryfallId: string): Promise<ScryfallCard | null> {
+  if (!scryfallId) return null;
+
+  try {
+    const url = `https://api.scryfall.com/cards/${scryfallId}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.error(`Scryfall API error for ID "${scryfallId}": ${response.statusText}`);
+      return null;
+    }
+
+    const cardData: ScryfallCard = await response.json();
+    return cardData;
+
+  } catch (error) {
+    console.error(`Failed to fetch card by ID "${scryfallId}" from Scryfall:`, error);
+    return null;
   }
-  const res = await fetch(`https://api.scryfall.com/cards/${id}`);
-  if (!res.ok) {
-    throw new Error(`Erro ao buscar carta: ${res.status} - ${res.statusText}`);
-  }
-  return res.json();
 }
 
 export async function fetchAutocomplete(query: string): Promise<{ data: string[] }> {
@@ -344,5 +360,44 @@ export async function searchScryfallCards(query: string): Promise<ScryfallCard[]
   } catch (error) {
     console.error("Falha ao buscar cartas no Scryfall:", error);
     return [];
+  }
+}
+
+
+/**
+ * Busca os dados de uma única carta, incluindo o preço em USD, da API do Scryfall.
+ * @param cardName - O nome exato da carta.
+ * @returns O preço em USD ou null se não for encontrado.
+ */
+export async function getCardPriceFromScryfall(cardName: string): Promise<number | null> {
+  if (!cardName) return null;
+
+  try {
+    // A API do Scryfall tem um endpoint para buscar pelo nome exato
+    const url = `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(cardName)}`;
+    
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      // Se a carta não for encontrada (404) ou houver outro erro, retorna null
+      console.error(`Scryfall API error for "${cardName}": ${response.statusText}`);
+      return null;
+    }
+
+    const cardData = await response.json();
+
+    // O objeto de preços pode ter vários valores (usd, usd_foil, eur, etc.)
+    // Vamos pegar o preço normal em USD como referência.
+    const priceUsd = cardData?.prices?.usd;
+
+    if (priceUsd) {
+      return parseFloat(priceUsd);
+    }
+
+    return null; // Retorna null se não houver preço em USD
+
+  } catch (error) {
+    console.error(`Failed to fetch price for "${cardName}" from Scryfall:`, error);
+    return null;
   }
 }
