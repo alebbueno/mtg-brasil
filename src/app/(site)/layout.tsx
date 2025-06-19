@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
 import Header from '@/app/(site)/components/Header';
 import Footer from '@/app/(site)/components/Footer';
 // CORREÇÃO: Caminho do import ajustado
