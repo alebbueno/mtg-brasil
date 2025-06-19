@@ -6,12 +6,28 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
-export default async function EditPostPage({ params }: { params: { id: string } }) {
+// O tipo das props para referência interna
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
+// AJUSTE: Recebemos as props como 'any' e depois as convertemos para o tipo correto,
+// exatamente como no seu arquivo de modelo, para resolver o erro de build.
+export default async function EditPostPage(props: any) {
+  // Garante que estamos a usar os parâmetros da forma correta
+  const { params } = props as PageProps;
+  
+  // Segurança
   const isAdmin = await checkUserRole('admin');
-  if (!isAdmin) notFound();
+  if (!isAdmin) {
+    notFound();
+  }
 
+  // Busca os dados do post específico que queremos editar
   const supabase = createClient();
-
+  
   const postPromise = supabase
     .from('posts')
     .select('*, categories(id)') // Pega o post e os IDs das suas categorias
@@ -25,8 +41,12 @@ export default async function EditPostPage({ params }: { params: { id: string } 
     categoriesPromise
   ]);
 
-  if (!post) notFound();
+  // Se o post não for encontrado, mostra a página 404
+  if (!post) {
+    notFound();
+  }
 
+  // Prepara a server action `updatePost`, passando o ID do post
   const updatePostWithId = updatePost.bind(null, post.id);
 
   return (
@@ -42,6 +62,7 @@ export default async function EditPostPage({ params }: { params: { id: string } 
         </p>
       </header>
       
+      {/* Renderiza o formulário, passando a action de UPDATE e os dados iniciais */}
       <PostForm 
         formAction={updatePostWithId} 
         initialData={post}
