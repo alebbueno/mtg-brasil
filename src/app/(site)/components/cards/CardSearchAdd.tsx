@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { searchCards } from "@/app/(site)/lib/scryfall";
-import type { ScryfallCard } from "@/app/(site)/lib/scryfall"; // Corrigido aqui
+import { searchCards } from "@/app/lib/scryfall";
+import type { ScryfallCard } from "@/app/lib/scryfall"; // Corrigido aqui
 
 interface CardSearchAddProps {
   onAddCard: (card: ScryfallCard) => void;

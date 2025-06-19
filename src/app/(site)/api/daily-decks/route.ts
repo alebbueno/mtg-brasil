@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
 import { NextResponse } from 'next/server';
-import { getDailyDecks } from '@/app/(site)/lib/daily-deck';
+import { getDailyDecks } from '@/app/lib/daily-deck';
 
 export async function GET() {
   try {

@@ -2,7 +2,7 @@
 /* eslint-disable no-undef */
 'use server'
 
-import { createClient } from '@/app/(site)/utils/supabase/server'
+import { createClient } from '@/app/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'

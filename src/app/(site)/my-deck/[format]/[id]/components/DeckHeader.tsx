@@ -8,7 +8,7 @@ import { ArrowLeft, Globe, Lock, Pencil } from 'lucide-react';
 import { DeckPrivacyToggle } from '@/app/(site)/components/deck/DeckPrivacyToggle';
 import DeckViewActions from '@/app/(site)/components/deck/DeckViewActions';
 import SaveDeckButton from '@/app/(site)/components/deck/SaveDeckButton';
-import type { DeckFromDB } from '@/app/(site)/lib/types';
+import type { DeckFromDB } from '@/app/lib/types';
 import Link from 'next/link';
 
 interface DeckHeaderProps {

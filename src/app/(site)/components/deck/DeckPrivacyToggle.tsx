@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { updateDeckPrivacy } from '@/app/(site)/actions/deckActions'
+import { updateDeckPrivacy } from '@/app/actions/deckActions'
 import { toast } from 'sonner' // Usando sonner para notificações (opcional)
 
 interface DeckPrivacyToggleProps {

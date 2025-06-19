@@ -2,8 +2,8 @@
 /* eslint-disable no-console */
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { createClient } from '@/app/(site)/utils/supabase/server';
-import { fetchCardsByNames } from '@/app/(site)/lib/scryfall';
+import { createClient } from '@/app/utils/supabase/server';
+import { fetchCardsByNames } from '@/app/lib/scryfall';
 
 // Definindo interfaces claras para os dados
 interface DeckCard {

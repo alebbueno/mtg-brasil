@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
-import { createClient } from '@/app/(site)/utils/supabase/server';
-import { fetchCardsByNames } from '@/app/(site)/lib/scryfall';
-import type { DeckFromDB } from '@/app/(site)/lib/types';
+import { createClient } from '@/app/utils/supabase/server';
+import { fetchCardsByNames } from '@/app/lib/scryfall';
+import type { DeckFromDB } from '@/app/lib/types';
 import DeckEditView from './DeckEditView';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';

@@ -5,7 +5,7 @@
 // app/actions/deckBuilderActions.ts
 'use server'
 
-import { createClient } from '@/app/(site)/utils/supabase/server'
+import { createClient } from '@/app/utils/supabase/server'
 import OpenAI from 'openai';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';

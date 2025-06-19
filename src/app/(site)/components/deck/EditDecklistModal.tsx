@@ -19,7 +19,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Save, Loader2, TextIcon } from 'lucide-react';
 //import { updateDecklistFromText } from '@/app/(site)/actions/deckActions'; // Sua Server Action
-import type { Decklist } from '@/app/(site)/lib/types'; // Seus tipos
+import type { Decklist } from '@/app/lib/types'; // Seus tipos
 
 interface EditDecklistModalProps {
   isOpen: boolean;

@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 // import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import AutocompleteInput from '@/app/(site)/components/deck/AutocompleteInput';
-import type { ScryfallCard } from '@/app/(site)/lib/types';
+import type { ScryfallCard } from '@/app/lib/types';
 import { ImagePlus, Loader2 } from 'lucide-react'; // Importa o ícone de loading
 
 type DeckInfoFormProps = {

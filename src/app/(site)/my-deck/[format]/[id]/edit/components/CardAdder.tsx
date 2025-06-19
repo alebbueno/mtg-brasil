@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import AutocompleteInput from '@/app/(site)/components/deck/AutocompleteInput';
 import { Plus } from 'lucide-react';
-import type { ScryfallCard } from '@/app/(site)/lib/types';
+import type { ScryfallCard } from '@/app/lib/types';
 import { toast } from 'sonner'; // Importa a função de toast
 
 type CardAdderProps = {

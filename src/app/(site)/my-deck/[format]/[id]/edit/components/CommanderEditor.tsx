@@ -9,12 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Crown, Trash2, Library, Plus, Minus } from 'lucide-react';
 import AutocompleteInput from '@/app/(site)/components/deck/AutocompleteInput';
-import type { ScryfallCard } from '@/app/(site)/lib/types';
+import type { ScryfallCard } from '@/app/lib/types';
 import type { EditableCard } from '../DeckEditView';
 
 // AJUSTE: Importamos a nova função auxiliar e a action da coleção
-import { upsertCardInCollection } from '@/app/(site)/actions/collectionActions';
-import { fetchCardById } from '@/app/(site)/lib/scryfall';
+import { upsertCardInCollection } from '@/app/actions/collectionActions';
+import { fetchCardById } from '@/app/lib/scryfall';
 
 
 type CommanderEditorProps = {

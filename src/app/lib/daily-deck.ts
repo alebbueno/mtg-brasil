@@ -1,8 +1,8 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
 import { DeckData } from '@/app/(site)/components/home/DailyDeckItem';
-import { supabaseServiceClient } from '@/app/(site)/lib/supabase';
-import { fetchCardByName, fetchCardsByNames } from '@/app/(site)/lib/scryfall';
+import { supabaseServiceClient } from '@/app/lib/supabase';
+import { fetchCardByName, fetchCardsByNames } from '@/app/lib/scryfall';
 import OpenAI from 'openai';
 import { format } from 'date-fns';
 

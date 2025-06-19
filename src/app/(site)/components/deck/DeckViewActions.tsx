@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { DeckFromDB, DeckCard } from '@/app/(site)/lib/types';
+import type { DeckFromDB, DeckCard } from '@/app/lib/types';
 
 // Props para o Componente de Ações
 interface DeckViewActionsProps {

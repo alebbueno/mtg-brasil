@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { fetchAutocomplete } from '@/app/(site)/lib/scryfall';
+import { fetchAutocomplete } from '@/app/lib/scryfall';
 
 export async function GET(req: Request) {
   try {

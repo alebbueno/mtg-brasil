@@ -12,8 +12,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import type { ScryfallCard } from '@/app/(site)/lib/scryfall';
-import type { DeckCard, DeckFromDB } from '@/app/(site)/lib/types';
+import type { ScryfallCard } from '@/app/lib/scryfall';
+import type { DeckCard, DeckFromDB } from '@/app/lib/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { BarChart } from 'lucide-react';
 import ManaCost from '@/components/ui/ManaCost';

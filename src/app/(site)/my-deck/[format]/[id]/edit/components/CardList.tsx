@@ -11,8 +11,8 @@ import ManaCost from '@/components/ui/ManaCost';
 import { Minus, Plus, Library } from 'lucide-react';
 
 // AJUSTE 1: Importar a função fetchCardById e a action da coleção
-import { upsertCardInCollection } from '@/app/(site)/actions/collectionActions';
-import { fetchCardById } from '@/app/(site)/lib/scryfall';
+import { upsertCardInCollection } from '@/app/actions/collectionActions';
+import { fetchCardById } from '@/app/lib/scryfall';
 import { toast } from 'sonner';
 
 interface CardRowProps {

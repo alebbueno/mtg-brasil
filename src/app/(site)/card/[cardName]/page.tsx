@@ -1,6 +1,6 @@
 import Link from "next/link";
 // import { notFound } from "next/navigation";
-import { fetchCardByName } from "@/app/(site)/lib/scryfall";
+import { fetchCardByName } from "@/app/lib/scryfall";
 import CardDisplay from "@/app/(site)/components/CardDisplay";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

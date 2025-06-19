@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
-import type { ScryfallCard } from '@/app/(site)/lib/scryfall';
-import type { DeckDetailViewProps, DeckCard } from '@/app/(site)/lib/types';
+import type { ScryfallCard } from '@/app/lib/scryfall';
+import type { DeckDetailViewProps, DeckCard } from '@/app/lib/types';
 
 // Importando os componentes filhos
 import CreatorHeader from './components/CreatorHeader';
@@ -16,7 +16,7 @@ import { List, LayoutGrid } from 'lucide-react';
 import type { GridCardData } from '@/app/(site)/components/deck/DeckGridView';
 
 // Importando as novas funções e o componente de preço
-import { getCardPriceFromScryfall } from '@/app/(site)/lib/scryfall';
+import { getCardPriceFromScryfall } from '@/app/lib/scryfall';
 import { getBRLRate } from '@/lib/utils';
 import PriceDisplay from '@/app/(site)/components/deck/PriceDisplay';
 

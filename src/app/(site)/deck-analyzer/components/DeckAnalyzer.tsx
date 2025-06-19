@@ -5,7 +5,7 @@ import { useState } from 'react';
 import DeckForm from './DeckForm';
 import AnalysisResult from './AnalysisResult';
 import CardKanban from './CardKanban';
-import { fetchCardsByNames } from '@/app/(site)/lib/scryfall';
+import { fetchCardsByNames } from '@/app/lib/scryfall';
 
 // Interfaces
 interface DeckAnalysisResult {

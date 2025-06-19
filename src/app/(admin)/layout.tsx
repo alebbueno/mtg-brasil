@@ -8,7 +8,6 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Segurança em nível de layout: protege todas as rotas dentro de /admin/*
   const isAdmin = await checkUserRole('admin');
   if (!isAdmin) {
     notFound();

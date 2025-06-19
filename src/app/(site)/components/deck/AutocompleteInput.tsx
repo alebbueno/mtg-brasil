@@ -9,8 +9,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { searchScryfallCards } from '@/app/(site)/lib/scryfall';
-import type { ScryfallCard } from '@/app/(site)/lib/scryfall';
+import { searchScryfallCards } from '@/app/lib/scryfall';
+import type { ScryfallCard } from '@/app/lib/scryfall';
 import { Search, Loader2 } from 'lucide-react';
 import ManaCost from '@/components/ui/ManaCost';
 

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle, Chrome } from 'lucide-react'
-import { createClient } from '@/app/(site)/utils/supabase/client'
+import { createClient } from '@/app/utils/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()

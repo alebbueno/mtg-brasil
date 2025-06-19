@@ -4,7 +4,7 @@
 'use client'
 
 import { Editor as TinyMCEEditor } from '@tinymce/tinymce-react';
-import { uploadImage } from '@/app/(site)/actions/postActions';
+import { uploadImage } from '@/app/actions/postActions';
 
 interface EditorProps {
   onChange: (value: string) => void;

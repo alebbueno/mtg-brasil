@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 'use client'
 
-import type { ScryfallCard } from '@/app/(site)/lib/scryfall';
+import type { ScryfallCard } from '@/app/lib/scryfall';
 import ManaCost from '@/components/ui/ManaCost';
 import { Crown } from 'lucide-react';
 

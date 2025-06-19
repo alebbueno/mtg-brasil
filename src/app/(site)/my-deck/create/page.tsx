@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { createDeck } from '@/app/(site)/actions/deckActions'
+import { createDeck } from '@/app/actions/deckActions'
 import { Loader2, PlusCircle, Globe, Lock } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"

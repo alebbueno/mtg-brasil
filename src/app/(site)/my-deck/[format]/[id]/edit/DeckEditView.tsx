@@ -9,8 +9,8 @@ import { useActionState, useState, useEffect, useMemo, useCallback } from 'react
 import { useFormStatus } from 'react-dom';
 import { toast } from 'sonner';
 import Image from 'next/image';
-import { updateDeckContent, updateDeckCoverImage } from '@/app/(site)/actions/deckActions';
-import type { DeckFromDB, ScryfallCard } from '@/app/(site)/lib/types';
+import { updateDeckContent, updateDeckCoverImage } from '@/app/actions/deckActions';
+import type { DeckFromDB, ScryfallCard } from '@/app/lib/types';
 
 // Importando os componentes filhos
 import DeckInfoForm from './components/DeckInfoForm';
@@ -21,7 +21,7 @@ import DeckActions from './components/DeckActions';
 import ExportMissingCards from './components/ExportMissingCards';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Info } from 'lucide-react';
-import { createClient } from '@/app/(site)/utils/supabase/client';
+import { createClient } from '@/app/utils/supabase/client';
 
 // Tipos
 export interface EditableCard extends ScryfallCard {

@@ -1,6 +1,6 @@
 // app/(admin)/admin/page.tsx
 
-import { createClient } from '@/app/(site)/utils/supabase/server';
+import { createClient } from '@/app/utils/supabase/server';
 import { Users, FileText, Bookmark, MessageSquare } from 'lucide-react';
 import StatCard from './components/StatCard';
 import RecentDecks from './components/RecentDecks';

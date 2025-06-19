@@ -3,7 +3,7 @@
 
 import { useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { createPost, uploadImage } from '@/app/(site)/actions/postActions';
+import { createPost, uploadImage } from '@/app/actions/postActions';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';

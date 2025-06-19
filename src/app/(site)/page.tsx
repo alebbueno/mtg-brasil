@@ -6,7 +6,7 @@ import FeatureShowcaseSection from "@/app/(site)/components/home/FeatureShowcase
 // import FeaturedCardsSection from "@/app/components/home/FeaturedCardsSection";
 import LatestSetsSection from "@/app/(site)/components/home/LatestSetsSection";
 import ManaColorNavigationSection from "@/app/(site)/components/home/ManaColorNavigationSection";
-import { fetchLatestSets, SetData } from "./lib/scryfall"; // << IMPORTANTE: Adicionei SetData aqui
+import { fetchLatestSets, SetData } from "@/app/lib/scryfall"; // << IMPORTANTE: Adicionei SetData aqui
 import DailyDecksSection from "./components/home/DailyDecksSection";
 
 // Dados mockados para exemplo - substitua por dados reais/API

@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
 import Link from "next/link";
-import { fetchCardById } from "@/app/(site)/lib/scryfall";
+import { fetchCardById } from "@/app/lib/scryfall";
 import CardDisplay from "@/app/(site)/components/CardDisplay";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

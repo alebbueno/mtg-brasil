@@ -4,7 +4,7 @@
 'use client'
 
 import { useMemo } from 'react';
-import type { ScryfallCard } from '@/app/(site)/lib/scryfall';
+import type { ScryfallCard } from '@/app/lib/scryfall';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Droplets } from 'lucide-react';
 import ManaCost from '@/components/ui/ManaCost';

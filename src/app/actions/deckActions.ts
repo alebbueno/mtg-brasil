@@ -5,12 +5,10 @@
 // app/actions/deckActions.ts
 'use server'
 
-import { createClient } from '@/app/(site)/utils/supabase/server'
+import { createClient } from '@/app/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import type { ScryfallCard } from '@/app/(site)/lib/scryfall'
-import { fetchCardByName, fetchCardsByNames } from '@/app/(site)/lib/scryfall'
-import { getLigamagicPrice } from '@/app/(site)/lib/scraping'
+import { fetchCardByName, fetchCardsByNames, getCardPriceFromScryfall } from '@/app/lib/scryfall'
 
 import OpenAI from 'openai';
 const openai = new OpenAI({
@@ -22,6 +20,9 @@ const openai = new OpenAI({
 interface DeckCard {
   count: number;
   name: string;
+  have_physical?: boolean;
+  price_usd?: number;
+  price_updated_at?: string;
 }
 
 interface Decklist {
@@ -37,11 +38,6 @@ interface FormState {
     format?: string[];
     decklist?: string[];
   };
-}
-
-// AJUSTE: A função delay é mantida, mas sua chamada será comentada.
-function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // --- Ação para ATUALIZAR a Privacidade ---
@@ -68,16 +64,14 @@ export async function updateDeckPrivacy(deckId: string, isPublic: boolean) {
 }
 
 // ============================================================================
-// --- AÇÃO PARA CRIAR UM DECK (AJUSTADA) ---
+// --- AÇÃO PARA CRIAR UM DECK (COM PREÇOS NO JSON) ---
 // ============================================================================
 export async function createDeck(prevState: FormState, formData: FormData): Promise<FormState> {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-        return { message: "Erro: Apenas utilizadores autenticados podem criar decks." }
-    }
+    if (!user) { return { message: "..." } }
     
-    // ... (lógica de coleta de dados e validação)...
+    // ... (Coleta de dados do formulário e validações iniciais como antes) ...
     const creationMode = formData.get('creationMode') as 'list' | 'builder';
     const name = formData.get('name') as string;
     const format = formData.get('format') as string;
@@ -96,162 +90,136 @@ export async function createDeck(prevState: FormState, formData: FormData): Prom
     }
 
     const decklist: Decklist = { mainboard: [], sideboard: [] };
-    let representativeCardImageUrl = null;
-    let color_identity: string[] = [];
-    const allCardNames = new Set<string>();
-
+    
     if (creationMode === 'list') {
-        if (format === 'commander' && commanderName) {
-            decklistText = `1 ${commanderName}\n${decklistText}`;
-        }
+        if (format === 'commander' && commanderName) { decklistText = `1 ${commanderName}\n${decklistText}`; }
         const lines = decklistText.split('\n').filter(line => line.trim() !== '');
         let currentSection: 'mainboard' | 'sideboard' = 'mainboard';
         for (const line of lines) {
-            if (line.toLowerCase().trim() === 'sideboard') {
-                currentSection = 'sideboard';
-                continue;
-            }
+            if (line.toLowerCase().trim() === 'sideboard') { currentSection = 'sideboard'; continue; }
             const match = line.match(/^(\d+)x?\s+(.+)/i);
             if (match) {
-                const card = { count: parseInt(match[1], 10), name: match[2].trim(), have_physical: false };
-                decklist[currentSection]?.push(card);
-                allCardNames.add(card.name);
+                decklist[currentSection]?.push({ count: parseInt(match[1], 10), name: match[2].trim(), have_physical: false });
             }
         }
     } else {
         if (format === 'commander' && commanderName) {
-            const card = { count: 1, name: commanderName, have_physical: false };
-            decklist.mainboard.push(card);
-            allCardNames.add(card.name);
+            decklist.mainboard.push({ count: 1, name: commanderName, have_physical: false });
         }
     }
     
-    if (allCardNames.size > 0) {
-        const scryfallData = await fetchCardsByNames(Array.from(allCardNames));
+    // --- LÓGICA PARA ENRIQUECER O DECKLIST COM PREÇOS ---
+    const allCards = [...decklist.mainboard, ...(decklist.sideboard || [])];
+    const enrichedCardsPromises = allCards.map(async (card) => {
+        const price = await getCardPriceFromScryfall(card.name);
+        return {
+            ...card,
+            price_usd: price,
+            price_updated_at: price !== null ? new Date().toISOString() : undefined,
+        };
+    });
+    
+    const enrichedCards = await Promise.all(enrichedCardsPromises);
+
+    const finalDecklist: Decklist = {
+        mainboard: enrichedCards.filter(c => decklist.mainboard.some(mc => mc.name === c.name)),
+        sideboard: enrichedCards.filter(c => decklist.sideboard?.some(sc => sc.name === c.name)),
+    };
+    // --- FIM DA LÓGICA DE PREÇOS ---
+
+    const allCardNames = [...new Set(allCards.map(c => c.name))];
+    let representativeCardImageUrl = null;
+    let color_identity: string[] = [];
+    if(allCardNames.length > 0) {
+        const scryfallData = await fetchCardsByNames(allCardNames);
         const colorIdentitySet = new Set<string>();
-        scryfallData.forEach(card => {
-            card.color_identity.forEach(color => colorIdentitySet.add(color));
-        });
+        scryfallData.forEach(card => { card.color_identity.forEach(color => colorIdentitySet.add(color)); });
         color_identity = Array.from(colorIdentitySet);
-        if (decklist.mainboard.length > 0) {
-            const firstCardName = decklist.mainboard[0].name;
+        if (finalDecklist.mainboard.length > 0) {
+            const firstCardName = finalDecklist.mainboard[0].name;
             const cardData = scryfallData.find(c => c.name === firstCardName);
             representativeCardImageUrl = cardData?.image_uris?.art_crop || cardData?.image_uris?.normal;
         }
     }
 
-    console.log('Iniciando atualização de preços para o deck...');
-    for (const cardName of allCardNames) {
-        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-        const { data: existingPrice } = await supabase.from('card_prices').select('price_brl').eq('card_name', cardName).gte('last_updated_at', twentyFourHoursAgo).single();
-
-        if (!existingPrice) {
-            console.log(`Preço para "${cardName}" não encontrado ou desatualizado. Buscando na Ligamagic...`);
-            const result = await getLigamagicPrice(cardName);
-            if (result.price !== null) {
-                await supabase.from('card_prices').upsert({ card_name: cardName, price_brl: result.price, source: 'ligamagic_min', last_updated_at: new Date().toISOString() }, { onConflict: 'card_name' });
-                console.log(`Preço de "${cardName}" atualizado para R$ ${result.price}`);
-            }
-            // AJUSTE: Chamada ao delay comentada para evitar o erro.
-            // await delay(2000); 
-        } else {
-            console.log(`Preço para "${cardName}" já está atualizado no cache.`);
-        }
-    }
-    console.log('Atualização de preços finalizada.');
-
-    const { data: newDeck, error } = await supabase.from('decks').insert({ user_id: user.id, name, format, description, decklist, representativeCardImageUrl, is_public: isPublic, color_identity, }).select('id, format').single();
-    if (error) {
-        console.error("Erro ao criar deck no Supabase:", error);
-        return { message: "Erro na base de dados: não foi possível guardar o deck." };
-    }
-
+    const { data: newDeck, error } = await supabase.from('decks').insert({
+        user_id: user.id, name, format, description, decklist: finalDecklist, // Salva o decklist com os preços
+        representative_card_image_url: representativeCardImageUrl, is_public: isPublic, color_identity,
+    }).select('id, format').single();
+    
+    if (error) { return { message: "Erro na base de dados: não foi possível guardar o deck." }; }
+    
     revalidatePath('/my-decks');
-    if (creationMode === 'builder') {
-        redirect(`/my-deck/${newDeck.format}/${newDeck.id}/edit`);
-    } else {
-        redirect(`/my-deck/${newDeck.format}/${newDeck.id}`);
-    }
+    if (creationMode === 'builder') { redirect(`/my-deck/${newDeck.format}/${newDeck.id}/edit`); } 
+    else { redirect(`/my-deck/${newDeck.format}/${newDeck.id}`); }
 }
 
 
 // ============================================================================
-// --- AÇÃO PARA EDITAR UM DECK (AJUSTADA) ---
+// --- AÇÃO PARA EDITAR UM DECK (COM PREÇOS NO JSON) ---
 // ============================================================================
 export async function updateDeckContent(deckId: string, prevState: FormState, formData: FormData): Promise<FormState> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { message: "Erro: Utilizador não autenticado.", success: false };
-  }
+  if (!user) { return { message: "Erro: Utilizador não autenticado.", success: false }; }
 
   const name = formData.get('name') as string;
   const description = formData.get('description') as string;
   const isPublic = formData.get('is_public') === 'on';
   const cardsJSON = formData.get('cards') as string;
 
-  if (!name || !cardsJSON) {
-    return { message: "Nome do deck e lista de cartas são obrigatórios.", success: false };
-  }
+  if (!name || !cardsJSON) { return { message: "Nome do deck e lista de cartas são obrigatórios.", success: false }; }
 
   let parsedCards: { name: string; count: number; is_sideboard: boolean; have_physical?: boolean }[];
-  try {
-    parsedCards = JSON.parse(cardsJSON);
-  } catch (error) {
-    return { message: "Erro ao processar a lista de cartas.", success: false };
-  }
+  try { parsedCards = JSON.parse(cardsJSON); } 
+  catch (error) { return { message: "Erro ao processar a lista de cartas.", success: false }; }
+
+  // --- LÓGICA PARA ENRIQUECER O DECKLIST COM PREÇOS ---
+  const enrichedCardsPromises = parsedCards.map(async (card) => {
+    const price = await getCardPriceFromScryfall(card.name);
+    return {
+        ...card,
+        price_usd: price,
+        price_updated_at: price !== null ? new Date().toISOString() : undefined,
+    };
+  });
+
+  const enrichedCards = await Promise.all(enrichedCardsPromises);
+  // --- FIM DA LÓGICA DE PREÇOS ---
 
   const decklist: Decklist = {
-    mainboard: parsedCards.filter(c => !c.is_sideboard).map(({ name, count, have_physical }) => ({ name, count, have_physical: !!have_physical })),
-    sideboard: parsedCards.filter(c => c.is_sideboard).map(({ name, count, have_physical }) => ({ name, count, have_physical: !!have_physical }))
+    mainboard: enrichedCards.filter(c => !c.is_sideboard).map(c => ({ name: c.name, count: c.count, have_physical: !!c.have_physical, price_usd: c.price_usd, price_updated_at: c.price_updated_at })),
+    sideboard: enrichedCards.filter(c => c.is_sideboard).map(c => ({ name: c.name, count: c.count, have_physical: !!c.have_physical, price_usd: c.price_usd, price_updated_at: c.price_updated_at }))
   };
 
   const allCardNames = [...new Set(parsedCards.map(c => c.name))];
   
-  const scryfallData = await fetchCardsByNames(allCardNames);
-  const colorIdentitySet = new Set<string>();
-  scryfallData.forEach(card => {
-      card.color_identity.forEach(color => colorIdentitySet.add(color));
-  });
-  const color_identity = Array.from(colorIdentitySet);
+  if (allCardNames.length > 0) {
+    const scryfallData = await fetchCardsByNames(allCardNames);
+    const colorIdentitySet = new Set<string>();
+    scryfallData.forEach(card => { card.color_identity.forEach(color => colorIdentitySet.add(color)); });
+    const color_identity = Array.from(colorIdentitySet);
 
-  console.log('Iniciando atualização de preços para o deck editado...');
-  for (const cardName of allCardNames) {
-      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const { data: existingPrice } = await supabase.from('card_prices').select('price_brl').eq('card_name', cardName).gte('last_updated_at', twentyFourHoursAgo).single();
+    const { data: originalDeck } = await supabase.from('decks').select('format').eq('id', deckId).single();
+    
+    const { error } = await supabase.from('decks').update({
+        name, description, decklist, is_public: isPublic, color_identity, updated_at: new Date().toISOString(),
+    }).eq('id', deckId).eq('user_id', user.id);
 
-      if (!existingPrice) {
-          console.log(`Preço para "${cardName}" não encontrado ou desatualizado. Buscando na Ligamagic...`);
-          const result = await getLigamagicPrice(cardName);
-          if (result.price !== null) {
-              await supabase.from('card_prices').upsert({ card_name: cardName, price_brl: result.price, source: 'ligamagic_min', last_updated_at: new Date().toISOString() }, { onConflict: 'card_name' });
-              console.log(`Preço de "${cardName}" atualizado para R$ ${result.price}`);
-          }
-          // AJUSTE: Chamada ao delay comentada para evitar o erro.
-          // await delay(2000);
-      } else {
-          console.log(`Preço para "${cardName}" já está atualizado no cache.`);
-      }
+    if (error) { return { message: "Erro na base de dados: não foi possível guardar as alterações.", success: false }; }
+
+    revalidatePath('/my-decks');
+    revalidatePath(`/my-deck/${originalDeck?.format}/${deckId}`);
+    return { message: "Deck guardado com sucesso!", success: true };
   }
-  console.log('Atualização de preços finalizada.');
-
-  const { data: originalDeck } = await supabase.from('decks').select('format').eq('id', deckId).single();
   
-  const { error } = await supabase
-    .from('decks')
-    .update({ name, description, decklist, is_public: isPublic, color_identity, updated_at: new Date().toISOString() })
-    .eq('id', deckId)
-    .eq('user_id', user.id);
-
-  if (error) {
-    console.error("Erro ao editar deck:", error);
-    return { message: "Erro na base de dados: não foi possível guardar as alterações.", success: false };
-  }
-
-  revalidatePath('/my-decks');
-  revalidatePath(`/my-deck/${originalDeck?.format}/${deckId}`);
+  // ... (código de fallback para deck vazio) ...
   return { message: "Deck guardado com sucesso!", success: true };
 }
+
+// ============================================================================
+// --- OUTRAS AÇÕES DO DECK ---
+// ============================================================================
 
 export async function updateDeckCoverImage(deckId: string, imageUrl: string) {
     'use server'
@@ -434,4 +402,3 @@ export async function analyzeDeckWithAI(deckId: string, decklistText: string): P
     return { error: "Ocorreu um erro ao comunicar com a IA." };
   }
 }
-

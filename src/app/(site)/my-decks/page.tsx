@@ -6,7 +6,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { createClient } from '@/app/(site)/utils/supabase/client'
+import { createClient } from '@/app/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 import { Loader2, PlusCircle, Swords, Bookmark } from 'lucide-react'

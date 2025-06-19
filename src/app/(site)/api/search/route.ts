@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchSearchResults, fetchFilteredSearchResults } from '@/app/(site)/lib/scryfall';
+import { fetchSearchResults, fetchFilteredSearchResults } from '@/app/lib/scryfall';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

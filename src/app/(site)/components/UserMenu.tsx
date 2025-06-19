@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BookOpen, Heart, User, LogOut, Swords, Star } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/app/(site)/utils/supabase/client';
+import { createClient } from '@/app/utils/supabase/client';
 
 type UserMenuProps = {
   user: {

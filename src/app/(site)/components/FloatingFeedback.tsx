@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MessageSquarePlus, Loader2 } from 'lucide-react';
-import { submitFeedback } from '@/app/(site)/actions/feedbackActions';
+import { submitFeedback } from '@/app/actions/feedbackActions';
 
 const initialState = { message: '', success: false };
 

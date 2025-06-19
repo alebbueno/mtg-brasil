@@ -20,7 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { deleteDeck } from '@/app/(site)/actions/deckActions';
+import { deleteDeck } from '@/app/actions/deckActions';
 import { toast } from 'sonner';
 import ManaCost from '@/components/ui/ManaCost';
 

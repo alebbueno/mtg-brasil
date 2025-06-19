@@ -5,7 +5,7 @@ import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Bookmark, BookmarkCheck, Loader2 } from 'lucide-react';
-import { toggleSaveDeck } from '@/app/(site)/actions/deckActions';
+import { toggleSaveDeck } from '@/app/actions/deckActions';
 
 interface SaveDeckButtonProps {
   deckId: string;

@@ -6,8 +6,8 @@ import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Bot, Loader2, Sparkles, ShieldCheck, ShieldAlert, Wrench, RefreshCw } from 'lucide-react';
-import { analyzeDeckWithAI } from '@/app/(site)/actions/deckActions';
-import type { DeckFromDB } from '@/app/(site)/lib/types';
+import { analyzeDeckWithAI } from '@/app/actions/deckActions';
+import type { DeckFromDB } from '@/app/lib/types';
 
 // O tipo para o resultado da análise, que será guardado no estado
 interface AnalysisResult {

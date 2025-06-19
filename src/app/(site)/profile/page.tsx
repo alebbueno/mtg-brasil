@@ -1,11 +1,12 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
-// app/profile/page.tsx
+// app/(site)/profile/page.tsx
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { createClient } from '@/app/(site)/utils/supabase/client'
+// AJUSTE: Corrigido o caminho da importação para apontar para a pasta 'utils' na raiz de 'app'
+import { createClient } from '@/app/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,7 +26,7 @@ type Profile = {
   bio: string | null
   birth_date: string | null
   cover_image_url: string | null
-  cover_position_y: number | null // Nova propriedade para a posição da capa
+  cover_position_y: number | null
   favorite_colors: string[] | null
   favorite_formats: string[] | null
   social_links: { twitter?: string; instagram?: string; } | null
@@ -40,7 +41,6 @@ export default function ProfilePage() {
   const [updating, setUpdating] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
-  // Estados para a funcionalidade de arrastar a imagem de capa
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ y: 0, position: 50 })
 
@@ -76,7 +76,6 @@ export default function ProfilePage() {
         setUser(user)
         getProfile(user)
       } else {
-        // Se não houver utilizador, redireciona para a página de login
         router.push('/login');
       }
     }
@@ -97,7 +96,7 @@ export default function ProfilePage() {
         full_name: profile.full_name,
         bio: profile.bio,
         birth_date: profile.birth_date,
-        cover_position_y: profile.cover_position_y, // Guardar a nova posição da capa
+        cover_position_y: profile.cover_position_y,
         favorite_colors: profile.favorite_colors,
         favorite_formats: profile.favorite_formats,
         social_links: profile.social_links,
@@ -173,7 +172,8 @@ export default function ProfilePage() {
   const handleDragMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isDragging || !profile) return;
     const deltaY = e.clientY - dragStart.y;
-    const containerHeight = e.currentTarget.clientHeight;
+    const containerHeight = (e.currentTarget as HTMLElement).clientHeight;
+    if (containerHeight === 0) return;
     const percentageChange = (deltaY / containerHeight) * 100;
     let newPosition = dragStart.position + percentageChange;
     newPosition = Math.max(0, Math.min(100, newPosition));
@@ -202,14 +202,14 @@ export default function ProfilePage() {
         onMouseDown={handleDragStart}
         onMouseMove={handleDragMove}
         onMouseUp={handleDragEnd}
-        onMouseLeave={handleDragEnd} // Termina o arraste se o rato sair da área
+        onMouseLeave={handleDragEnd}
       >
         {profile?.cover_image_url ? (
           <Image 
             src={profile.cover_image_url} 
             alt="Imagem de capa" 
             fill
-            className="object-cover pointer-events-none" // pointer-events-none para evitar que a imagem intercete os eventos do rato
+            className="object-cover pointer-events-none"
             style={{ objectPosition: `50% ${profile.cover_position_y || 50}%` }}
             priority
           />
@@ -225,7 +225,6 @@ export default function ProfilePage() {
           </label>
         </div>
 
-        {/* Slider de Posição da Capa - AJUSTADO */}
         {profile?.cover_image_url && (
           <div className="absolute bottom-4 right-4 w-1/3 max-w-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-3">
               <ImageIcon className="h-5 w-5 text-white/70" />

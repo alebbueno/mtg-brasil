@@ -3,7 +3,7 @@
 // app/actions/feedbackActions.ts
 'use server'
 
-import { createClient } from '@/app/(site)/utils/supabase/server'
+import { createClient } from '@/app/utils/supabase/server'
 import { Resend } from 'resend';
 import { z } from 'zod';
 
