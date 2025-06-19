@@ -3,8 +3,8 @@
 // Este é um SCRIPT, não uma página ou API route.
 // Ele é feito para ser executado manualmente ou por um agendador (Cron Job).
 
-import { createClient } from '@/app/(site)/utils/supabase/client'; // Adapte o caminho se necessário
-import { getLigamagicPrice } from '@/app/(site)/lib/scraping'; // Importa nossa função
+import { createClient } from '@/app/utils/supabase/client'; // Adapte o caminho se necessário
+import { getLigamagicPrice } from '@/app/lib/scraping'; // Importa nossa função
 
 // Função para introduzir um atraso e não sobrecarregar o site
 function delay(ms: number) {
