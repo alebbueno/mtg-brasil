@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { checkUserRole } from '@/lib/auth';
 import { notFound } from 'next/navigation';
-// CORREÇÃO: Caminho do import ajustado
 import { createClient } from '@/app/utils/supabase/server';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,19 +10,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { PlusCircle, Edit, ExternalLink } from 'lucide-react';
 
 export default async function AdminBlogPage() {
+  // 1. Segurança: Continua igual
   const isAdmin = await checkUserRole('admin');
   if (!isAdmin) {
     notFound();
   }
 
+  // 2. Busca de Dados: Agora chama a nossa nova função RPC
   const supabase = createClient();
-  const { data: posts, error } = await supabase
-    .from('posts')
-    .select('id, title, status, slug, created_at, profiles(username)')
-    .order('created_at', { ascending: false });
+  const { data: posts, error } = await supabase.rpc('get_all_posts_with_author');
   
   if (error) {
-    console.error("Erro ao buscar posts:", error);
+    console.error("Erro ao buscar posts com RPC:", error);
   }
 
   return (
@@ -54,7 +52,7 @@ export default async function AdminBlogPage() {
           </TableHeader>
           <TableBody>
             {posts && posts.length > 0 ? (
-              posts.map((post: any) => (
+              posts.map((post) => (
                 <TableRow key={post.id} className="border-neutral-800">
                   <TableCell className="font-medium">{post.title}</TableCell>
                   <TableCell>
@@ -62,8 +60,9 @@ export default async function AdminBlogPage() {
                       {post.status === 'published' ? 'Publicado' : 'Rascunho'}
                     </Badge>
                   </TableCell>
+                  {/* AJUSTE: O nome de usuário agora vem direto no objeto 'post' */}
                   <TableCell className="text-neutral-400">
-                    @{ (Array.isArray(post.profiles) ? post.profiles[0]?.username : post.profiles?.username) || 'N/A' }
+                    @{post.username || 'N/A'}
                   </TableCell>
                   <TableCell className="text-neutral-400">
                     {new Date(post.created_at).toLocaleDateString('pt-BR')}
@@ -73,6 +72,7 @@ export default async function AdminBlogPage() {
                       <Link href={`/blog/${post.slug}`} target="_blank" title="Ver post no site">
                          <Button variant="outline" size="icon" className="h-8 w-8"><ExternalLink className="h-4 w-4" /></Button>
                       </Link>
+                      {/* Futuramente o link de edição funcionará */}
                       <Link href={`/admin/blog/edit/${post.id}`} title="Editar post">
                          <Button variant="secondary" size="icon" className="h-8 w-8"><Edit className="h-4 w-4" /></Button>
                       </Link>
