@@ -1,47 +1,42 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
-// Home.tsx (app/page.tsx ou similar)
 import HeroSection from "@/app/(site)/components/home/HeroSection";
 import FeatureShowcaseSection from "@/app/(site)/components/home/FeatureShowcaseSection";
-// import FeaturedCardsSection from "@/app/components/home/FeaturedCardsSection";
 import LatestSetsSection from "@/app/(site)/components/home/LatestSetsSection";
 import ManaColorNavigationSection from "@/app/(site)/components/home/ManaColorNavigationSection";
-import { fetchLatestSets, SetData } from "@/app/lib/scryfall"; // << IMPORTANTE: Adicionei SetData aqui
 import DailyDecksSection from "./components/home/DailyDecksSection";
+import LatestPostsSection from "./components/home/LatestPostsSection";
 
-// Dados mockados para exemplo - substitua por dados reais/API
-// Interface para FeaturedCardData, se você precisar (para mockFeaturedCards)
-// interface FeaturedCardData {
-//   id: string;
-//   name: string;
-//   imageUrl: string;
-//   set: string;
-// }
-
+import { createClient } from "@/app/utils/supabase/server";
+import { fetchLatestSets } from "@/app/lib/scryfall";
 
 export default async function Home() {
+  const supabase = createClient();
   console.log("Home: Iniciando renderização do Server Component.");
-  let latestSetsData: SetData[] = []; // A interface SetData é usada aqui
-  try {
-    latestSetsData = await fetchLatestSets(10); // Use a contagem menor para teste
-    console.log("Home: Dados de latestSetsData recebidos:", latestSetsData ? latestSetsData.length : 'undefined/null');
-  } catch (e: any) {
-    console.error("Home: Erro ao chamar fetchLatestSets:", e.message, e.stack); // Adicionado e.stack para mais detalhes
-    // latestSetsData permanecerá como []
+
+  // AJUSTE: A busca de posts agora chama a nossa nova função RPC
+  const [latestSetsData, { data: postsData, error: postsError }] = await Promise.all([
+    fetchLatestSets(10),
+    supabase.rpc('get_latest_published_posts', { post_limit: 3 })
+  ]);
+  
+  if (postsError) {
+    console.error("Home: Erro ao buscar posts para a homepage com RPC:", postsError);
   }
+  
+  console.log("Home: Dados de latestSetsData recebidos:", latestSetsData ? latestSetsData.length : 'undefined/null');
+
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col">
       <main className="flex-1 w-full">
         <HeroSection />
         <FeatureShowcaseSection />
-
         <DailyDecksSection />
-
-        <LatestSetsSection sets={latestSetsData} /> {/* Passe os dados como props */}
+        <LatestPostsSection posts={postsData || []} />
+        <LatestSetsSection sets={latestSetsData || []} />
         
         <div className="container mx-auto p-6">
-          {/* Seção combinada para Coleções e Cores */}
           <ManaColorNavigationSection />
         </div>
       </main>

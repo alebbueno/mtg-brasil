@@ -1,0 +1,122 @@
+/* eslint-disable no-console */
+/* eslint-disable no-undef */
+import { notFound } from 'next/navigation';
+import { createClient } from '@/app/utils/supabase/server';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import DOMPurify from 'isomorphic-dompurify';
+
+// AJUSTE 1: Importa nosso novo arquivo de estilos
+import styles from './PostStyles.module.scss'; 
+
+// Tipagem para os dados que esperamos da nossa função RPC
+type PostData = {
+  id: string; title: string; content: string; excerpt: string | null;
+  cover_image_url: string | null; published_at: string;
+  username: string | null; full_name: string | null; avatar_url: string | null;
+  categories: { slug: string; name: string }[] | null;
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const supabase = createClient();
+  const { data: post } = await supabase
+    .from('posts')
+    .select('title, excerpt, meta_title, meta_description, cover_image_url')
+    .eq('slug', params.slug)
+    .eq('status', 'published')
+    .single();
+
+  if (!post) {
+    return { title: 'Post Não Encontrado' };
+  }
+
+  return {
+    title: post.meta_title || post.title,
+    description: post.meta_description || post.excerpt,
+    openGraph: {
+      title: post.meta_title || post.title,
+      description: post.meta_description || post.excerpt || '',
+      images: post.cover_image_url ? [{ url: post.cover_image_url, width: 1200, height: 630 }] : [],
+    },
+  };
+}
+
+
+export default async function PostPage({ params }: { params: { slug: string } }) {
+  const supabase = createClient();
+
+  const { data: post, error } = await supabase
+    .rpc('get_published_post_details', { p_slug: params.slug })
+    .single<PostData>();
+
+  if (error || !post) {
+    notFound();
+  }
+
+  supabase.rpc('increment_post_view', { post_slug: params.slug }).then(({ error }) => {
+    if(error) console.error(`Falha ao incrementar view para ${params.slug}:`, error.message);
+  });
+  
+  const cleanContent = post.content ? DOMPurify.sanitize(post.content) : '';
+
+  return (
+    <>
+      {/* --- SEÇÃO DE HERÓI (AGORA COM TODOS OS METADADOS) --- */}
+      <header className="relative h-[60vh] min-h-[450px] w-full flex flex-col items-center justify-center text-center text-white p-4">
+        {/* Imagem de Fundo */}
+        {post.cover_image_url && (
+          <Image
+            src={post.cover_image_url}
+            alt={post.title}
+            fill
+            className="object-cover"
+            priority
+          />
+        )}
+        {/* Overlay Escuro para Legibilidade */}
+        <div className="absolute inset-0 bg-black/60"></div>
+        
+        {/* Conteúdo do Cabeçalho */}
+        <div className="relative z-10 max-w-4xl">
+           <div className="flex justify-center items-center flex-wrap gap-2 mb-4">
+            {post.categories?.map((cat) => (
+              <Link key={cat.slug} href={`/blog/category/${cat.slug}`}>
+                <Badge variant="outline" className="border-white/20 bg-black/20 text-white backdrop-blur-sm hover:bg-white/20">
+                  {cat.name}
+                </Badge>
+              </Link>
+            ))}
+          </div>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight drop-shadow-lg">
+            {post.title}
+          </h1>
+           <div className="mt-6 flex items-center justify-center gap-4 text-base text-neutral-200">
+              <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 border-2 border-white/50">
+                      <AvatarImage src={post.avatar_url || ''} />
+                      <AvatarFallback>{post.full_name?.charAt(0).toUpperCase() || post.username?.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium">por {post.full_name || post.username}</span>
+              </div>
+              <span className="text-neutral-500">•</span>
+              <span>{new Date(post.published_at).toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          </div>
+        </div>
+      </header>
+
+      {/* --- SEÇÃO DE CONTEÚDO (AGORA CENTRALIZADA E SEM SIDEBAR) --- */}
+      <main className="w-full bg-neutral-950 flex justify-center">
+        {/* AJUSTE 2: Aplicamos a classe do nosso CSS Module aqui */}
+        <article className={styles.articleContent}>
+          {/* A classe 'prose' continua necessária para alguns estilos base */}
+          <div
+            className="prose prose-invert prose-lg max-w-4xl py-16 px-4"
+            dangerouslySetInnerHTML={{ __html: cleanContent }}
+          />
+        </article>
+      </main>
+    </>
+  );
+}
