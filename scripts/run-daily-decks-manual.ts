@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
 import 'dotenv/config';
-import { getDailyDecks } from '@/app/(site)/lib/daily-deck';
+import { getDailyDecks } from '@/app/lib/daily-deck';
 import { format } from 'date-fns';
 
 async function runDailyDecksManual() {
@@ -14,7 +14,7 @@ async function runDailyDecksManual() {
     console.log('Decks gerados com sucesso:', JSON.stringify(decks, null, 2));
 
     // Buscar decks salvos no Supabase para confirmar
-    const { supabaseServiceClient } = await import('@/app/(site)/lib/supabase');
+    const { supabaseServiceClient } = await import('@/app/lib/supabase');
     const { data: savedDecks, error } = await supabaseServiceClient
       .from('daily_decks')
       .select('*')

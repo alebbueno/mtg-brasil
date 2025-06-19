@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
 import 'dotenv/config';
-import { supabaseServiceClient } from '@/app/(site)/lib/supabase';
+import { supabaseServiceClient } from '@/app/lib/supabase';
 
 async function testConnection() {
   try {
