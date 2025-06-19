@@ -7,8 +7,15 @@ import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import DOMPurify from 'isomorphic-dompurify';
+import styles from './PostStyles.module.scss';
+//import type { ScryfallCard } from '@/app/lib/scryfall';
 
-import styles from './PostStyles.module.scss'; 
+// O tipo das props para referência interna
+interface PageProps {
+  params: {
+    slug: string;
+  };
+}
 
 // Tipagem para os dados que esperamos da nossa função RPC
 type PostData = {
@@ -18,15 +25,8 @@ type PostData = {
   categories: { slug: string; name: string }[] | null;
 }
 
-// O tipo das props para referência interna
-interface PageProps {
-  params: {
-    slug: string;
-  };
-}
-
-// generateMetadata já está correto e não precisa de alteração
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata(props: any) {
+  const { params } = props as PageProps;
   const supabase = createClient();
   const { data: post } = await supabase
     .from('posts')
@@ -50,11 +50,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-// AJUSTE: Recebemos as props como 'any' e as convertemos para o tipo correto
+
+// AJUSTE: Recebemos as props como 'any' e as convertemos para o tipo correto para resolver o erro de build.
 export default async function PostPage(props: any) {
-  // Garante que estamos a usar os parâmetros da forma correta
   const { params } = props as PageProps;
-  
   const supabase = createClient();
 
   const { data: post, error } = await supabase
