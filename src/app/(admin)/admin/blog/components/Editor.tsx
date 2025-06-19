@@ -26,7 +26,7 @@ export default function Editor({ onEditorChange, initialValue }: EditorProps) {
 
   return (
     <TinyMCEEditor
-      apiKey='SUA_CHAVE_DE_API_AQUI' // Lembre-se de colocar sua chave de API
+      apiKey='gh28lo786los493f359etal65m9sadq1j1k05ddse50xmy19' // Lembre-se de colocar sua chave de API
       initialValue={initialValue}
       onEditorChange={(newValue, editor) => onEditorChange(newValue)}
       init={{
