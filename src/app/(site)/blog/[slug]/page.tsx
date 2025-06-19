@@ -8,9 +8,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import DOMPurify from 'isomorphic-dompurify';
 import styles from './PostStyles.module.scss';
-//import type { ScryfallCard } from '@/app/lib/scryfall';
 
-// O tipo das props para referência interna
+// O tipo das props para referência interna, evitando o erro de build do Next.js
 interface PageProps {
   params: {
     slug: string;
@@ -19,15 +18,26 @@ interface PageProps {
 
 // Tipagem para os dados que esperamos da nossa função RPC
 type PostData = {
-  id: string; title: string; content: string; excerpt: string | null;
-  cover_image_url: string | null; published_at: string;
-  username: string | null; full_name: string | null; avatar_url: string | null;
+  id: string; 
+  title: string; 
+  content: string; 
+  excerpt: string | null;
+  cover_image_url: string | null; 
+  published_at: string;
+  username: string | null; 
+  full_name: string | null; 
+  avatar_url: string | null;
   categories: { slug: string; name: string }[] | null;
 }
 
+/**
+ * Gera os metadados de SEO (título, descrição, etc.) para a página.
+ * Roda no servidor antes da página ser renderizada.
+ */
 export async function generateMetadata(props: any) {
   const { params } = props as PageProps;
   const supabase = createClient();
+  
   const { data: post } = await supabase
     .from('posts')
     .select('title, excerpt, meta_title, meta_description, cover_image_url')
@@ -50,12 +60,14 @@ export async function generateMetadata(props: any) {
   };
 }
 
-
-// AJUSTE: Recebemos as props como 'any' e as convertemos para o tipo correto para resolver o erro de build.
+/**
+ * O componente principal da página do artigo.
+ */
 export default async function PostPage(props: any) {
   const { params } = props as PageProps;
   const supabase = createClient();
 
+  // 1. Chama a função RPC para buscar todos os dados do post de forma otimizada
   const { data: post, error } = await supabase
     .rpc('get_published_post_details', { p_slug: params.slug })
     .single<PostData>();
@@ -64,14 +76,17 @@ export default async function PostPage(props: any) {
     notFound();
   }
 
+  // 2. Incrementa a contagem de visualizações sem bloquear a renderização da página
   supabase.rpc('increment_post_view', { post_slug: params.slug }).then(({ error }) => {
     if(error) console.error(`Falha ao incrementar view para ${params.slug}:`, error.message);
   });
   
+  // 3. Limpa o HTML do conteúdo para renderização segura
   const cleanContent = post.content ? DOMPurify.sanitize(post.content) : '';
 
   return (
     <>
+      {/* Seção de Herói com imagem de capa, título e metadados */}
       <header className="relative h-[60vh] min-h-[450px] w-full flex flex-col items-center justify-center text-center text-white p-4">
         {post.cover_image_url && (
           <Image
@@ -82,12 +97,13 @@ export default async function PostPage(props: any) {
             priority
           />
         )}
-        <div className="absolute inset-0 bg-black/60"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30"></div>
+        
         <div className="relative z-10 max-w-4xl">
            <div className="flex justify-center items-center flex-wrap gap-2 mb-4">
             {post.categories?.map((cat) => (
               <Link key={cat.slug} href={`/blog/category/${cat.slug}`}>
-                <Badge variant="outline" className="border-white/20 bg-black/20 text-white backdrop-blur-sm hover:bg-white/20">
+                <Badge variant="outline" className="border-white/20 bg-black/20 text-white backdrop-blur-sm hover:bg-white/20 transition-colors">
                   {cat.name}
                 </Badge>
               </Link>
@@ -110,6 +126,7 @@ export default async function PostPage(props: any) {
         </div>
       </header>
 
+      {/* Seção do Conteúdo do Artigo */}
       <main className="w-full bg-neutral-950 flex justify-center">
         <article className={styles.articleContent}>
           <div
