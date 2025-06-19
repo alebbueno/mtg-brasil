@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import DOMPurify from 'isomorphic-dompurify';
 
-// AJUSTE 1: Importa nosso novo arquivo de estilos
 import styles from './PostStyles.module.scss'; 
 
 // Tipagem para os dados que esperamos da nossa função RPC
@@ -19,6 +18,14 @@ type PostData = {
   categories: { slug: string; name: string }[] | null;
 }
 
+// O tipo das props para referência interna
+interface PageProps {
+  params: {
+    slug: string;
+  };
+}
+
+// generateMetadata já está correto e não precisa de alteração
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const supabase = createClient();
   const { data: post } = await supabase
@@ -43,8 +50,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-
-export default async function PostPage({ params }: { params: { slug: string } }) {
+// AJUSTE: Recebemos as props como 'any' e as convertemos para o tipo correto
+export default async function PostPage(props: any) {
+  // Garante que estamos a usar os parâmetros da forma correta
+  const { params } = props as PageProps;
+  
   const supabase = createClient();
 
   const { data: post, error } = await supabase
@@ -63,9 +73,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
 
   return (
     <>
-      {/* --- SEÇÃO DE HERÓI (AGORA COM TODOS OS METADADOS) --- */}
       <header className="relative h-[60vh] min-h-[450px] w-full flex flex-col items-center justify-center text-center text-white p-4">
-        {/* Imagem de Fundo */}
         {post.cover_image_url && (
           <Image
             src={post.cover_image_url}
@@ -75,10 +83,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
             priority
           />
         )}
-        {/* Overlay Escuro para Legibilidade */}
         <div className="absolute inset-0 bg-black/60"></div>
-        
-        {/* Conteúdo do Cabeçalho */}
         <div className="relative z-10 max-w-4xl">
            <div className="flex justify-center items-center flex-wrap gap-2 mb-4">
             {post.categories?.map((cat) => (
@@ -106,11 +111,8 @@ export default async function PostPage({ params }: { params: { slug: string } })
         </div>
       </header>
 
-      {/* --- SEÇÃO DE CONTEÚDO (AGORA CENTRALIZADA E SEM SIDEBAR) --- */}
       <main className="w-full bg-neutral-950 flex justify-center">
-        {/* AJUSTE 2: Aplicamos a classe do nosso CSS Module aqui */}
         <article className={styles.articleContent}>
-          {/* A classe 'prose' continua necessária para alguns estilos base */}
           <div
             className="prose prose-invert prose-lg max-w-4xl py-16 px-4"
             dangerouslySetInnerHTML={{ __html: cleanContent }}
