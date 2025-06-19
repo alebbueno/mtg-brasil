@@ -1,6 +1,6 @@
 // src/middleware.ts
 import { NextResponse, type NextRequest } from 'next/server'
-import { createClient } from '@/app/utils/supabase/middleware'
+import { createClient } from '@/app/(site)/utils/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
   // Cria um cliente Supabase específico para o middleware e obtém a resposta original.

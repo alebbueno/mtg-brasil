@@ -33,6 +33,9 @@ const nextConfig: NextConfig = {
       // Você pode adicionar outros domínios aqui se precisar
     ],
   },
+  serverActions: {
+    bodySizeLimit: '10mb', // Aumenta o limite para 10MB
+  },
 };
 
 export default nextConfig;

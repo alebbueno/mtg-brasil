@@ -1,6 +1,6 @@
 // app/lib/auth.ts
 
-import { createClient } from '@/app/utils/supabase/server';
+import { createClient } from '@/app/(site)/utils/supabase/server';
 import { cache } from 'react';
 
 /**

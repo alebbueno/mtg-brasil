@@ -2,7 +2,7 @@
 /* eslint-disable no-undef */
 import 'dotenv/config';
 import cron from 'node-cron';
-import { getDailyDecks } from '@/app/lib/daily-deck';
+import { getDailyDecks } from '@/app/(site)/lib/daily-deck';
 
 cron.schedule('0 0 * * *', async () => {
   console.log('Gerando decks diários...');
