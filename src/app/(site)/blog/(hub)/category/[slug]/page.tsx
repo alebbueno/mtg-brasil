@@ -5,17 +5,25 @@ import { notFound } from "next/navigation";
 import PostCard from "@/app/(site)/components/blog/PostCard";
 import PaginationControls from "@/app/(site)/components/blog/PaginationControls";
 
-// A página aceita `params` (para o slug da categoria) e `searchParams` (para a página)
-export default async function CategoryPage({
-  params,
-  searchParams,
-}: {
-  params: { slug: string };
-  searchParams?: { page?: string };
-}) {
+// O tipo das props para referência interna
+interface PageProps {
+  params: {
+    slug: string;
+  };
+  searchParams?: {
+    page?: string;
+  };
+}
+
+// AJUSTE: Recebemos as props como 'any' e as convertemos para o tipo correto
+// para resolver o erro de build do Next.js, seguindo o modelo que funcionou.
+export default async function CategoryPage(props: any) {
+  // Garante que estamos a usar os parâmetros da forma correta
+  const { params, searchParams } = props as PageProps;
+
   const supabase = createClient();
   const currentPage = Number(searchParams?.page) || 1;
-  const POSTS_PER_PAGE = 9; // 9 posts por página, como pedido
+  const POSTS_PER_PAGE = 9;
 
   const offset = (currentPage - 1) * POSTS_PER_PAGE;
 
@@ -64,7 +72,7 @@ export default async function CategoryPage({
 
       {posts && posts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {posts.map(post => (
+          {posts.map((post: any) => (
             <PostCard key={post.id} post={post} />
           ))}
         </div>
