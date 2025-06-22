@@ -14,6 +14,7 @@ export interface DeckCard {
 // Em: src/app/lib/scryfall.ts (Exemplo)
 
 export interface ScryfallCard {
+  cmc: any;
   id: string; // UUID do Scryfall
   name: string;
   mana_cost?: string;
@@ -40,6 +41,7 @@ export interface DeckFromDB {
   format: string;
   description: string | null;
   decklist: {
+    commander: any[];
     mainboard: { name: string; count: number }[];
     sideboard?: { name: string; count: number }[];
   };
