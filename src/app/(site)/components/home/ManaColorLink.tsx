@@ -1,33 +1,56 @@
-// app/components/home/ManaColorLink.tsx
 'use client';
 
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 interface ManaColorLinkProps {
   symbol: string;
   name: string;
-  gradient: string; // Classes de gradiente do Tailwind CSS
+  textColor: string;
+  href: string;
 }
 
-export default function ManaColorLink({ symbol, name, gradient }: ManaColorLinkProps) {
-  // Gera a classe correta do mana-font a partir do símbolo
-  // ex: 'W' -> 'ms-w', 'U' -> 'ms-u', etc.
-  const manaClass = `ms ms-${symbol.toLowerCase()} ms-5x`;
+export default function ManaColorLink({ symbol, name, textColor, href }: ManaColorLinkProps) {
+  const manaSymbolClass = `ms ms-cost ms-${symbol.toLowerCase()}`;
 
   return (
-    <Link href={`/search?colors=${symbol}`} className="block group">
-      <div 
-        className={`relative flex flex-col items-center justify-center p-6 aspect-square rounded-xl border border-neutral-800 overflow-hidden transition-all duration-300 hover:border-amber-400 hover:shadow-2xl hover:-translate-y-1`}
-      >
-        {/* Fundo com Gradiente */}
-        <div className={`absolute inset-0 ${gradient} opacity-20 group-hover:opacity-30 transition-opacity`} />
-        
-        {/* Ícone de Mana da biblioteca mana-font */}
-        <i className={`${manaClass} text-white/80 group-hover:text-white transition-colors drop-shadow-lg`} />
-        
-        {/* Nome da Cor */}
-        <span className="mt-2 text-base font-semibold text-neutral-200">{name}</span>
-      </div>
-    </Link>
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ duration: 0.2 }}
+      className="flex flex-col items-center gap-4"
+    >
+      <Link href={href} className="flex flex-col items-center group">
+        <i
+          className={cn(
+            manaSymbolClass,
+            "transition-transform duration-300 group-hover:scale-110",
+            textColor
+          )}
+          style={{
+            fontSize: '2rem',          // << AQUI O TAMANHO REALMENTE GRANDE DO ÍCONE
+            lineHeight: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '5rem',
+            height: '5rem',
+            borderRadius: '50%',
+          }}
+        />
+        <span
+          className={cn(
+            "mt-4 text-base md:text-lg font-semibold tracking-wide uppercase text-center",
+            "transition-colors duration-300",
+            symbol === 'M'
+              ? "bg-gradient-to-r from-amber-400 to-fuchsia-500 bg-clip-text text-transparent"
+              : "text-neutral-300 group-hover:text-white"
+          )}
+        >
+          {name}
+        </span>
+      </Link>
+    </motion.div>
   );
 }

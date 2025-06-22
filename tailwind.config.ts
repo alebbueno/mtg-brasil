@@ -2,7 +2,8 @@
 import type { Config } from 'tailwindcss';
 
 const config = {
-  // darkMode: ["class"],
+  // AJUSTE 1: A linha darkMode foi descomentada para ativar o tema escuro.
+  darkMode: "class",
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
@@ -59,6 +60,14 @@ const config = {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
+        "fade-in-down": {
+          '0%': { opacity: '0', transform: 'translateY(-20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        "fade-in-up": {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -69,95 +78,53 @@ const config = {
         },
       },
       animation: {
+        // AJUSTE 2: Adicionada a palavra-chave 'forwards' para manter o estado final da animação.
+        "fade-in-down": "fade-in-down 0.8s ease-out forwards",
+        "fade-in-up": "fade-in-up 0.8s ease-out forwards",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
-      // --- INÍCIO DA ADIÇÃO DA TIPOGRAFIA ---
       typography: (theme: any) => ({
         invert: {
           css: {
             '--tw-prose-body': theme('colors.neutral[300]'),
             '--tw-prose-headings': theme('colors.amber[400]'),
-            '--tw-prose-links': theme('colors.amber[400]'),
+            '--tw-prose-links': theme('colors.amber[500]'),
             '--tw-prose-bold': theme('colors.white'),
             '--tw-prose-bullets': theme('colors.amber[500]'),
             '--tw-prose-hr': theme('colors.neutral[800]'),
-            '--tw-prose-quotes': theme('colors.neutral[300]'),
+            '--tw-prose-quotes': theme('colors.amber[400]'),
             '--tw-prose-quote-borders': theme('colors.amber[500]'),
             '--tw-prose-th-borders': theme('colors.neutral[600]'),
             '--tw-prose-td-borders': theme('colors.neutral[700]'),
-
-            // Estilos customizados para os elementos do artigo
+            
             p: { lineHeight: '1.8' },
-            'h2, h3, h4': {
-              color: theme('colors.amber.400'),
-              fontWeight: '700',
-              scrollMarginTop: theme('spacing.20'),
-            },
+            'h2, h3, h4': { color: theme('colors.amber.400'), fontWeight: '700' },
             a: {
-              color: theme('colors.amber.500'),
-              fontWeight: '600',
-              textDecoration: 'none',
-              transition: 'color 0.2s ease-in-out',
-              '&:hover': {
-                color: theme('colors.amber.300'),
-                textDecoration: 'underline',
-              },
+                color: theme('colors.amber.500'),
+                fontWeight: '600',
+                textDecoration: 'none',
+                '&:hover': { color: theme('colors.amber.300'), textDecoration: 'underline' },
             },
-            'ol > li::before': {
-              color: theme('colors.neutral.400'),
-              fontWeight: 'bold',
-            },
-            'ul > li::before': {
-              content: '""',
-              position: 'absolute',
-              backgroundColor: theme('colors.amber.500'),
-              borderRadius: '50%',
-              width: '0.375em',
-              height: '0.375em',
-              top: 'calc(0.875em - 0.1875em)',
-              left: '0.25em',
-            },
+            'ul > li::before': { display: 'none' },
+            'ol > li::before': { color: theme('colors.neutral.400') },
             img: {
               width: '100%',
               borderRadius: theme('borderRadius.xl'),
               marginTop: '2em',
               marginBottom: '2em',
-              border: `1px solid ${theme('colors.neutral.800')}`,
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             },
-            table: {
-              width: '100%',
-              fontSize: theme('fontSize.sm'),
-            },
-            thead: {
-              backgroundColor: theme('colors.neutral[800]'),
-              borderBottomColor: theme('colors.neutral[600]'),
-            },
-            'thead th': {
-              color: theme('colors.white'),
-              padding: '0.75rem',
-              textAlign: 'left',
-            },
-            'tbody tr': {
-              borderBottomColor: theme('colors.neutral[800]'),
-            },
-            'tbody tr:last-child': {
-              borderBottom: 'none',
-            },
-            'td, th': {
-              padding: '0.75rem',
-            },
+            table: { width: '100%' },
+            'thead': { backgroundColor: theme('colors.neutral.800') },
+            'thead th': { color: theme('colors.white') },
           },
         },
       }),
-      // --- FIM DA ADIÇÃO DA TIPOGRAFIA ---
     },
   },
   plugins: [
-    require('tailwindcss-animate'),
-    // ADIÇÃO: O plugin de tipografia é essencial para que a configuração acima funcione.
     require('@tailwindcss/typography'),
+    require('tailwindcss-animate')
   ],
 } satisfies Config;
 

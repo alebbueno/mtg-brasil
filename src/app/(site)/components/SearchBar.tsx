@@ -1,11 +1,13 @@
+/* eslint-disable no-console */
+/* eslint-disable no-undef */
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDebounce } from 'use-debounce';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Search } from 'lucide-react';
 
 export default function SearchBar() {
   const [query, setQuery] = useState('');
@@ -13,11 +15,9 @@ export default function SearchBar() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const commandRef = useRef<HTMLDivElement>(null);
 
-  // Buscar sugestões quando a query mudar
   useEffect(() => {
     if (debouncedQuery.length < 2) {
       setSuggestions([]);
@@ -25,19 +25,15 @@ export default function SearchBar() {
       setIsLoading(false);
       return;
     }
-
     async function fetchSuggestions() {
       setIsLoading(true);
       try {
         const response = await fetch(`/api/autocomplete?q=${encodeURIComponent(debouncedQuery)}`);
-        if (!response.ok) {
-          throw new Error('Erro ao buscar sugestões');
-        }
+        if (!response.ok) throw new Error('Erro ao buscar sugestões');
         const { suggestions } = await response.json();
         setSuggestions(suggestions || []);
         setIsOpen(true);
       } catch (error) {
-        // eslint-disable-next-line no-undef, no-console
         console.error('Erro no autocomplete:', error);
         setSuggestions([]);
         setIsOpen(false);
@@ -45,96 +41,85 @@ export default function SearchBar() {
         setIsLoading(false);
       }
     }
-
     fetchSuggestions();
   }, [debouncedQuery]);
 
-  // Lidar com a submissão do formulário
-  // eslint-disable-next-line no-undef
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (query.trim()) {
-      setIsSubmitting(true);
       setIsOpen(false);
-      await router.push(`/card/${encodeURIComponent(query)}`);
-      setQuery('');
-      setIsSubmitting(false);
+      router.push(`/search?q=${encodeURIComponent(query)}`);
     }
   };
 
-  // Lidar com a seleção de uma sugestão
-  const handleSelect = async (suggestion: string) => {
+  const handleSelect = (suggestion: string) => {
     setQuery(suggestion);
     setIsOpen(false);
-    setIsSubmitting(true);
-    await router.push(`/card/${encodeURIComponent(suggestion)}`);
-    setQuery('');
-    setIsSubmitting(false);
-    inputRef.current?.blur();
-  };
-
-  // Lidar com navegação por teclado
-  // eslint-disable-next-line no-undef
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      setIsOpen(false);
+    router.push(`/card/${encodeURIComponent(suggestion)}`);
+    if (commandRef.current) {
+      (commandRef.current.querySelector('input') as HTMLInputElement)?.blur();
     }
   };
 
   return (
-    <form onSubmit={handleSearch} className="relative flex gap-2 w-full max-w-md">
-      <div className="relative w-full">
-        <Command className="bg-neutral-800 border py-2 border-neutral-700 rounded-lg overflow-visible">
-          <CommandInput
-            ref={inputRef}
-            placeholder="Nome da carta"
-            value={query}
-            onValueChange={setQuery}
-            onKeyDown={handleKeyDown}
-            className="bg-neutral-800 border-none p-3 text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-          />
-          {isOpen && (
-            <CommandList className="absolute top-full left-0 right-0 mt-1 bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg max-h-60 overflow-y-auto z-10">
-              {isLoading ? (
-                <div className="p-2 space-y-2">
-                  <Skeleton className="h-8 bg-neutral-700" />
-                  <Skeleton className="h-8 bg-neutral-700" />
-                  <Skeleton className="h-8 bg-neutral-700" />
-                </div>
-              ) : suggestions.length === 0 && debouncedQuery.length >= 2 ? (
-                <CommandEmpty>Nenhuma carta encontrada</CommandEmpty>
-              ) : (
-                <CommandGroup>
-                  {suggestions.map((suggestion) => (
-                    <CommandItem
-                      key={suggestion}
-                      value={suggestion}
-                      onSelect={() => handleSelect(suggestion)}
-                      className="px-3 py-2 text-white border-0 hover:bg-amber-500 hover:text-black cursor-pointer"
-                    >
-                      {suggestion}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              )}
-            </CommandList>
-          )}
-        </Command>
-      </div>
-      <Button
-        type="submit"
-         size="lg"
-        disabled={isSubmitting}
-        className="bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+    <form onSubmit={handleSearch} className="w-full">
+      <Command 
+        ref={commandRef}
+        className="relative bg-black/30 border border-neutral-700 rounded-[100px] shadow-lg overflow-visible
+                   backdrop-blur-sm transition-all duration-300
+                   focus-within:border-amber-500/80 focus-within:shadow-[0_0_30px_0px_rgba(245,158,11,0.3)]"
       >
-        {isSubmitting ? (
-          <span className="animate-spin">⏳</span>
-        ) : (
-          <>
-            <span>🔍</span> Buscar
-          </>
+        {/* AJUSTE: O CommandInput agora está dentro de uma div com flex-1 para garantir que ele se expanda */}
+        <div className="flex items-center px-5 py-[20px]">
+          <Search className="h-5 w-5 text-neutral-400 shrink-0" />
+          <div className="flex-1">
+            <CommandInput
+              placeholder="Digite o nome de uma carta de Magic..."
+              value={query}
+              onValueChange={setQuery}
+              onBlur={() => setTimeout(() => setIsOpen(false), 150)}
+              onFocus={() => query.length > 1 && setIsOpen(true)}
+              className="w-full h-16 pl-3 bg-transparent border-0 text-lg text-white
+                         selection:bg-amber-500/50 placeholder:text-neutral-500
+                         focus:ring-0"
+            />
+          </div>
+        </div>
+        
+        {isOpen && (
+          <CommandList 
+            className="absolute top-full left-0 right-0 mt-2 bg-neutral-900/90 border border-neutral-700 
+                       rounded-xl shadow-2xl backdrop-blur-md max-h-60 overflow-y-auto z-20
+                       animate-in fade-in-0 zoom-in-95"
+          >
+            {isLoading ? (
+              <div className="p-2 space-y-2">
+                <Skeleton className="h-9 w-full bg-neutral-700/80" />
+                <Skeleton className="h-9 w-full bg-neutral-700/80" />
+                <Skeleton className="h-9 w-full bg-neutral-700/80" />
+              </div>
+            ) : (
+              <CommandGroup>
+                {suggestions.map((suggestion) => (
+                  <CommandItem
+                    key={suggestion}
+                    value={suggestion}
+                    onSelect={() => handleSelect(suggestion)}
+                    className="px-4 py-2.5 text-base text-white border-0 
+                               aria-selected:bg-amber-500 aria-selected:text-black 
+                               cursor-pointer"
+                  >
+                    {suggestion}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+            {suggestions.length === 0 && debouncedQuery.length > 1 && !isLoading && (
+                <CommandEmpty>Nenhuma carta encontrada para &quot;{debouncedQuery}&quot;</CommandEmpty>
+            )}
+          </CommandList>
         )}
-      </Button>
+      </Command>
     </form>
   );
 }

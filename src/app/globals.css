@@ -153,3 +153,35 @@
 
 }
 
+/* --- Animações customizadas --- */
+@layer utilities {
+  /* Animações de entrada que já tínhamos */
+  @keyframes fade-in-down {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in-up {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* --- ADIÇÃO: Keyframes para a nova animação de brilho --- */
+  @keyframes gradient-shine {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Classes de utilitário que usaremos no nosso HTML */
+  .animate-fade-in-down {
+    animation: fade-in-down 0.6s ease-out forwards;
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out forwards;
+  }
+  
+  /* --- ADIÇÃO: Nova classe para aplicar a animação de brilho --- */
+  .animate-gradient-shine {
+    animation: gradient-shine 5s linear infinite;
+  }
+}
