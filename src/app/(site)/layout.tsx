@@ -6,6 +6,7 @@ import Footer from '@/app/(site)/components/Footer';
 // CORREÇÃO: Caminho do import ajustado
 import { createClient } from '@/app/utils/supabase/server';
 import type { User } from '@supabase/supabase-js';
+import FloatingFeedback from './components/FloatingFeedback';
 
 type Profile = {
   full_name: string | null;
@@ -54,6 +55,7 @@ export default async function SiteLayout({
         {children}
       </main>
       <Footer />
+      <FloatingFeedback />
     </div>
   );
 }
