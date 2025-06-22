@@ -155,7 +155,7 @@ export default function MyDecksPage() {
               Meus Decks
             </h1>
             <p className="text-lg text-neutral-300">
-              Crie, gira e analise as suas estratégias.
+              Crie, compartilha e analise seus decks com a DeckSage IA
             </p>
           </div>
           <Link href="/my-deck/create" passHref>
@@ -167,7 +167,7 @@ export default function MyDecksPage() {
         </header>
 
         <h2 className="text-3xl font-bold text-primary mb-6 border-b border-neutral-700 pb-2 flex items-center gap-2">
-          <Swords /> Decks Criados por Si
+          <Swords /> Seus Decks
         </h2>
         {/* AJUSTE: Removida a condição de myDecks.length > 0 para sempre mostrar o grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -192,7 +192,7 @@ export default function MyDecksPage() {
         {/* Secção Decks Guardados (sem alterações) */}
         <div className="mt-16">
           <h2 className="text-3xl font-bold text-primary mb-6 border-b border-neutral-700 pb-2 flex items-center gap-2">
-            <Bookmark /> Decks Guardados 
+            <Bookmark /> Decks da Comunidade
           </h2>
           {savedDecks.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
