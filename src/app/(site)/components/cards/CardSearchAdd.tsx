@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { searchCards } from "@/app/lib/scryfall";
-import type { ScryfallCard } from "@/app/lib/scryfall"; // Corrigido aqui
+import type { ScryfallCard } from '@/app/lib/types';  // Corrigido aqui
 
 interface CardSearchAddProps {
   onAddCard: (card: ScryfallCard) => void;
