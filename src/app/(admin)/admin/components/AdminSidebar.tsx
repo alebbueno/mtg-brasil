@@ -13,6 +13,7 @@ import {
   PanelLeftClose, 
   PanelLeftOpen,
   LayoutDashboard,
+  Megaphone,
   Home
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -31,6 +32,7 @@ export default function AdminSidebar() {
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/users', label: 'Usuários', icon: Users },
     { href: '/admin/feedback', label: 'Feedbacks', icon: Users },
+    { href: '/admin/ads', label: 'Anúncios', icon: Megaphone },
     { href: '/admin/decks', label: 'Decks Públicos', icon: FileText },
     { href: '/admin/blog', label: 'Posts', icon: MessageSquare },
     { href: '/admin/meta', label: 'Decks Meta', icon: Trophy },
