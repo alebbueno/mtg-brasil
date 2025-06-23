@@ -26,6 +26,7 @@ export default function RootLayout({
         <head>
           {/* Injeta o Script do GTM */}
           <GTM gtmId={GTM_ID} />
+          <meta name="google-adsense-account" content="ca-pub-9935800504955016"></meta>
         </head>
         {/* ESTA LINHA É A MAIS IMPORTANTE! */}
         {/* Se ela estiver faltando, sua página ficará em branco. */}
