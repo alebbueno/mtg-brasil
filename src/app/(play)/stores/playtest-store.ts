@@ -6,6 +6,7 @@ import type { ScryfallCard } from '@/app/lib/types';
 import { toast } from 'sonner';
 
 export interface GameCard extends ScryfallCard {
+  zone: string;
   instanceId: string;
   tapped: boolean;
   commanderTax: number;
@@ -62,6 +63,7 @@ export const usePlaytestStore = create<PlaytestState>((set, get) => ({
         instanceId: id,
         tapped: false,
         commanderTax: 0,
+        zone: ''
       });
 
       let potentialCommanders = commanderList;
