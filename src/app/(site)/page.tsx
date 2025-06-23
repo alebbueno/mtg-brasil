@@ -48,9 +48,7 @@ export default async function Home() {
         <LatestPostsSection posts={postsData || []} />
 
         {/* --- ADIÇÃO 3: Seção do Anúncio Dinâmico --- */}
-        <section className="container mx-auto px-6 py-16 flex justify-center">
-          <DynamicAdSlot adConfig={adConfig} />
-        </section>
+        <DynamicAdSlot adConfig={adConfig} />
 
         <div className="bg-neutral-900">
           <div className="container mx-auto py-16 px-6">
