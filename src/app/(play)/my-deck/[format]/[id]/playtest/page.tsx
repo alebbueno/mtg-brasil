@@ -30,7 +30,7 @@ export default async function PlaytestPage(props: any) {
   
   const uniqueCardNames = [...new Set(allCardNames)] as string[];
   const scryfallCards = await fetchCardsByNames(uniqueCardNames);
-  const scryfallCardMapArray = scryfallCards.map(card => [card.name, card] as [string, ScryfallCard]);
+  const scryfallCardMapArray = scryfallCards.map(card => [card.name, card] as unknown as [string, ScryfallCard]);
 
   const fullDecklist = [
     ...deckData.decklist.mainboard,
