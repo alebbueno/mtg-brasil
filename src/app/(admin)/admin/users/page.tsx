@@ -7,32 +7,54 @@ import { notFound } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { MoreHorizontal } from 'lucide-react';
+import UserActions from './components/UserActions';
+import UserSearch from './components/UserSearch';
+// O caminho do import pode precisar de ajuste dependendo de onde você moveu o componente
+import PaginationControls from '@/app/(admin)/admin/components/PaginationControls'; 
 
-export default async function AdminUsersPage() {
-  // Segurança da página
+export default async function AdminUsersPage({ searchParams }: {
+  searchParams?: {
+    query?: string;
+    page?: string;
+  }
+}) {
   const isAdmin = await checkUserRole('admin');
-  if (!isAdmin) {
-    notFound();
-  }
+  if (!isAdmin) notFound();
 
-  // Busca os dados usando nossa nova função RPC
   const supabase = createClient();
-  const { data: users, error } = await supabase.rpc('get_all_users_with_details');
+  const query = searchParams?.query || '';
+  const currentPage = Number(searchParams?.page) || 1;
+  const USERS_PER_PAGE = 10;
+  const offset = (currentPage - 1) * USERS_PER_PAGE;
 
-  if (error) {
-    console.error("Erro ao buscar usuários:", error);
-  }
+  const { data: users, error } = await supabase.rpc('search_users_paginated', {
+    search_term: query,
+    page_size: USERS_PER_PAGE,
+    page_offset: offset
+  });
+
+  if (error) console.error("Erro ao buscar usuários:", error);
+
+  const totalUsers = users?.[0]?.total_count || 0;
+  const totalPages = Math.ceil(totalUsers / USERS_PER_PAGE);
 
   return (
     <>
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-amber-500">Gerenciar Usuários</h1>
-        <p className="text-neutral-400 mt-1">
-          Visualize e gerencie todos os usuários cadastrados na plataforma.
-        </p>
+      <header className="mb-8 flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-amber-500">Gerenciar Usuários</h1>
+            <Badge variant="secondary" className="text-base">{totalUsers ?? 0} total</Badge>
+          </div>
+          <p className="text-neutral-400 mt-1">
+            Visualize, filtre e gerencie todos os usuários cadastrados.
+          </p>
+        </div>
       </header>
+
+      <div className="mb-6 max-w-sm">
+        <UserSearch placeholder="Buscar por nome ou email..." />
+      </div>
 
       <div className="bg-neutral-900 border border-neutral-800 rounded-lg">
         <Table>
@@ -40,14 +62,15 @@ export default async function AdminUsersPage() {
             <TableRow className="border-neutral-700 hover:bg-neutral-900">
               <TableHead className="text-white w-[350px]">Usuário</TableHead>
               <TableHead className="text-white">Email</TableHead>
-              <TableHead className="text-white">Cargo (Role)</TableHead>
+              <TableHead className="text-white">Cargo</TableHead>
+              <TableHead className="text-white">Status</TableHead>
               <TableHead className="text-white">Data de Cadastro</TableHead>
               <TableHead className="text-right text-white">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {users && users.length > 0 ? (
-              users.map((user) => (
+              users.map((user: any) => (
                 <TableRow key={user.id} className="border-neutral-800">
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -62,30 +85,26 @@ export default async function AdminUsersPage() {
                     </div>
                   </TableCell>
                   <TableCell className="text-neutral-300">{user.email}</TableCell>
-                  <TableCell>
-                    <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'}>
-                      {user.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-neutral-400">
-                    {new Date(user.created_at).toLocaleDateString('pt-BR')}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" disabled>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
+                  <TableCell><Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'}>{user.role}</Badge></TableCell>
+                  <TableCell><Badge variant={user.status === 'active' ? 'default' : 'outline'} className={user.status === 'active' ? 'border-green-500/50 bg-green-500/10 text-green-300' : 'border-red-500/50 bg-red-500/10 text-red-300'}>{user.status === 'active' ? 'Ativo' : 'Bloqueado'}</Badge></TableCell>
+                  <TableCell className="text-neutral-400">{new Date(user.created_at).toLocaleDateString('pt-BR')}</TableCell>
+                  <TableCell className="text-right"><UserActions user={user} /></TableCell>
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center text-neutral-500 py-10">
-                  Nenhum usuário encontrado.
-                </TableCell>
-              </TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center text-neutral-500 py-10">Nenhum usuário encontrado para esta busca.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>
+      </div>
+      
+      <div className="mt-6">
+        {/* AJUSTE: Passamos o basePath correto para a paginação */}
+        <PaginationControls 
+            totalPages={totalPages} 
+            currentPage={currentPage} 
+            basePath="/admin/users" 
+        />
       </div>
     </>
   );
