@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
 // app/lib/scryfall.ts
-import type { ScryfallCard } from './types'; 
+
 // --- INTERFACE PRINCIPAL PARA CARTAS ---
 // Esta interface define a estrutura de dados de uma carta da API Scryfall.
 // export interface ScryfallCard {
@@ -45,7 +45,7 @@ import type { ScryfallCard } from './types';
 //   };
 //   // Adicione outros campos que precisar aqui
 // }
-
+import type { ScryfallCard } from './types'; 
 
 // --- Funções para buscar dados no Scryfall ---
 

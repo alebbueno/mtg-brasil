@@ -20,7 +20,8 @@ import {
 } from "@/components/ui/select";
 import AutocompleteInput from '@/app/(site)/components/deck/AutocompleteInput';
 import { buildDeckWithAI, saveGeneratedDeck } from '@/app/actions/deckBuilderActions';
-import type { ScryfallCard } from '@/app/lib/scryfall';
+// import type { ScryfallCard } from '@/app/lib/scryfall';
+import type { ScryfallCard } from '@/app/lib/types'; 
 import { Loader2, Sparkles, X, Wand2, Save } from 'lucide-react';
 import Link from 'next/link';
 
