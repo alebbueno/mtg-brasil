@@ -49,16 +49,12 @@ export async function translateCardText(
   }
 
   const prompt = `
-    Traduza o seguinte texto de uma carta de Magic: The Gathering chamada "${cardName}" para o Português do Brasil. 
-    Mantenha os termos de jogo chave em seu formato original em inglês (ex: 'Deathtouch', 'Flying', 'Trample', 'Haste', 'First Strike', 'Scry', 'Surveil', 'Indestructible', 'Hexproof').
-    Mantenha a formatação, como quebras de linha e símbolos de mana (ex: {T}, {W}, {U}, {B}, {R}, {G}, {X}).
-    Apenas retorne o texto traduzido, sem nenhuma introdução ou explicação adicional.
+    Você é um tradutor especializado em cartas de Magic: The Gathering. Traduza o texto para o português brasileiro, mantendo termos técnicos do jogo (ex: "Channel", "Tap", "Discard", "Creature", "Instant") em inglês e preservando a formatação de símbolos de mana (ex: {1}{G}). Não modifique os símbolos de mana. Se a tradução for incerta, mantenha o termo original.
 
-    Texto Original:
-    ---
+    Texto:
     ${cardText}
-    ---
   `;
+  
 
   try {
     const completion = await openai.chat.completions.create({

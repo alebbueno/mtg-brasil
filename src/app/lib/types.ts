@@ -16,6 +16,7 @@ export interface DeckCard {
 
 // A definição completa e única para uma carta do Scryfall
 export interface ScryfallCard {
+  card_faces: boolean;
   id: string;
   name: string;
   oracle_id: string;

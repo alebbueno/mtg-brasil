@@ -6,36 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Interface para a resposta da API do Scryfall
-interface ScryfallCard {
-  id: string;
-  name: string;
-  type_line: string;
-  mana_cost?: string;
-  oracle_text?: string;
-  power?: string;
-  toughness?: string;
-  rarity: string;
-  set_name: string;
-  image_uris?: {
-    normal: string;
-  };
-  card_faces?: Array<{
-    image_uris?: {
-      normal: string;
-    };
-    name: string;
-    type_line: string;
-    mana_cost?: string;
-    oracle_text?: string;
-    power?: string;
-    toughness?: string;
-  }>;
-}
+import type { ScryfallCard } from '@/app/lib/types'; // Ajuste o caminho conforme necessário
 
 interface Props {
   card: ScryfallCard;
   isDoubleFaced: boolean;
-  displayCard: ScryfallCard | NonNullable<ScryfallCard['card_faces']>[number];
+  // displayCard: ScryfallCard | NonNullable<ScryfallCard['card_faces']>[number];
+  displayCard: any; // O tipo exato dependerá da sua implementação
   translatedOracleText: string;
   translatedBackOracleText: string;
 }

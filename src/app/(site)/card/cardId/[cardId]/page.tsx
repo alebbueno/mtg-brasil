@@ -1,139 +1,131 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
 import Link from "next/link";
-import { fetchCardById } from "@/app/lib/scryfall";
-import CardDisplay from "@/app/(site)/components/CardDisplay";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { notFound } from "next/navigation";
+import type { ScryfallCard } from "@/app/lib/types";
+import { fetchCardById } from "@/app/lib/scryfall"; // AJUSTE: Usa a busca por ID
+import { translateCardText } from "@/app/actions/aiActions";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
-// Interface para a resposta da API do Scryfall
-interface ScryfallCard {
-  id: string;
-  name: string;
-  type_line: string;
-  mana_cost?: string;
-  oracle_text?: string;
-  power?: string;
-  toughness?: string;
-  rarity: string;
-  set_name: string;
-  image_uris?: {
-    normal: string;
-  };
-  card_faces?: Array<{
-    image_uris?: {
-      normal: string;
-    };
-    name: string;
-    type_line: string;
-    mana_cost?: string;
-    oracle_text?: string;
-    power?: string;
-    toughness?: string;
-  }>;
+// AJUSTE: Imports dos novos componentes de layout
+import CardDetailPageLayout from "../../components/CardDetailPageLayout";
+import CardImageDisplay from "../../components/CardImageDisplay";
+import CardDetailsDisplay from "../../components/CardDetailsDisplay";
+import CardHeaderInfo from "../../components/CardHeaderInfo";
+import CardTypeLine from "../../components/CardTypeLine";
+import CardOracleText from "../../components/CardOracleText";
+import CardFlavorText from "../../components/CardFlavorText";
+import CardPowerToughness from "../../components/CardPowerToughness";
+import CardRaritySetInfo from "../../components/CardRaritySetInfo";
+import CardTextDisplay from "../../components/CardTextDisplay";
+
+interface PageProps {
+  params: { cardId: string };
 }
 
-interface Props {
-  params: Promise<{ cardId: string }>;
-}
-
-// Função para traduzir o texto
-async function translateText(text: string): Promise<string> {
+export async function generateMetadata({ params }: any) {
+  const { cardId } = (params || {}) as { cardId: string };
+  if (!cardId) return { title: "Carta" };
+  
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/translate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ text }),
-    });
-
-    if (!response.ok) {
-      console.log('Erro na API de tradução:', response.status, response.statusText);
-      return text; // Fallback para o texto original
-    }
-
-    const { translation } = await response.json();
-    return translation || text; // Retorna o texto original se a tradução for vazia
+    const card = await fetchCardById(cardId);
+    return {
+      title: `${card.name} | MTG Deck Builder`,
+      description: card.oracle_text || `Detalhes da carta de Magic: ${card.name}.`,
+    };
   } catch (error) {
-    console.log(`Erro ao chamar a API de tradução: ${error}`);
-    return text; // Fallback para o texto original
+    return { title: "Carta não encontrada" };
   }
 }
 
-export default async function CardPage({ params }: Props) {
-  const { cardId } = await params;
-  const decodedCardId = decodeURIComponent(cardId);
+export default async function CardByIdPage(props: any) {
+  const { params } = props as PageProps;
 
   let card: ScryfallCard;
   try {
-    card = await fetchCardById(decodedCardId);
+    // AJUSTE: A busca inicial agora é por ID com fetchCardById
+    card = await fetchCardById(params.cardId);
   } catch (error) {
-    console.error("Erro ao buscar carta:", error);
+    console.error("Erro ao buscar carta por ID:", error);
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-6">
-        <Card className="w-full max-w-md bg-gray-800 border-gray-700">
+      <div className="min-h-screen flex items-center justify-center bg-neutral-950 text-white p-6">
+        <Card className="w-full max-w-md bg-neutral-900 border-neutral-800 text-center">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-red-500">
-              Carta não encontrada
-            </CardTitle>
+            <CardTitle className="text-2xl font-bold text-red-500">Carta não encontrada</CardTitle>
           </CardHeader>
-          <CardContent className="text-center">
-            <p className="text-lg mb-4">
-              Nenhuma carta encontrada com o ID:{" "}
-              <span className="font-bold">&quot;{decodedCardId}&quot;</span>
-            </p>
-            <Link href="/">
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                Voltar para a busca
-              </Button>
-            </Link>
+          <CardContent>
+            <p className="text-lg mb-6">Nenhuma carta encontrada com o ID fornecido.</p>
+            <Link href="/"><Button>Voltar para a busca</Button></Link>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  // Determina se a carta tem faces
-  const isDoubleFaced = !!(card.card_faces && card.card_faces.length > 0);
-  const displayCard = isDoubleFaced ? card.card_faces![0] : card;
+  // A lógica de tradução e exibição agora é idêntica à da outra página
+  const isDoubleFaced = Array.isArray(card.card_faces) && card.card_faces.length > 0;
+  const displayCard = isDoubleFaced ? card.card_faces?.[0] : card;
+  const backCard = isDoubleFaced ? card.card_faces?.[1] : null;
 
-  // Traduz o oracle_text, se disponível
-  const translatedOracleText = displayCard.oracle_text
-    ? await translateText(displayCard.oracle_text)
-    : '';
-
-  const translatedBackOracleText = isDoubleFaced && card.card_faces![1]?.oracle_text
-    ? await translateText(card.card_faces![1].oracle_text)
-    : "";
-
-  return (
-    <CardDisplay
-      card={card}
-      isDoubleFaced={isDoubleFaced}
-      displayCard={displayCard}
-      translatedOracleText={translatedOracleText}
-      translatedBackOracleText={translatedBackOracleText}
-    />
-  );
-}
-
-export async function generateMetadata({ params }: Props) {
-  const { cardId } = await params;
-  const decodedCardId = decodeURIComponent(cardId);
-  try {
-    const card = await fetchCardById(decodedCardId);
-    return {
-      title: card.name,
-      description: card.oracle_text || "Carta de Magic: The Gathering",
-    };
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    return {
-      title: "Carta não encontrada",
-      description: "Nenhuma carta encontrada com o ID fornecido.",
-    };
+  let translatedOracleText = '';
+  if (displayCard?.oracle_text) {
+    const result = await translateCardText(card.id, displayCard.name, displayCard.oracle_text);
+    translatedOracleText = result.translatedText || displayCard.oracle_text;
   }
+
+  let translatedBackOracleText = '';
+  if (backCard?.oracle_text) {
+    const result = await translateCardText(card.id, backCard.name, backCard.oracle_text);
+    translatedBackOracleText = result.translatedText || backCard.oracle_text;
+  }
+
+  // AJUSTE: O JSX de retorno agora usa a nova estrutura de componentes
+  return (
+    <CardDetailPageLayout>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+        <div className="lg:col-span-2">
+          <CardImageDisplay
+            imageUrl={displayCard?.image_uris?.normal}
+            altText={displayCard?.name || ''}
+            backImageUrl={backCard?.image_uris?.normal}
+            backAltText={backCard?.name}
+          />
+        </div>
+        <div className="lg:col-span-3">
+          <CardDetailsDisplay>
+            <CardHeaderInfo name={displayCard?.name || ''} manaCost={displayCard?.mana_cost} />
+            <CardTypeLine typeLine={displayCard?.type_line} />
+            <Separator className="bg-neutral-700 my-4" />
+            {/* AJUSTE: Usamos o novo componente interativo aqui */}
+            <CardTextDisplay
+              originalText={displayCard?.oracle_text}
+              translatedText={translatedOracleText}
+            />
+
+            {/* <CardOracleText oracleText={translatedOracleText} /> */}
+            <CardFlavorText flavorText={displayCard?.flavor_text} />
+            <CardPowerToughness power={displayCard?.power} toughness={displayCard?.toughness} />
+            <CardRaritySetInfo rarity={displayCard?.rarity} setName={displayCard?.set_name} />
+
+            {isDoubleFaced && backCard && (
+              <>
+                <Separator className="bg-amber-500/50 my-8" />
+                <CardHeaderInfo name={backCard.name} manaCost={backCard.mana_cost} />
+                <CardTypeLine typeLine={backCard.type_line} />
+                <Separator className="bg-neutral-700 my-4" />
+                <CardOracleText oracleText={translatedBackOracleText} />
+                <CardFlavorText flavorText={backCard.flavor_text} />
+                <CardPowerToughness power={backCard.power} toughness={backCard.toughness} />
+                <CardRaritySetInfo rarity={backCard.rarity} setName={backCard.set_name} />
+              </>
+            )}
+          </CardDetailsDisplay>
+        </div>
+      </div>
+    </CardDetailPageLayout>
+  );
 }
