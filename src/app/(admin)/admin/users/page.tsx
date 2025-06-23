@@ -9,8 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import UserActions from './components/UserActions';
 import UserSearch from './components/UserSearch';
-// O caminho do import pode precisar de ajuste dependendo de onde você moveu o componente
-import PaginationControls from '@/app/(admin)/admin/components/PaginationControls'; 
+import PaginationControls from '../components/PaginationControls'; 
+// ADIÇÃO: Importa nosso componente reutilizável de pontos
+import UserPointsDisplay from '@/app/(site)/components/ui/UserPointsDisplay';
+
 
 export default async function AdminUsersPage({ searchParams }: {
   searchParams?: {
@@ -27,6 +29,7 @@ export default async function AdminUsersPage({ searchParams }: {
   const USERS_PER_PAGE = 10;
   const offset = (currentPage - 1) * USERS_PER_PAGE;
 
+  // A função RPC já foi atualizada para buscar os pontos
   const { data: users, error } = await supabase.rpc('search_users_paginated', {
     search_term: query,
     page_size: USERS_PER_PAGE,
@@ -44,10 +47,11 @@ export default async function AdminUsersPage({ searchParams }: {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-amber-500">Gerenciar Usuários</h1>
-            <Badge variant="secondary" className="text-base">{totalUsers ?? 0} total</Badge>
+            {/* A contagem total de usuários agora é o `totalUsers` da busca paginada */}
+            <Badge variant="secondary" className="text-base">{totalUsers ?? 0} encontrados</Badge>
           </div>
           <p className="text-neutral-400 mt-1">
-            Visualize, filtre e gerencie todos os usuários cadastrados.
+            Visualize, filtre e gerencie todos os usuários cadastrados na plataforma.
           </p>
         </div>
       </header>
@@ -62,6 +66,8 @@ export default async function AdminUsersPage({ searchParams }: {
             <TableRow className="border-neutral-700 hover:bg-neutral-900">
               <TableHead className="text-white w-[350px]">Usuário</TableHead>
               <TableHead className="text-white">Email</TableHead>
+              {/* ADIÇÃO: Nova coluna para os pontos */}
+              <TableHead className="text-white">Pontos</TableHead>
               <TableHead className="text-white">Cargo</TableHead>
               <TableHead className="text-white">Status</TableHead>
               <TableHead className="text-white">Data de Cadastro</TableHead>
@@ -85,6 +91,10 @@ export default async function AdminUsersPage({ searchParams }: {
                     </div>
                   </TableCell>
                   <TableCell className="text-neutral-300">{user.email}</TableCell>
+                  {/* ADIÇÃO: Célula que exibe os pontos */}
+                  <TableCell>
+                    <UserPointsDisplay points={user.points} size="sm" />
+                  </TableCell>
                   <TableCell><Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'}>{user.role}</Badge></TableCell>
                   <TableCell><Badge variant={user.status === 'active' ? 'default' : 'outline'} className={user.status === 'active' ? 'border-green-500/50 bg-green-500/10 text-green-300' : 'border-red-500/50 bg-red-500/10 text-red-300'}>{user.status === 'active' ? 'Ativo' : 'Bloqueado'}</Badge></TableCell>
                   <TableCell className="text-neutral-400">{new Date(user.created_at).toLocaleDateString('pt-BR')}</TableCell>
@@ -92,14 +102,14 @@ export default async function AdminUsersPage({ searchParams }: {
                 </TableRow>
               ))
             ) : (
-              <TableRow><TableCell colSpan={6} className="text-center text-neutral-500 py-10">Nenhum usuário encontrado para esta busca.</TableCell></TableRow>
+              // AJUSTE: O colSpan agora é 7 para incluir a nova coluna
+              <TableRow><TableCell colSpan={7} className="text-center text-neutral-500 py-10">Nenhum usuário encontrado para esta busca.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>
       </div>
       
       <div className="mt-6">
-        {/* AJUSTE: Passamos o basePath correto para a paginação */}
         <PaginationControls 
             totalPages={totalPages} 
             currentPage={currentPage} 

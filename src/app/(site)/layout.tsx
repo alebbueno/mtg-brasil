@@ -12,6 +12,8 @@ type Profile = {
   full_name: string | null;
   avatar_url: string | null;
   role: string | null;
+  referral_code: string | null; // <-- Adicionado
+  points: number | null; // <-- Adicionado
 }
 
 // O tipo para as props do Header deve ser ajustado para receber userRole
@@ -20,6 +22,7 @@ interface HeaderProps {
   profile: Profile;
   fallbackInitial: string;
   userRole: string;
+  
 }
 
 
@@ -35,7 +38,7 @@ export default async function SiteLayout({
   if (user) {
     const { data: profileData } = await supabase
       .from('profiles')
-      .select('full_name, avatar_url, role')
+      .select('full_name, avatar_url, role, referral_code, points')
       .eq('id', user.id)
       .single();
     profile = profileData;
@@ -47,7 +50,7 @@ export default async function SiteLayout({
     <div className="flex flex-col min-h-screen">
       <Header 
         user={user ? { email: user.email || '', user_metadata: user.user_metadata } : null}
-        profile={profile || { full_name: '', avatar_url: '', role: 'user' }}
+        profile={profile ? { full_name: profile.full_name, avatar_url: profile.avatar_url } : { full_name: '', avatar_url: '' }}
         fallbackInitial={fallbackInitial}
         userRole={profile?.role || 'user'}
       />

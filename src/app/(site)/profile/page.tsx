@@ -13,12 +13,17 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import ReferralLink from '@/app/(site)/components/ui/ReferralLink'; // Importa nosso novo componente
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Image as ImageIcon, Loader2, Upload } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import UserPointsDisplay from '@/app/(site)/components/ui/UserPointsDisplay'; // Importa nosso novo componente
+
 
 // Tipagem para os dados do perfil, garantindo que os campos podem ser nulos
 type Profile = {
+  referral_code: null
   id: string
   username: string | null
   full_name: string | null
@@ -30,6 +35,7 @@ type Profile = {
   favorite_colors: string[] | null
   favorite_formats: string[] | null
   social_links: { twitter?: string; instagram?: string; } | null
+  points: number | null; // <-- Adicionado
 }
 
 export default function ProfilePage() {
@@ -259,6 +265,26 @@ export default function ProfilePage() {
           <h1 className="text-3xl font-bold">{profile?.full_name || 'Nome do Utilizador'}</h1>
           <p className="text-amber-500">@{profile?.username || 'username'}</p>
         </div>
+
+        {/* --- CARD DE GAMIFICAÇÃO ATUALIZADO --- */}
+        <Card className="bg-neutral-900 border-neutral-800">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold text-amber-500">Gamificação e Recompensas</CardTitle>
+            <CardDescription>
+              Seus pontos e seu link para convidar amigos.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+                <Label className="text-sm text-neutral-400">Seus Pontos</Label>
+                <UserPointsDisplay points={profile?.points} />
+            </div>
+            <div>
+                <Label className="text-sm text-neutral-400">Seu Link de Convite</Label>
+                <ReferralLink referralCode={profile?.referral_code || null} />
+            </div>
+          </CardContent>
+        </Card>
         
         <div className="p-8 bg-neutral-900 rounded-lg border border-neutral-800 space-y-6">
           <h2 className="text-xl font-semibold text-amber-500 border-b border-neutral-700 pb-2">Informações do Perfil</h2>
@@ -320,6 +346,8 @@ export default function ProfilePage() {
             </Button>
           </div>
         </div>
+
+        
       </div>
     </div>
   )
