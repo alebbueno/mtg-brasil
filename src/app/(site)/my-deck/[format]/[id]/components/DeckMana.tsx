@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import type { ScryfallCard } from '@/app/lib/scryfall';
+import type { ScryfallCard } from '@/app/lib/types'; 
 import type { DeckCard, DeckFromDB } from '@/app/lib/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { BarChart } from 'lucide-react';

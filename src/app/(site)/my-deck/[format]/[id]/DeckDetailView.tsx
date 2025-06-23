@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
-import type { ScryfallCard } from '@/app/lib/scryfall';
+import type { ScryfallCard } from '@/app/lib/types'; 
 import type { DeckDetailViewProps, DeckCard } from '@/app/lib/types';
 
 // Importando os componentes filhos

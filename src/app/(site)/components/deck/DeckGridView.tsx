@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Crown, Star } from 'lucide-react';
 import { useMemo } from 'react';
-import type { ScryfallCard } from '@/app/lib/scryfall';
+import type { ScryfallCard } from '@/app/lib/types'; 
 
 // --- AJUSTE CRÍTICO: Esta é a definição correta e final ---
 // GridCardData herda todas as propriedades de ScryfallCard e adiciona 'count'.
