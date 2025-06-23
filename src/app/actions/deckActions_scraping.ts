@@ -8,7 +8,7 @@
 import { createClient } from '@/app/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import type { ScryfallCard } from '@/app/lib/scryfall'
+import type { ScryfallCard } from '@/app/lib/types'; 
 import { fetchCardByName, fetchCardsByNames } from '@/app/lib/scryfall'
 import { getLigamagicPrice } from '@/app/lib/scraping'
 
