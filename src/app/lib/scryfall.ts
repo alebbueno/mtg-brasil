@@ -1,50 +1,50 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-console */
 // app/lib/scryfall.ts
-
+import type { ScryfallCard } from './types'; 
 // --- INTERFACE PRINCIPAL PARA CARTAS ---
 // Esta interface define a estrutura de dados de uma carta da API Scryfall.
-export interface ScryfallCard {
-  collector_number: any;
-  set: any;
-  id: string;
-  name: string;
-  printed_name?: string; // Nome impresso na carta (pode ser em português)
-  lang: string;
-  mana_cost?: string;
-  cmc: number;
-  type_line: string;
-  oracle_text?: string;
-  colors?: string[];
-  color_identity: string[];
-  rarity: string;
-  set_name: string;
-  legalities: {
-    standard: string;
-    modern: string;
-    pauper: string;
-    commander: string;
-    legacy: string;
-    vintage: string;
-    pioneer: string;
-    [key: string]: string;
-  };
-  prices: { // Campo adicionado para corrigir o erro de build
-    usd: string | null;
-    usd_foil: string | null;
-    eur: string | null;
-    eur_foil: string | null;
-    tix: string | null;
-  };
-  image_uris?: {
-    small: string;
-    normal: string;
-    large: string;
-    art_crop: string;
-    border_crop: string;
-  };
-  // Adicione outros campos que precisar aqui
-}
+// export interface ScryfallCard {
+//   collector_number: any;
+//   set: any;
+//   id: string;
+//   name: string;
+//   printed_name?: string; // Nome impresso na carta (pode ser em português)
+//   lang: string;
+//   mana_cost?: string;
+//   cmc: number;
+//   type_line: string;
+//   oracle_text?: string;
+//   colors?: string[];
+//   color_identity: string[];
+//   rarity: string;
+//   set_name: string;
+//   legalities: {
+//     standard: string;
+//     modern: string;
+//     pauper: string;
+//     commander: string;
+//     legacy: string;
+//     vintage: string;
+//     pioneer: string;
+//     [key: string]: string;
+//   };
+//   prices: { // Campo adicionado para corrigir o erro de build
+//     usd: string | null;
+//     usd_foil: string | null;
+//     eur: string | null;
+//     eur_foil: string | null;
+//     tix: string | null;
+//   };
+//   image_uris?: {
+//     small: string;
+//     normal: string;
+//     large: string;
+//     art_crop: string;
+//     border_crop: string;
+//   };
+//   // Adicione outros campos que precisar aqui
+// }
 
 
 // --- Funções para buscar dados no Scryfall ---

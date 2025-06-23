@@ -13,24 +13,79 @@ export interface DeckCard {
 
 // Em: src/app/lib/scryfall.ts (Exemplo)
 
+
+// A definição completa e única para uma carta do Scryfall
 export interface ScryfallCard {
-  toughness: any;
-  power: any;
-  flavor_text: any;
-  oracle_text: string;
-  cmc: any;
-  id: string; // UUID do Scryfall
+  id: string;
   name: string;
-  mana_cost?: string;
-  type_line?: string;
+  oracle_id: string;
+  lang: string;
+  released_at: string;
+  uri: string;
+  scryfall_uri: string;
+  layout: string;
+  highres_image: boolean;
+  image_status: string;
   image_uris?: {
     small: string;
     normal: string;
     large: string;
+    png: string;
     art_crop: string;
     border_crop: string;
   };
-  // ...muitos outros campos que a API do Scryfall retorna
+  mana_cost?: string;
+  cmc: number;
+  type_line: string;
+  oracle_text?: string;
+  power?: string;
+  toughness?: string;
+  colors?: string[];
+  color_identity: string[];
+  keywords: string[];
+  legalities: Record<string, string>;
+  games: string[];
+  reserved: boolean;
+  foil: boolean;
+  nonfoil: boolean;
+  finishes: string[];
+  oversized: boolean;
+  promo: boolean;
+  reprint: boolean;
+  variation: boolean;
+  set_id: string;
+  set: string;
+  set_name: string;
+  set_type: string;
+  set_uri: string;
+  set_search_uri: string;
+  scryfall_set_uri: string;
+  rulings_uri: string;
+  prints_search_uri: string;
+  collector_number: string;
+  digital: boolean;
+  rarity: string;
+  flavor_text?: string;
+  card_back_id: string;
+  artist: string;
+  artist_ids: string[];
+  illustration_id: string;
+  border_color: string;
+  frame: string;
+  full_art: boolean;
+  textless: boolean;
+  booster: boolean;
+  story_spotlight: boolean;
+  edhrec_rank?: number;
+  prices: {
+    usd: string | null;
+    usd_foil: string | null;
+    usd_etched: string | null;
+    eur: string | null;
+    eur_foil: string | null;
+    tix: string | null;
+  };
+  // E qualquer outro campo que você precise
 }
 
 export interface Decklist {
