@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 'use client'
 
 import { useEffect, useState, useMemo } from 'react';
@@ -9,19 +10,47 @@ import InteractiveCard from './components/InteractiveCard';
 import { DndContext, DragEndEvent, DragOverlay, useDroppable, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import ZoneViewerModal from './components/ZoneViewerModal';
 
-const BattlefieldSubZone = ({ zoneName, cards }: { zoneName: string, cards: GameCard[] }) => {
+// Importa todos os componentes de UI que a página controla
+import ZoneViewerModal from './components/ZoneViewerModal';
+import PreviewPanel from './components/PreviewPanel';
+import CardDetailModal from './components/CardDetailModal';
+
+// Sub-componente interno para renderizar as fileiras do campo de batalha
+const BattlefieldSubZone = ({ zoneName, cards, onHover, onViewDetails }: { 
+  zoneName: string, 
+  cards: GameCard[], 
+  onHover: (card: GameCard | null) => void,
+  onViewDetails: (card: GameCard) => void 
+}) => {
   const { setNodeRef, isOver } = useDroppable({
     id: `battlefield-${zoneName}`,
     data: { zone: 'battlefield' }
   });
+
   if (cards.length === 0) return null;
+
   return (
     <div className="border-b border-neutral-800/50 pb-4 last:border-b-0">
-      <h3 className="font-bold text-sm text-amber-400 mb-3 ml-1">{zoneName} ({cards.length})</h3>
-      <div ref={setNodeRef} className={cn("flex flex-wrap gap-2 pt-2 min-h-[150px] rounded-md transition-colors -m-2 p-2", isOver && "bg-amber-900/20")}>
-        {cards.map(card => (<InteractiveCard key={card.instanceId} card={card} zone="battlefield" />))}
+      <h3 className="font-bold text-sm text-amber-400 mb-3 ml-1">
+        {zoneName} ({cards.length})
+      </h3>
+      <div
+        ref={setNodeRef}
+        className={cn(
+          "flex flex-wrap gap-2 pt-2 min-h-[150px] rounded-md transition-colors -m-2 p-2",
+          isOver && "bg-amber-900/20"
+        )}
+      >
+        {cards.map(card => (
+          <InteractiveCard 
+            key={card.instanceId} 
+            card={card} 
+            zone="battlefield" 
+            onHover={onHover} 
+            onViewDetails={onViewDetails} 
+          />
+        ))}
       </div>
     </div>
   )
@@ -33,9 +62,11 @@ export default function PlaytestView({ initialDecklist, initialCommanderList, in
   const playtestState = usePlaytestStore();
   const { actions } = playtestState;
   
-  const [activeCard, setActiveCard] = useState<GameCard | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [viewingZone, setViewingZone] = useState<{title: string, cards: GameCard[]}>({ title: '', cards: [] });
+  // --- ESTADOS DE UI ---
+  const [activeCard, setActiveCard] = useState<GameCard | null>(null); // Para o 'arrastar'
+  const [hoveredCard, setHoveredCard] = useState<GameCard | null>(null); // Para o painel de preview
+  const [zoneViewer, setZoneViewer] = useState<{title: string, cards: GameCard[]}>({ title: '', cards: [] }); // Para o modal de ver zona
+  const [detailModalCard, setDetailModalCard] = useState<GameCard | null>(null); // Para o modal de detalhes da carta
 
   useEffect(() => {
     const scryfallMap = new Map<string, ScryfallCard>(initialScryfallMapArray);
@@ -62,10 +93,11 @@ export default function PlaytestView({ initialDecklist, initialCommanderList, in
     return groups;
   }, [playtestState.battlefield]);
 
+
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 10 },
-      onActivation: ({ event }) => (event as PointerEvent).button === 0
+    useSensor(PointerSensor, { 
+      activationConstraint: { distance: 10 }, 
+      onActivation: ({ event }) => (event as PointerEvent).button === 0 
     })
   );
 
@@ -82,17 +114,16 @@ export default function PlaytestView({ initialDecklist, initialCommanderList, in
   };
 
   const handleViewZone = (title: string, cards: GameCard[]) => {
-    setViewingZone({ title, cards });
-    setIsModalOpen(true);
+    setZoneViewer({ title, cards });
   };
     
   return (
     <DndContext sensors={sensors} onDragStart={(event) => setActiveCard(event.active.data.current?.cardObject)} onDragEnd={handleDragEnd}>
       <div className="flex h-screen max-h-screen overflow-hidden bg-neutral-950 text-white">
-        <main className="flex-1 flex flex-col p-4 gap-4">
+        <main className="flex-1 flex flex-col p-4 gap-4 relative">
           <div className="flex-grow bg-black/20 rounded-lg border border-neutral-800 p-4 overflow-y-auto space-y-4">
             {BATTLEFIELD_ZONE_ORDER.map(zoneName => (
-              <BattlefieldSubZone key={zoneName} zoneName={zoneName} cards={groupedBattlefield[zoneName] || []} />
+              <BattlefieldSubZone key={zoneName} zoneName={zoneName} cards={groupedBattlefield[zoneName] || []} onHover={setHoveredCard} onViewDetails={setDetailModalCard} />
             ))}
             {playtestState.battlefield.length === 0 && (
               <div className="flex items-center justify-center h-full pointer-events-none">
@@ -101,26 +132,35 @@ export default function PlaytestView({ initialDecklist, initialCommanderList, in
             )}
           </div>
           <div className="flex gap-4 h-[220px]">
-            <div ref={handRef} className={cn("flex-grow ...", isOverHand && "...")}>
-              <h2 className="font-bold ...">Mão: {playtestState.hand.length} cartas</h2>
-              <div className="flex ...">
-                {playtestState.hand.map(card => <InteractiveCard key={card.instanceId} card={card} zone="hand" />)}
+            <div ref={handRef} className={cn("flex-grow bg-black/20 rounded-lg p-4 border transition-colors", isOverHand ? 'border-amber-400' : 'border-neutral-800')}>
+              <h2 className="font-bold mb-2 text-sm text-neutral-300">Mão: {playtestState.hand.length} cartas</h2>
+              <div className="flex flex-nowrap gap-2 h-full pb-4 overflow-x-auto">
+                {playtestState.hand.map(card => <InteractiveCard key={card.instanceId} card={card} zone="hand" onHover={setHoveredCard} onViewDetails={setDetailModalCard} />)}
               </div>
             </div>
             {deckFormat === 'commander' && (
-              <div ref={commandZoneRef} className={cn("w-44 ...", isOverCommandZone && "...")}>
-                <h2 className="font-bold ..."><Crown size={14}/> Comando</h2>
-                <div className="flex ...">
-                  {playtestState.commandZone.map(cmd => <InteractiveCard key={cmd.instanceId} card={cmd} zone="commandZone" />)}
+              <div ref={commandZoneRef} className={cn("w-44 flex-shrink-0 bg-black/20 rounded-lg p-2 border transition-colors", isOverCommandZone ? 'border-amber-400' : 'border-neutral-800')}>
+                <h2 className="font-bold text-xs text-center text-neutral-300 mb-1 flex items-center justify-center gap-1"><Crown size={14}/> Comando</h2>
+                <div className="flex flex-col items-center justify-center gap-2 h-full">
+                  {playtestState.commandZone.map(cmd => <InteractiveCard key={cmd.instanceId} card={cmd} zone="commandZone" onHover={setHoveredCard} onViewDetails={setDetailModalCard} />)}
                 </div>
               </div>
             )}
           </div>
+          <PreviewPanel 
+            imageUrl={hoveredCard?.image_uris?.normal || null}
+            manaCost={hoveredCard && hoveredCard.zone === 'hand' ? hoveredCard.mana_cost : null}
+          />
         </main>
         <PlaytestSidebar deckFormat={deckFormat} onViewZone={handleViewZone} />
       </div>
-      <DragOverlay>{activeCard ? <div className="w-28 ..."><Image src={activeCard.image_uris?.small || ''} alt={activeCard.name} width={146} height={204} className="rounded"/></div> : null}</DragOverlay>
-      <ZoneViewerModal isOpen={isModalOpen} onOpenChange={setIsModalOpen} zoneName={viewingZone.title} cards={viewingZone.cards} />
+      <DragOverlay>{activeCard ? <div className="w-28 opacity-90 rotate-3 shadow-2xl"><Image src={activeCard.image_uris?.small || ''} alt={activeCard.name} width={146} height={204} className="rounded"/></div> : null}</DragOverlay>
+      <ZoneViewerModal isOpen={!!zoneViewer.title} onOpenChange={(isOpen) => !isOpen && setZoneViewer({title: '', cards: []})} zoneName={zoneViewer.title} cards={zoneViewer.cards} />
+      <CardDetailModal
+        isOpen={!!detailModalCard}
+        onOpenChange={(isOpen) => { if (!isOpen) setDetailModalCard(null) }}
+        card={detailModalCard}
+      />
     </DndContext>
   );
 }

@@ -14,6 +14,10 @@ export interface DeckCard {
 // Em: src/app/lib/scryfall.ts (Exemplo)
 
 export interface ScryfallCard {
+  toughness: any;
+  power: any;
+  flavor_text: any;
+  oracle_text: string;
   cmc: any;
   id: string; // UUID do Scryfall
   name: string;
