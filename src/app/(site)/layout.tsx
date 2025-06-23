@@ -50,8 +50,8 @@ export default async function SiteLayout({
     <div className="flex flex-col min-h-screen">
       <Header 
         user={user ? { email: user.email || '', user_metadata: user.user_metadata } : null}
-        profile={profile ? { full_name: profile.full_name, avatar_url: profile.avatar_url } : { full_name: '', avatar_url: '' }}
-        fallbackInitial={fallbackInitial}
+        profile={profile || { full_name: '', avatar_url: '', role: 'user', referral_code: null, points: null }}
+        fallbackInitial={fallbackInitial} 
         userRole={profile?.role || 'user'}
       />
       <main className="flex-grow">

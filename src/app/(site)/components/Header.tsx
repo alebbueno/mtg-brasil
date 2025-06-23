@@ -11,9 +11,18 @@ import Image from 'next/image';
 import DeckSageLogo from '../../../../public/decksage.png'
 import { UserMetadata } from '@supabase/supabase-js';
 
+// AJUSTE: A tipagem do perfil agora inclui todos os campos que o layout busca
+interface Profile {
+  full_name: string | null;
+  avatar_url: string | null;
+  role: string | null;
+  referral_code: string | null;
+  points: number | null;
+}
+
 type HeaderProps = {
   user: { email: string; user_metadata: UserMetadata } | null;
-  profile: { full_name: string; avatar_url: string };
+  profile: Profile | null;
   fallbackInitial: string;
   userRole: string;
 }
