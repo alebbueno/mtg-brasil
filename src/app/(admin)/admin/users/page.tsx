@@ -1,5 +1,5 @@
-/* eslint-disable no-console */
 /* eslint-disable no-undef */
+/* eslint-disable no-console */
 import { checkUserRole } from '@/lib/auth';
 import { createClient } from '@/app/utils/supabase/server';
 import { notFound } from 'next/navigation';
@@ -9,37 +9,47 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import UserActions from './components/UserActions';
 import UserSearch from './components/UserSearch';
-import PaginationControls from '../components/PaginationControls'; 
-// ADIÇÃO: Importa nosso componente reutilizável de pontos
+import UserPagination from './components/UserPagination';
 import UserPointsDisplay from '@/app/(site)/components/ui/UserPointsDisplay';
 
+export const dynamic = 'force-dynamic';
 
-export default async function AdminUsersPage({ searchParams }: {
-  searchParams?: {
-    query?: string;
-    page?: string;
-  }
-}) {
+interface PageProps {
+  searchParams?: { query?: string; page?: string; }
+}
+
+export default async function AdminUsersPage(props: any) {
+  const { searchParams } = props as PageProps;
+
   const isAdmin = await checkUserRole('admin');
   if (!isAdmin) notFound();
 
   const supabase = createClient();
   const query = searchParams?.query || '';
-  const currentPage = Number(searchParams?.page) || 1;
-  const USERS_PER_PAGE = 10;
+  let currentPage = Number(searchParams?.page) || 1;
+  currentPage = Math.max(1, currentPage);
+
+  const USERS_PER_PAGE = 15;
   const offset = (currentPage - 1) * USERS_PER_PAGE;
 
-  // A função RPC já foi atualizada para buscar os pontos
   const { data: users, error } = await supabase.rpc('search_users_paginated', {
     search_term: query,
     page_size: USERS_PER_PAGE,
     page_offset: offset
   });
 
-  if (error) console.error("Erro ao buscar usuários:", error);
+  if (error) {
+    console.error("Erro ao buscar usuários:", error);
+  }
 
-  const totalUsers = users?.[0]?.total_count || 0;
-  const totalPages = Math.ceil(totalUsers / USERS_PER_PAGE);
+  const { count: absoluteTotalUsers } = await supabase
+    .from('profiles')
+    .select('*', { count: 'exact', head: true });
+
+  const filteredTotalUsers = users?.[0]?.total_count || 0;
+  const totalPages = Math.ceil(filteredTotalUsers / USERS_PER_PAGE);
+
+  currentPage = Math.min(currentPage, totalPages > 0 ? totalPages : 1);
 
   return (
     <>
@@ -47,26 +57,21 @@ export default async function AdminUsersPage({ searchParams }: {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-amber-500">Gerenciar Usuários</h1>
-            {/* A contagem total de usuários agora é o `totalUsers` da busca paginada */}
-            <Badge variant="secondary" className="text-base">{totalUsers ?? 0} encontrados</Badge>
+            <Badge variant="secondary" className="text-base">{absoluteTotalUsers ?? 0} total</Badge>
           </div>
-          <p className="text-neutral-400 mt-1">
-            Visualize, filtre e gerencie todos os usuários cadastrados na plataforma.
-          </p>
+          <p className="text-neutral-400 mt-1">Visualize, filtre e gerencie todos os usuários cadastrados.</p>
         </div>
       </header>
 
-      <div className="mb-6 max-w-sm">
-        <UserSearch placeholder="Buscar por nome ou email..." />
-      </div>
+      {/* Apenas a busca acima da tabela */}
+      <UserSearch initialQuery={query} />
 
-      <div className="bg-neutral-900 border border-neutral-800 rounded-lg">
+      <div className="bg-neutral-900 border border-neutral-800 rounded-lg mt-6">
         <Table>
           <TableHeader>
             <TableRow className="border-neutral-700 hover:bg-neutral-900">
               <TableHead className="text-white w-[350px]">Usuário</TableHead>
               <TableHead className="text-white">Email</TableHead>
-              {/* ADIÇÃO: Nova coluna para os pontos */}
               <TableHead className="text-white">Pontos</TableHead>
               <TableHead className="text-white">Cargo</TableHead>
               <TableHead className="text-white">Status</TableHead>
@@ -81,8 +86,8 @@ export default async function AdminUsersPage({ searchParams }: {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage src={user.avatar_url || ''} alt={user.full_name || user.username || ''} />
-                        <AvatarFallback>{user.full_name?.charAt(0) || user.username?.charAt(0) || 'U'}</AvatarFallback>
+                        <AvatarImage src={user.avatar_url || ''} />
+                        <AvatarFallback>{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium">{user.full_name || 'Nome não definido'}</p>
@@ -91,31 +96,43 @@ export default async function AdminUsersPage({ searchParams }: {
                     </div>
                   </TableCell>
                   <TableCell className="text-neutral-300">{user.email}</TableCell>
-                  {/* ADIÇÃO: Célula que exibe os pontos */}
+                  <TableCell><UserPointsDisplay points={user.points} size="sm" /></TableCell>
                   <TableCell>
-                    <UserPointsDisplay points={user.points} size="sm" />
+                    <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'}>
+                      {user.role}
+                    </Badge>
                   </TableCell>
-                  <TableCell><Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'}>{user.role}</Badge></TableCell>
-                  <TableCell><Badge variant={user.status === 'active' ? 'default' : 'outline'} className={user.status === 'active' ? 'border-green-500/50 bg-green-500/10 text-green-300' : 'border-red-500/50 bg-red-500/10 text-red-300'}>{user.status === 'active' ? 'Ativo' : 'Bloqueado'}</Badge></TableCell>
-                  <TableCell className="text-neutral-400">{new Date(user.created_at).toLocaleDateString('pt-BR')}</TableCell>
-                  <TableCell className="text-right"><UserActions user={user} /></TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={user.status === 'active' ? 'default' : 'outline'}
+                      className={user.status === 'active'
+                        ? 'border-green-500/50 bg-green-500/10 text-green-300'
+                        : 'border-red-500/50 bg-red-500/10 text-red-300'}
+                    >
+                      {user.status === 'active' ? 'Ativo' : 'Bloqueado'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-neutral-400">
+                    {new Date(user.created_at).toLocaleDateString('pt-BR')}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <UserActions user={user} />
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
-              // AJUSTE: O colSpan agora é 7 para incluir a nova coluna
-              <TableRow><TableCell colSpan={7} className="text-center text-neutral-500 py-10">Nenhum usuário encontrado para esta busca.</TableCell></TableRow>
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-neutral-500 py-10">
+                  Nenhum usuário encontrado para esta busca.
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
-      
-      <div className="mt-6">
-        <PaginationControls 
-            totalPages={totalPages} 
-            currentPage={currentPage} 
-            basePath="/admin/users" 
-        />
-      </div>
+
+      {/* Paginação agora embaixo da tabela */}
+      <UserPagination totalPages={totalPages} />
     </>
   );
 }
