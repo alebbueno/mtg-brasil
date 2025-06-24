@@ -53,11 +53,7 @@ export default function Header({ user, profile, fallbackInitial }: HeaderProps) 
           </div>
 
           <div className="hidden md:flex items-center">
-            <UserMenu 
-              user={user}
-              profile={profile}
-              fallbackInitial={fallbackInitial}
-            />
+            <UserMenu />
           </div>
 
           {/* 2. MODIFICAR a div do menu mobile para alinhar os itens lado a lado */}
