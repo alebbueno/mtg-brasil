@@ -9,6 +9,7 @@ import DynamicAdSlot from "@/app/(site)/components/ads/DynamicAdSlot";
 
 import { createClient } from "@/app/utils/supabase/server";
 import { fetchLatestSets } from "@/app/lib/scryfall";
+import AIDeckBuilderPromo from "./components/home/AIDeckBuilderPromo";
 
 export default async function Home() {
   const supabase = createClient();
@@ -44,6 +45,9 @@ export default async function Home() {
     <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col">
       <main className="flex-1 w-full">
         <HeroSection />
+
+        {/* ADIÇÃO: Nosso novo componente de destaque entra aqui */}
+        <AIDeckBuilderPromo />
 
         <LatestPostsSection posts={postsData || []} />
 

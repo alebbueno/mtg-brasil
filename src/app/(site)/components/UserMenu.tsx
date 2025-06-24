@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BookOpen, Heart, User, LogOut, Swords, ShieldCheck, Gift } from 'lucide-react';
+import { BookOpen, Heart, User, LogOut, Swords, ShieldCheck, Gift, Wand2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/app/utils/supabase/client';
@@ -52,12 +52,25 @@ export default function UserMenu({ user, fallbackInitial, profile, userRole }: U
   return (
     <>
       <nav className="flex items-center gap-4 md:gap-6 text-neutral-200">
-        <Link href="/search" className="hover:text-amber-500 transition-colors text-sm sm:text-base">
-          Buscar
+        <Link href="/collections" className="hover:text-amber-500 transition-colors text-sm sm:text-base">
+          Guia por Coleções
         </Link>
         <Link href="/blog" className="hover:text-amber-500 transition-colors text-sm sm:text-base flex items-center gap-1">
-          <BookOpen size={16} /> Blog
+          Hub de Conteúdo
         </Link>
+        <Link href="/glossary" className="hover:text-amber-500 transition-colors text-sm sm:text-base flex items-center gap-1">
+          Glossario
+        </Link>
+
+        {/* --- NOVO BOTÃO DE DESTAQUE --- */}
+        <Button asChild variant="secondary" size="sm" className="bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 border border-sky-500/20 h-9">
+            <Link href="/ai-deck-builder" className="flex items-center gap-2">
+                <Wand2 className="h-4 w-4" />
+                {/* Texto responsivo para o botão */}
+                <span className="hidden sm:inline">Crie Deck com IA</span>
+                <span className="inline sm:hidden">IA</span>
+            </Link>
+        </Button>
         
         {user ? (
           <DropdownMenu>
