@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 
 // Reutilizaremos o componente de busca dos usuários
-import UserSearch from '../users/components/UserSearch';
+// import UserSearch from '../users/components/UserSearch';
 // E o de paginação
 import PaginationControls from '@/app/(admin)/admin/components/PaginationControls';
 
@@ -52,11 +52,9 @@ export default async function AdminFeedbackPage({ searchParams }: {
           Analise o que os usuários estão dizendo sobre a plataforma.
         </p>
       </header>
-
-      <div className="mb-6 max-w-sm">
+      {/* <div className="mb-6 max-w-sm">
         <UserSearch placeholder="Buscar por conteúdo ou email..." />
-      </div>
-
+      </div> */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-lg">
         <Table>
           <TableHeader>
