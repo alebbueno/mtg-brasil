@@ -1,78 +1,77 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { AlertCircle, Chrome } from 'lucide-react'
-import { createClient } from '@/app/utils/supabase/client'
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle, Chrome } from 'lucide-react';
+import { createClient } from '@/app/utils/supabase/client';
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setIsSubmitting(true)
-    setError(null)
-    
+    event.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
     try {
-      const supabase = createClient()
+      const supabase = createClient();
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-      })
+      });
 
-      if (error) {
-        throw error
-      }
+      if (error) throw error;
 
-      // Aguarda um pequeno atraso para garantir que a sessão seja propagada
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      console.log('Login com email/senha bem-sucedido')
+      console.log('Login com email/senha bem-sucedido');
 
-      // Força a revalidação dos Server Components e redireciona
-      router.refresh()
-      router.push('/')
+      // Pequeno delay para garantir que o cookie da sessão seja propagado
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
+      // Faz refresh dos Server Components para pegar a sessão nova
+      router.refresh();
+
+      // Redireciona para a Home ou Dashboard
+      router.replace('/');
     } catch (error: any) {
-      console.error('Login Error:', error)
+      console.error('Login Error:', error);
       if (error.message === 'Invalid login credentials') {
-        setError('Email ou senha inválidos. Por favor, verifique os seus dados.')
+        setError('Email ou senha inválidos. Por favor, verifique os seus dados.');
       } else {
-        setError(error.message || 'Ocorreu um erro inesperado.')
+        setError(error.message || 'Ocorreu um erro inesperado.');
       }
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleLoginWithGoogle = async () => {
     try {
-      const supabase = createClient()
+      const supabase = createClient();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
-      })
-      if (error) {
-        throw error
-      }
-      console.log('Iniciando login com Google')
+      });
+      if (error) throw error;
+
+      console.log('Iniciando login com Google');
     } catch (error: any) {
-      console.error('Google Login Error:', error)
-      setError(error.message || 'Erro ao fazer login com Google.')
+      console.error('Google Login Error:', error);
+      setError(error.message || 'Erro ao fazer login com Google.');
     }
-  }
+  };
 
   return (
     <div
@@ -154,7 +153,7 @@ export default function LoginPage() {
             className="w-full text-lg py-6 bg-amber-500 text-black hover:bg-amber-600"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'A entrar...' : 'Entrar com Email'}
+            {isSubmitting ? 'Entrando...' : 'Entrar com Email'}
           </Button>
         </form>
 
@@ -162,11 +161,11 @@ export default function LoginPage() {
           <p className="text-neutral-400">
             Não tem uma conta?{' '}
             <Link href="/signup" className="font-medium text-amber-500 hover:underline">
-              Registe-se
+              Registre-se
             </Link>
           </p>
         </div>
       </div>
     </div>
-  )
+  );
 }

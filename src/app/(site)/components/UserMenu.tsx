@@ -1,53 +1,67 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 'use client'
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, User, LogOut, Swords, ShieldCheck, Gift, Wand2 } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/app/utils/supabase/client';
 import ReferralLink from '@/app/(site)/components/ui/ReferralLink';
 import UserPointsDisplay from '@/app/(site)/components/ui/UserPointsDisplay';
 
-// A tipagem aqui já está correta e completa
-type UserMenuProps = {
-  user: {
-    email: string;
-    user_metadata: {
-      full_name?: string;
-      avatar_url?: string;
-    };
-  } | null;
-  fallbackInitial: string;
-  profile: {
-    full_name: string | null;
-    avatar_url: string | null;
-    referral_code?: string | null;
-    points?: number | null;
-  };
-  userRole?: string;
-};
-
-export default function UserMenu({ user, fallbackInitial, profile, userRole }: UserMenuProps) {
+export default function UserMenu() {
   const router = useRouter();
+  const supabase = createClient();
+
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [isReferralDialogOpen, setIsReferralDialogOpen] = useState(false);
 
-  const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/');
-    router.refresh();
+  const fetchUserData = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+
+    if (user) {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      setProfile(profileData);
+      setUserRole(profileData?.role || null);
+    } else {
+      setProfile(null);
+      setUserRole(null);
+    }
   };
+
+  useEffect(() => {
+    fetchUserData();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, _session) => {
+      fetchUserData();
+      router.refresh();
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.refresh();
+    router.push('/');
+  };
+
+  const fallbackInitial = profile?.full_name?.charAt(0)?.toUpperCase() || 'U';
 
   return (
     <>
@@ -55,32 +69,28 @@ export default function UserMenu({ user, fallbackInitial, profile, userRole }: U
         <Link href="/collections" className="hover:text-amber-500 transition-colors text-sm sm:text-base">
           Guia por Coleções
         </Link>
-        <Link href="/blog" className="hover:text-amber-500 transition-colors text-sm sm:text-base flex items-center gap-1">
+        <Link href="/blog" className="hover:text-amber-500 transition-colors text-sm sm:text-base">
           Hub de Conteúdo
         </Link>
-        <Link href="/glossary" className="hover:text-amber-500 transition-colors text-sm sm:text-base flex items-center gap-1">
-          Glossario
+        <Link href="/glossary" className="hover:text-amber-500 transition-colors text-sm sm:text-base">
+          Glossário
         </Link>
 
-        {/* --- NOVO BOTÃO DE DESTAQUE --- */}
         <Button asChild variant="secondary" size="sm" className="bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 border border-sky-500/20 h-9">
-            <Link href="/ai-deck-builder" className="flex items-center gap-2">
-                <Wand2 className="h-4 w-4" />
-                {/* Texto responsivo para o botão */}
-                <span className="hidden sm:inline">Crie Deck com IA</span>
-                <span className="inline sm:hidden">IA</span>
-            </Link>
+          <Link href="/ai-deck-builder" className="flex items-center gap-2">
+            <Wand2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Crie Deck com IA</span>
+            <span className="inline sm:hidden">IA</span>
+          </Link>
         </Button>
-        
+
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar className="h-10 w-10 border-2 border-neutral-600 hover:border-amber-400 transition-colors">
                   <AvatarImage src={profile?.avatar_url ?? undefined} alt="Avatar do usuário" />
-                  <AvatarFallback className="bg-neutral-700 text-amber-500 font-bold">
-                    {fallbackInitial.toUpperCase()}
-                  </AvatarFallback>
+                  <AvatarFallback className="bg-neutral-700 text-amber-500 font-bold">{fallbackInitial}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -95,24 +105,29 @@ export default function UserMenu({ user, fallbackInitial, profile, userRole }: U
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-neutral-700" />
-              <DropdownMenuItem asChild className="cursor-pointer hover:!bg-neutral-800 focus:!bg-neutral-800">
+              <DropdownMenuItem asChild>
                 <Link href="/profile" className="flex items-center w-full"><User className="mr-2 h-4 w-4" /><span>Editar Perfil</span></Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild className="cursor-pointer hover:!bg-neutral-800 focus:!bg-neutral-800">
+              <DropdownMenuItem asChild>
                 <Link href="/my-decks" className="flex items-center w-full"><Swords className="mr-2 h-4 w-4" /><span>Meus Decks</span></Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild className="cursor-pointer hover:!bg-neutral-800 focus:!bg-neutral-800">
+              <DropdownMenuItem asChild>
                 <Link href="/favorites" className="flex items-center w-full"><Heart className="mr-2 h-4 w-4" /><span>Favoritos</span></Link>
               </DropdownMenuItem>
               {userRole === 'admin' && (
-                <><DropdownMenuSeparator className="bg-neutral-700" /><DropdownMenuItem asChild className="cursor-pointer text-amber-400 hover:!text-amber-300 ..."><Link href="/admin" className="flex items-center w-full"><ShieldCheck className="mr-2 h-4 w-4" /><span>Painel Admin</span></Link></DropdownMenuItem></>
+                <>
+                  <DropdownMenuSeparator className="bg-neutral-700" />
+                  <DropdownMenuItem asChild className="text-amber-400">
+                    <Link href="/admin" className="flex items-center w-full"><ShieldCheck className="mr-2 h-4 w-4" /><span>Painel Admin</span></Link>
+                  </DropdownMenuItem>
+                </>
               )}
               <DropdownMenuSeparator className="bg-neutral-700" />
-              <DropdownMenuItem onSelect={() => setIsReferralDialogOpen(true)} className="cursor-pointer hover:!bg-neutral-800 focus:!bg-neutral-800">
+              <DropdownMenuItem onSelect={() => setIsReferralDialogOpen(true)}>
                 <Gift className="mr-2 h-4 w-4" /><span>Convidar um Amigo</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-neutral-700" />
-              <DropdownMenuItem className="cursor-pointer text-red-400 hover:!text-red-300 ..." onSelect={handleSignOut}>
+              <DropdownMenuItem className="text-red-400" onSelect={handleSignOut}>
                 <LogOut className="mr-2 h-4 w-4" /><span>Sair</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -121,7 +136,7 @@ export default function UserMenu({ user, fallbackInitial, profile, userRole }: U
           <Link href="/login"><Button>Login</Button></Link>
         )}
       </nav>
-      
+
       <Dialog open={isReferralDialogOpen} onOpenChange={setIsReferralDialogOpen}>
         <DialogContent className="bg-neutral-900 border-neutral-800">
           <DialogHeader>
