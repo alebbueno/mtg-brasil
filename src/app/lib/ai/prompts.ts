@@ -10,7 +10,8 @@ interface PromptData {
  */
 export function createDeckPrompt({ format, commanderName, coreCardsList, userPrompt }: PromptData): string {
   
-  const jsonOutputFormat = 'Você DEVE responder usando apenas um objeto JSON válido, sem nenhum texto, introdução ou explicação adicional. A estrutura do JSON deve ser: { "name": "string (um nome criativo e temático para o deck)", "description": "string (uma breve descrição da estratégia do deck em 2 a 3 frases concisas.)", "decklist": { "mainboard": [{"count": number, "name": "string"}], "sideboard": [{"count": number, "name": "string"}] } }.';
+  // AJUSTE: A descrição do output agora exige o idioma Português do Brasil.
+  const jsonOutputFormat = 'Você DEVE responder usando apenas um objeto JSON válido, sem nenhum texto, introdução ou explicação adicional. A estrutura do JSON deve ser: { "name": "string (um nome criativo e temático para o deck em Português do Brasil)", "description": "string (uma breve descrição da estratégia do deck em 2-3 frases concisas em Português do Brasil.)", "decklist": { "mainboard": [{"count": number, "name": "string"}], "sideboard": [{"count": number, "name": "string"}] } }.';
 
   const promptCore = coreCardsList ? `O núcleo de cartas fornecido pelo usuário é este (use estas cartas como base para a estratégia):\n${coreCardsList}` : 'O usuário não forneceu cartas base, então o deck deve ser construído do zero.';
   
@@ -28,6 +29,7 @@ export function createDeckPrompt({ format, commanderName, coreCardsList, userPro
         3. Todas as cartas devem respeitar a identidade de cor do comandante.
         4. O deck deve conter entre 36 a 39 terrenos para uma base de mana consistente.
         5. Você conhece a lista de cartas banidas no formato Commander e NÃO incluirá nenhuma carta banida.
+        6. O nome ("name") e a descrição ("description") do deck DEVEM ser escritos em Português do Brasil.
         
         Informações do Usuário:
         - Comandante: ${commanderName}
@@ -46,6 +48,7 @@ export function createDeckPrompt({ format, commanderName, coreCardsList, userPro
         2. Legalidade: APENAS cartas que já foram impressas na raridade COMUM em qualquer coleção oficial são permitidas.
         3. Você conhece a lista de cartas banidas no formato Pauper e NÃO incluirá nenhuma carta banida.
         4. O deck deve ter uma curva de mana consistente e cerca de 18-22 terrenos.
+        5. O nome ("name") e a descrição ("description") do deck DEVEM ser escritos em Português do Brasil.
         
         Informações do Usuário:
         - ${promptCore}
@@ -63,6 +66,7 @@ export function createDeckPrompt({ format, commanderName, coreCardsList, userPro
         2. Legalidade: APENAS cartas das coleções mais recentes, atualmente válidas no formato Standard TIPO 2, são permitidas.
         3. Você conhece a lista de cartas banidas no formato Standard e NÃO incluirá nenhuma carta banida.
         4. O deck deve ter uma curva de mana consistente e cerca de 23-26 terrenos.
+        5. O nome ("name") e a descrição ("description") do deck DEVEM ser escritos em Português do Brasil.
         
         Informações do Usuário:
         - ${promptCore}
@@ -80,6 +84,7 @@ export function createDeckPrompt({ format, commanderName, coreCardsList, userPro
         2. Legalidade: APENAS cartas a partir da coleção 'Retorno a Ravnica' em diante são permitidas.
         3. Você conhece a lista de cartas banidas no formato Pioneer e NÃO incluirá nenhuma carta banida.
         4. O deck deve ter uma curva de mana consistente e cerca de 23-25 terrenos.
+        5. O nome ("name") e a descrição ("description") do deck DEVEM ser escritos em Português do Brasil.
         
         Informações do Usuário:
         - ${promptCore}
@@ -98,6 +103,7 @@ export function createDeckPrompt({ format, commanderName, coreCardsList, userPro
         2. Legalidade: APENAS cartas com borda moderna (a partir da 8ª Edição) são permitidas.
         3. Você conhece a lista de cartas banidas no formato Modern e NÃO incluirá nenhuma carta banida.
         4. O deck deve ter uma curva de mana consistente e cerca de 22-25 terrenos.
+        5. O nome ("name") e a descrição ("description") do deck DEVEM ser escritos em Português do Brasil.
         
         Informações do Usuário:
         - ${promptCore}
