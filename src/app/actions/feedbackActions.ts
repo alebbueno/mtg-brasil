@@ -5,14 +5,21 @@
 import { createClient } from '@/app/utils/supabase/server';
 import { Resend } from 'resend';
 import { z } from 'zod';
-import { headers } from 'next/headers'; // Importa o 'headers' para pegar dados da requisição
-import { checkUserRole } from '@/lib/auth'; // Importa nossa função de verificação de cargo
+import { headers } from 'next/headers';
+import { checkUserRole } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 
-// Schema de validação para o formulário de feedback (mantido)
-const FeedbackSchema = z.object({
-  feedback_type: z.string().min(1, 'Por favor, selecione um tipo de feedback.'),
-  message: z.string().min(10, 'A mensagem deve ter pelo menos 10 caracteres.'),
+// Schema de validação base, para campos que sempre existem
+const BaseFeedbackSchema = z.object({
+  feedback_type: z.string().min(1, { message: 'Por favor, selecione um tipo de feedback.' }),
+  content: z.string().min(10, { message: 'A mensagem deve ter pelo menos 10 caracteres.' }),
+});
+
+// Schema que estende o base, para usuários não logados (visitantes)
+const AnonymousFeedbackSchema = BaseFeedbackSchema.extend({
+  user_name: z.string().optional(),
+  // Permite que o email seja uma string de email, uma string vazia, ou nulo/undefined
+  user_email: z.string().email({ message: 'O email fornecido é inválido.' }).nullable().optional().or(z.literal('')),
 });
 
 interface FormState {
@@ -20,44 +27,47 @@ interface FormState {
   success: boolean;
 }
 
-/**
- * Ação PÚBLICA que permite a qualquer usuário enviar um feedback.
- * Versão melhorada para capturar mais dados.
- */
 export async function submitFeedback(prevState: FormState, formData: FormData): Promise<FormState> {
   const supabase = createClient();
   const resend = new Resend(process.env.RESEND_API_KEY);
 
-  const validatedFields = FeedbackSchema.safeParse({
+  // 1. PRIMEIRO, verifica se o usuário está logado
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // 2. DEPOIS, escolhe o schema de validação correto
+  const schemaToUse = user ? BaseFeedbackSchema : AnonymousFeedbackSchema;
+  
+  const validatedFields = schemaToUse.safeParse({
     feedback_type: formData.get('feedback_type'),
-    message: formData.get('message'),
+    content: formData.get('content'),
+    user_name: formData.get('user_name'),
+    user_email: formData.get('user_email'),
   });
 
   if (!validatedFields.success) {
-    return {
-      message: validatedFields.error.flatten().fieldErrors.message?.[0] || 'Dados inválidos.',
-      success: false,
-    };
+    const errors = validatedFields.error.flatten().fieldErrors;
+    console.error("Erro de Validação Zod:", errors);
+    const errorMessage = Object.values(errors)[0]?.[0] || 'Dados inválidos.';
+    return { success: false, message: errorMessage };
   }
   
-  const { feedback_type, message } = validatedFields.data;
-
-  // Pega o usuário logado, se houver
-  const { data: { user } } = await supabase.auth.getUser();
-
-  // AJUSTE: Pega cabeçalhos para informações extras e automáticas
+  const { feedback_type, content } = validatedFields.data;
+  // Apenas pega o nome e email se a validação para anônimos foi usada
+  const user_name = 'user_name' in validatedFields.data ? validatedFields.data.user_name : null;
+  const user_email = 'user_email' in validatedFields.data ? validatedFields.data.user_email : null;
+  
   const headerList = await headers();
-  const page_url = headerList.get('referer'); // URL da página de onde o feedback foi enviado
-  const user_agent = headerList.get('user-agent'); // Navegador e Sistema Operacional do usuário
+  const page_url = headerList.get('referer');
+  const user_agent = headerList.get('user-agent');
 
-  // 1. Guarda o feedback na base de dados
   const { error: dbError } = await supabase.from('feedback').insert({
+    content,
     feedback_type,
-    content: message, // Usamos 'content' na tabela, como planejado
     page_url,
     user_agent,
     user_id: user?.id,
-    user_email: user?.email, // Salva o email se o usuário estiver logado
+    user_email: user ? user.email : user_email,
+    user_name: user ? user.user_metadata.full_name : user_name,
   });
 
   if (dbError) {
@@ -65,22 +75,12 @@ export async function submitFeedback(prevState: FormState, formData: FormData): 
     return { message: "Não foi possível guardar o seu feedback. Tente novamente.", success: false };
   }
   
-  // 2. Envia o e-mail de notificação (sua lógica original mantida)
   try {
     await resend.emails.send({
-      from: 'Feedback <feedback@decksage.com.br>', // Use um e-mail do seu domínio verificado
-      to: ['alebueno.dev@gmail.com'], // E-mail para receber os feedbacks
+      from: 'Feedback <feedback@decksage.com.br>',
+      to: ['decksage.br@gmail.com'],
       subject: `Novo Feedback: ${feedback_type}`,
-      html: `
-        <h1>Novo Feedback Recebido!</h1>
-        <p><strong>Tipo:</strong> ${feedback_type}</p>
-        <p><strong>Mensagem:</strong></p>
-        <blockquote style="border-left: 2px solid #ccc; padding-left: 1em; margin-left: 1em; color: #666;">${message}</blockquote>
-        <hr>
-        <p><strong>Enviado da página:</strong> ${page_url}</p>
-        <p><strong>Enviado por:</strong> ${user ? `${user.email} (ID: ${user.id})` : 'Visitante não logado'}</p>
-        <p><small><strong>User Agent:</strong> ${user_agent}</small></p>
-      `,
+      html: `<p><strong>Tipo:</strong> ${feedback_type}</p><p><strong>Mensagem:</strong></p><blockquote style="border-left: 2px solid #ccc; padding-left: 1em; margin-left: 1em; color: #666;">${content}</blockquote><hr><p><strong>URL:</strong> ${page_url}</p><p><strong>Enviado por:</strong> ${user ? `${user.email} (ID: ${user.id})` : `${user_name || 'Anônimo'} (${user_email || 'Email não fornecido'})`}</p><p><small><strong>User Agent:</strong> ${user_agent}</small></p>`,
     });
   } catch (emailError) {
     console.error("Erro ao enviar e-mail de feedback:", emailError);
@@ -90,65 +90,26 @@ export async function submitFeedback(prevState: FormState, formData: FormData): 
 }
 
 
-// --- AÇÕES PARA O PAINEL DE ADMIN ---
-
-/**
- * Ação de ADMIN para atualizar o status de um feedback.
- */
 export async function updateFeedbackStatus(feedbackId: string, newStatus: 'new' | 'in_analysis' | 'completed' | 'unnecessary') {
   const isAdmin = await checkUserRole('admin');
-  if (!isAdmin) {
-    throw new Error('Acesso negado.');
-  }
-
+  if (!isAdmin) { throw new Error('Acesso negado.'); }
   const supabase = createClient();
-  const { error } = await supabase
-    .from('feedback')
-    .update({ status: newStatus })
-    .eq('id', feedbackId);
-
-  if (error) {
-    console.error('Erro ao atualizar status do feedback:', error);
-    throw new Error('Não foi possível atualizar o status.');
-  }
-
-  // Revalida o cache para que a lista e a página de detalhes mostrem o novo status
+  const { error } = await supabase.from('feedback').update({ status: newStatus }).eq('id', feedbackId);
+  if (error) { throw new Error('Não foi possível atualizar o status.'); }
   revalidatePath('/admin/feedback');
   revalidatePath(`/admin/feedback/${feedbackId}`);
 }
 
-
-/**
- * Ação de ADMIN para adicionar um comentário a um feedback.
- */
 export async function addFeedbackComment(feedbackId: string, prevState: any, formData: FormData) {
   const isAdmin = await checkUserRole('admin');
-  if (!isAdmin) {
-    return { success: false, message: 'Acesso negado.' };
-  }
-
+  if (!isAdmin) { return { success: false, message: 'Acesso negado.' }; }
   const commentText = formData.get('comment') as string;
-  if (!commentText || commentText.trim().length < 1) {
-    return { success: false, message: 'O comentário não pode estar vazio.' };
-  }
-
+  if (!commentText || commentText.trim().length < 1) { return { success: false, message: 'O comentário não pode estar vazio.' }; }
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, message: 'Usuário não autenticado.' };
-
-  const { error } = await supabase.from('feedback_comments').insert({
-      feedback_id: feedbackId,
-      admin_id: user.id,
-      comment: commentText,
-  });
-
-  if (error) {
-    console.error('Erro ao adicionar comentário de feedback:', error);
-    return { success: false, message: 'Não foi possível adicionar o comentário.' };
-  }
-
+  if (!user) { return { success: false, message: 'Usuário não autenticado.' }; }
+  const { error } = await supabase.from('feedback_comments').insert({ feedback_id: feedbackId, admin_id: user.id, comment: commentText });
+  if (error) { return { success: false, message: 'Não foi possível adicionar o comentário.' }; }
   revalidatePath(`/admin/feedback/${feedbackId}`);
-  
-  // AJUSTE: Retorna um estado de sucesso para o formulário poder reagir
   return { success: true, message: 'Comentário adicionado.' };
 }

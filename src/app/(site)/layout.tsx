@@ -31,7 +31,7 @@ export default async function SiteLayout({
         {children}
       </main>
       <Footer />
-      <FloatingFeedback />
+      <FloatingFeedback user={user} />
     </div>
   );
 }
