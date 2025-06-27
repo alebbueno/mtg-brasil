@@ -14,7 +14,8 @@ import {
   PanelLeftOpen,
   LayoutDashboard,
   Megaphone,
-  Home
+  Home,
+  Wand2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -36,6 +37,7 @@ export default function AdminSidebar() {
     { href: '/admin/decks', label: 'Decks Públicos', icon: FileText },
     { href: '/admin/blog', label: 'Posts', icon: MessageSquare },
     { href: '/admin/meta', label: 'Decks Meta', icon: Trophy },
+    { href: '/admin/ai-generator', label: 'Gerador de Conteúdo', icon: Wand2 },
   ];
 
   return (
