@@ -111,7 +111,7 @@ export default function GenerationDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <DecklistVisualizer decklist={decklist} />
+              <DecklistVisualizer decklist={decklist} cardDataMap={undefined} />
             </CardContent>
           </Card>
         </TabsContent>

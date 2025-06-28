@@ -6,6 +6,7 @@ import UserPagination from './UserPagination';
 interface UserControlsProps {
   initialQuery: string;
   totalPages: number;
+  currentPage: number;
 }
 
 export default function UserControls({ initialQuery, totalPages }: UserControlsProps) {
