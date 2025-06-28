@@ -55,7 +55,7 @@ export default async function AdminSiteDecksPage(props: any) {
         </div>
       </header>
 
-      <div className="max-w-md"><UserControls initialQuery={query} totalPages={totalPages}/></div>
+      <div className="max-w-md"><UserControls initialQuery={query} totalPages={totalPages} currentPage={0}/></div>
 
       <div className="bg-neutral-900 border border-neutral-800 rounded-lg mt-6">
         <Table>
