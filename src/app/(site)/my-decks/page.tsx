@@ -51,6 +51,7 @@ export default function MyDecksPage() {
       .from('decks')
       .select('id, name, format, representative_card_image_url, created_at, view_count, save_count, color_identity')
       .eq('user_id', userId)
+      .eq('owner_type', 'user') 
       .order('created_at', { ascending: false })
 
     if (error) {

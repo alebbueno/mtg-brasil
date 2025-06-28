@@ -95,6 +95,7 @@ export interface Decklist {
 }
 
 export interface DeckFromDB {
+  author: any;
   social_posts: any;
   how_to_play_guide: string;
   deck_check: any;
