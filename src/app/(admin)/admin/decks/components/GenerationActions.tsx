@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Eye, Trash2, Loader2 } from 'lucide-react';
