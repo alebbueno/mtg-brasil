@@ -9,7 +9,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import OpenAI from 'openai';
 import { fetchCardsByNames } from '../lib/scryfall';
-import { createDeckPrompt, createSocialPostsPrompt } from '../lib/ai/prompts';
+import { createDeckPrompt } from '../lib/ai/prompts';
+import { createSocialPostsPrompt } from '../lib/ai/admin/prompts';
 import { checkUserRole } from '@/lib/auth';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -113,7 +114,8 @@ export async function generateDeckContentPackage(prevState: GenerationState, for
     deckName: deckResult.name,
     deckDescription: deckResult.description,
     deckCheck: deckCheckResult,
-    format: format
+    format: format,
+    decklist: decklistString
   });
   let socialPostsResult;
   try {
