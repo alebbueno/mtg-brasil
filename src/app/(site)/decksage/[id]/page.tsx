@@ -1,19 +1,28 @@
+/* eslint-disable no-console */
+/* eslint-disable no-undef */
+// src/app/(site)/decksage/[id]/page.tsx
+
 import { createClient } from '@/app/utils/supabase/server';
 import { notFound } from 'next/navigation';
 import type { DeckFromDB, ScryfallCard } from '@/app/lib/types';
 import { fetchCardsByNames } from '@/app/lib/scryfall';
 
 import DeckHeader from '../components/DeckHeader';
-// Importa nosso novo menu de navegação
 import DeckPageNav from '../components/DeckPageNav'; 
-// Importa os componentes de conteúdo
 import DecklistVisualizer from '../components/DecklistVisualizer';
 import DeckAnalysis from '../components/DeckAnalysis';
 import HowToPlayGuide from '../components/HowToPlayGuide';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SiteDeckPage({ params }: { params: { id: string } }) {
+interface PageProps {
+  params: { id: string };
+}
+
+export default async function SiteDeckPage(props: any) {
+  // ✅ Fazemos o cast corretamente para evitar erro de build
+  const { params } = props as PageProps;
+
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -22,16 +31,28 @@ export default async function SiteDeckPage({ params }: { params: { id: string } 
     .single<DeckFromDB>();
 
   if (error || !deck) {
+    console.error("Erro ao buscar deck público:", error);
     notFound();
   }
 
-  const allCardNames = [...(deck.decklist.commander || []), ...deck.decklist.mainboard, ...(deck.decklist.sideboard || [])].map((c: any) => c.name);
+  const allCardNames = [
+    ...(deck.decklist.commander || []),
+    ...deck.decklist.mainboard,
+    ...(deck.decklist.sideboard || [])
+  ].map((c: any) => c.name);
+
   const scryfallCards = await fetchCardsByNames([...new Set(allCardNames)]);
   const cardDataMap = new Map(scryfallCards.map((c: ScryfallCard) => [c.name, c]));
 
   let isInitiallySaved = false;
   if (user) {
-    const { data: savedDeck } = await supabase.from('saved_decks').select('deck_id').eq('user_id', user.id).eq('deck_id', deck.id).single();
+    const { data: savedDeck } = await supabase
+      .from('saved_decks')
+      .select('deck_id')
+      .eq('user_id', user.id)
+      .eq('deck_id', deck.id)
+      .maybeSingle();
+
     isInitiallySaved = !!savedDeck;
   }
 
@@ -44,15 +65,15 @@ export default async function SiteDeckPage({ params }: { params: { id: string } 
           isInitiallySaved={isInitiallySaved}
         />
         
-        {/* Renderizamos o novo menu de navegação aqui */}
+        {/* Navegação fixa moderna */}
         <DeckPageNav />
 
-        {/* O conteúdo agora é uma lista vertical de seções, cada uma com um ID */}
+        {/* Conteúdo da página */}
         <main className="space-y-12">
           <section id="decklist">
             <DecklistVisualizer 
-                decklist={deck.decklist} 
-                cardDataMap={cardDataMap}
+              decklist={deck.decklist} 
+              cardDataMap={cardDataMap}
             />
           </section>
 
