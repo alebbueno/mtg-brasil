@@ -26,7 +26,15 @@ interface ContentPromptsData extends AnalysisPromptData {
 
 // --- Constantes de Formato de Saída ---
 
-const jsonDeckOutputFormat = 'Você DEVE responder usando apenas um objeto JSON válido, sem nenhum texto adicional. A estrutura do JSON deve ser: { "name": "string (nome criativo e temático para o deck em Português do Brasil)", "description": "string (breve descrição da estratégia em Português do Brasil)", "decklist": { "mainboard": [{"count": number, "name": "string"}], "sideboard": [{"count": number, "name": "string"}] } }.';
+const jsonDeckOutputFormat = `IMPORTANTE: Você deve responder com um único objeto JSON no seguinte formato (sem nenhuma explicação ou texto extra):
+{
+  "name": "string (nome criativo e temático do deck, em Português do Brasil)",
+  "description": "string (breve descrição da estratégia do deck, em 2-3 frases, em Português do Brasil)",
+  "decklist": {
+    "mainboard": [ { "count": number, "name": "string" } ],
+    "sideboard": [ { "count": number, "name": "string" } ]
+  }
+}`;
 const jsonDeckCheckOutputFormat = 'Responda APENAS com um objeto JSON com a estrutura: { "playstyle": "string", "win_condition": "string", "difficulty": "string (Fácil, Médio, ou Difícil)", "strengths": ["array de 2 a 3 pontos fortes"], "weaknesses": ["array de 2 a 3 pontos fracos"] }';
 const jsonSocialOutputFormat = 'Responda APENAS com um objeto JSON com a seguinte estrutura: { "facebook": "string", "instagram": "string", "x": "string", "reddit": "string" }';
 
@@ -36,22 +44,94 @@ const jsonSocialOutputFormat = 'Responda APENAS com um objeto JSON com a seguint
  * Cria o prompt para a IA gerar uma DECKLIST base.
  */
 export function createDecklistPrompt({ format, userPrompt, commanderName, commanderColorIdentity }: DecklistPromptData): string {
-  const instructions = `A instrução principal do usuário para o deck é: "${userPrompt}". A sinergia e a escolha das cartas devem girar em torno desta instrução.`;
-  let rules = '';
+  const instructions = userPrompt
+    ? `A instrução principal do usuário para o deck é: "${userPrompt}". A estratégia do deck deve girar em torno desta instrução.`
+    : `Não há instrução do usuário. Crie uma estratégia sinérgica e eficaz com base nas melhores práticas do formato.`;
 
   switch (format) {
     case 'commander':
-      rules = `O Comandante é ${commanderName}. Regras a seguir: 100 cartas no total (99 + comandante), formato singleton, respeite a identidade de cor [${commanderColorIdentity?.join(', ')}], inclua 36-40 terrenos.`;
-      break;
-    case 'pauper':
-      rules = `Regras a seguir: 60 cartas no maindeck, 15 no sideboard, apenas cartas de raridade COMUM. Inclua 18-22 terrenos.`
-      break;
-    default:
-      rules = `Regras a seguir: 60 cartas no maindeck, 15 no sideboard, até 4 cópias de cada. Inclua 22-25 terrenos.`
-      break;
+      return `
+        Você é um deckbuilder especialista em Magic: The Gathering. Crie um deck no formato **Commander (EDH)** com base nas regras abaixo:
+
+        1. O deck deve conter exatamente 100 cartas no total (1 comandante + 99 cartas no maindeck).
+        2. O comandante é "${commanderName}".
+        3. O formato é singleton: não repita nenhuma carta, exceto terrenos básicos.
+        4. Todas as cartas devem respeitar a identidade de cor do comandante, que é: [${commanderColorIdentity?.join(', ') || 'N/A'}].
+            - A identidade de cor é definida por todos os símbolos de mana no custo e no texto de regras do comandante.
+            - **Não inclua nenhuma carta que contenha cores que não estejam nesta identidade.**
+        5. Use entre 36 e 40 terrenos. Se o deck ficar com menos de 100 cartas, complete com terrenos básicos apropriados.
+        6. Não use nenhuma carta banida no formato Commander.
+
+        ${instructions}
+
+        ${jsonDeckOutputFormat}
+              `.trim();
+
+            case 'pauper':
+              return `
+        Você é um deckbuilder veterano em Magic: The Gathering. Crie um deck no formato **Pauper** com base nas regras abaixo:
+
+        1. O maindeck deve conter exatamente 60 cartas.
+        2. O sideboard deve conter até 15 cartas.
+        3. Todas as cartas devem ter sido impressas como **comuns** em alguma coleção oficial.
+        4. Use entre 18 e 22 terrenos para uma base de mana consistente.
+        5. Não use nenhuma carta banida no formato Pauper.
+        6. Se o deck ficar incompleto, complete com terrenos básicos.
+
+        ${instructions}
+
+        ${jsonDeckOutputFormat}
+              `.trim();
+
+            case 'standard':
+              return `
+        Você é um jogador de Pro Tour focado no formato **Standard (T2)**. Crie um deck rigorosamente legal com base nas regras abaixo:
+
+        1. O maindeck deve conter exatamente 60 cartas.
+        2. O sideboard pode conter até 15 cartas.
+        3. Use entre 22 e 26 terrenos.
+        4. Apenas cartas das coleções atualmente válidas no formato Standard.
+        5. Não use nenhuma carta banida no formato.
+        6. Se faltar cartas, complete com terrenos básicos.
+
+        ${instructions}
+
+        ${jsonDeckOutputFormat}
+              `.trim();
+
+            case 'pioneer':
+              return `
+        Você é um deckbuilder de alto nível, especializado no formato **Pioneer**. Crie um deck com as seguintes regras:
+
+        1. O maindeck deve conter exatamente 60 cartas.
+        2. O sideboard pode conter até 15 cartas.
+        3. Apenas cartas lançadas a partir de 'Return to Ravnica' são válidas.
+        4. Não use nenhuma carta banida no formato Pioneer.
+        5. Use entre 22 e 26 terrenos.
+        6. Complete com terrenos básicos, se necessário.
+
+        ${instructions}
+
+        ${jsonDeckOutputFormat}
+              `.trim();
+
+            case 'modern':
+            default:
+              return `
+        Você é um deckbuilder experiente, focado no formato **Modern**. Construa um deck seguindo estas regras:
+
+        1. O maindeck deve conter exatamente 60 cartas.
+        2. O sideboard pode conter até 15 cartas.
+        3. Apenas cartas com borda moderna (8ª edição em diante) são válidas.
+        4. Não use nenhuma carta banida no formato Modern.
+        5. Use entre 22 e 26 terrenos.
+        6. Se faltar cartas, complete com terrenos básicos.
+
+        ${instructions}
+
+        ${jsonDeckOutputFormat}
+              `.trim();
   }
-  
-  return `Você é um deckbuilder especialista em Magic: The Gathering. Crie um deck do zero para o formato ${format}. ${instructions}. ${rules} Não inclua cartas banidas no formato. ${jsonDeckOutputFormat}`;
 }
 
 /**
