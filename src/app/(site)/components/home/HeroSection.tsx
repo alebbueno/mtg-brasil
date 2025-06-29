@@ -1,7 +1,16 @@
+'use client' // Precisa ser um client component para controlar o estado do modal
+import { useState } from 'react';
+
+import { motion } from 'framer-motion';
 import SearchBar from "@/app/(site)/components/SearchBar";
 import CameraScanner from "../CameraScanner";
+import { useDeviceDetection } from '@/app/hooks/useDeviceDetection'; // Importa nosso novo hook
 
 export default function HeroSection() {
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  // Usa o hook para saber se estamos no mobile
+  const { isMobile } = useDeviceDetection();
+
   const sectionStyle = {
     backgroundImage: `
       radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.1), rgba(255, 255, 255, 0)),
@@ -14,7 +23,10 @@ export default function HeroSection() {
       className="py-16 flex items-center justify-center bg-center bg-cover bg-no-repeat h-[800px] md:py-24"
       style={sectionStyle}
     >
-      <div className="container mx-auto px-6 text-center flex flex-col items-center">
+    
+      <div className="container mx-auto px-6 relative z-10">
+
+        <div className="container mx-auto px-6 text-center flex flex-col items-center">
         
         {/* AJUSTE: Título agora com o novo gradiente e a nova animação contínua */}
         <h1 
@@ -34,17 +46,35 @@ export default function HeroSection() {
         >
           Digite o nome da carta, em qualquer idioma, e veja a mágica acontecer. Não fique mais sem entender o que a carta faz!
         </p>
-
-        <div 
-          className="max-w-2xl w-full animate-fade-in-up"
-          style={{ animationDelay: '400ms', animationFillMode: 'backwards' }}
-        >
-          <SearchBar />
-
-          {/* Nosso novo botão de scanner */}
-          <CameraScanner />
-        </div>
       </div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          className="max-w-2xl mx-auto"
+        >
+          {/* AJUSTE: Passamos uma nova prop para a SearchBar */}
+          <SearchBar onCameraClick={() => setIsScannerOpen(true)} showCameraButton={isMobile} />
+        </motion.div>
+
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+          className="mt-4 text-center text-sm text-neutral-400"
+        >
+          Encontre qualquer carta, veja traduções e construa seus decks.
+        </motion.p>
+      </div>
+
+      {/* AJUSTE: O scanner só é incluído no DOM se for mobile, otimizando a página */}
+      {isMobile && (
+        <CameraScanner 
+            isOpen={isScannerOpen} 
+            onOpenChange={setIsScannerOpen}
+        />
+      )}
     </section>
   );
 }
