@@ -1,4 +1,5 @@
 import SearchBar from "@/app/(site)/components/SearchBar";
+import CameraScanner from "../CameraScanner";
 
 export default function HeroSection() {
   const sectionStyle = {
@@ -39,6 +40,9 @@ export default function HeroSection() {
           style={{ animationDelay: '400ms', animationFillMode: 'backwards' }}
         >
           <SearchBar />
+
+          {/* Nosso novo botão de scanner */}
+          <CameraScanner />
         </div>
       </div>
     </section>
