@@ -94,7 +94,7 @@ export default function LoginPage() {
         <Button
           onClick={handleLoginWithGoogle}
           variant="outline"
-          className="w-full text-lg py-6 bg-white text-black hover:bg-neutral-200 flex items-center gap-3 transition-transform hover:scale-105"
+          className="w-full text-lg py-6 bg-white text-amber-500 hover:bg-neutral-200 flex items-center gap-3 transition-transform hover:scale-105"
         >
           <Chrome size={22} />
           Continuar com Google

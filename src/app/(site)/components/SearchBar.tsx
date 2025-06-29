@@ -100,8 +100,36 @@ export default function SearchBar({ onCameraClick, showCameraButton }: SearchBar
         </div>
         
         {isOpen && (
-          <CommandList className="absolute top-full ...">
-            {/* ... (sua lista de sugestões como antes) ... */}
+          <CommandList 
+            className="absolute top-full left-0 right-0 mt-2 bg-neutral-900/90 border border-neutral-700 
+                       rounded-xl shadow-2xl backdrop-blur-md max-h-60 overflow-y-auto z-20
+                       animate-in fade-in-0 zoom-in-95"
+          >
+            {isLoading ? (
+              <div className="p-2 space-y-2">
+                <Skeleton className="h-9 w-full bg-neutral-700/80" />
+                <Skeleton className="h-9 w-full bg-neutral-700/80" />
+                <Skeleton className="h-9 w-full bg-neutral-700/80" />
+              </div>
+            ) : (
+              <CommandGroup>
+                {suggestions.map((suggestion) => (
+                  <CommandItem
+                    key={suggestion}
+                    value={suggestion}
+                    onSelect={() => handleSelect(suggestion)}
+                    className="px-4 py-2.5 text-base text-white border-0 
+                               aria-selected:bg-amber-500 aria-selected:text-black 
+                               cursor-pointer"
+                  >
+                    {suggestion}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+            {suggestions.length === 0 && debouncedQuery.length > 1 && !isLoading && (
+                <CommandEmpty>Nenhuma carta encontrada para &quot;{debouncedQuery}&quot;</CommandEmpty>
+            )}
           </CommandList>
         )}
       </Command>
