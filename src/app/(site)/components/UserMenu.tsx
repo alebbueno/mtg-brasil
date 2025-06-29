@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, User, LogOut, Swords, ShieldCheck, Gift, Wand2 } from 'lucide-react';
+import { Heart, User, LogOut, Swords, ShieldCheck, Gift, Wand2, Library } from 'lucide-react';
 import { createClient } from '@/app/utils/supabase/client';
 import ReferralLink from '@/app/(site)/components/ui/ReferralLink';
 import UserPointsDisplay from '@/app/(site)/components/ui/UserPointsDisplay';
@@ -74,6 +74,10 @@ export default function UserMenu() {
         </Link>
         <Link href="/glossary" className="hover:text-amber-500 transition-colors text-sm sm:text-base">
           Glossário
+        </Link>
+        {/* ADIÇÃO */}
+        <Link href="/decks-ai" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors flex items-center gap-1">
+            <Library size={16} /> Decks
         </Link>
 
         <Button asChild variant="secondary" size="sm" className="bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 border border-sky-500/20 h-9">
