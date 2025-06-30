@@ -32,6 +32,7 @@ export default function DailyDeckItem({ deck }: DailyDeckItemProps) {
           alt={deck.representativeCard.name}
           width={340}
           height={475}
+          unoptimized
           className="rounded-lg shadow-lg w-full transition-transform duration-300 group-hover:scale-105"
         />
       </div>

@@ -82,6 +82,7 @@ export default function CardDisplay({ card, isDoubleFaced, displayCard, translat
                       alt={card.name}
                       width={340}
                       height={475}
+                      unoptimized
                       className="rounded-lg shadow-lg w-full transition-transform duration-300 group-hover:scale-105"
                       priority={true}
                     />
@@ -101,6 +102,7 @@ export default function CardDisplay({ card, isDoubleFaced, displayCard, translat
                       alt={`${card.name} (verso)`}
                       width={340}
                       height={475}
+                      unoptimized
                       className="rounded-lg shadow-lg w-full transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>

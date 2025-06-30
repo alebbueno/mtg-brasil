@@ -74,6 +74,7 @@ export default function DeckCardItem({ deck, onDelete }: DeckCardItemProps) {
               src={deck.representative_card_image_url}
               alt={`Carta representativa do deck ${deck.name}`}
               fill
+              unoptimized
               className="object-cover"
             />
           ) : (

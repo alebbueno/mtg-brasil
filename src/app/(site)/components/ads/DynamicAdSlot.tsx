@@ -38,6 +38,7 @@ export default function DynamicAdSlot({ adConfig }: { adConfig: AdConfig | null 
           alt={adConfig.custom_alt_text || 'Anúncio'}
           width={970}
           height={90}
+          unoptimized
           className="rounded-lg object-cover"
         />
       </Link>

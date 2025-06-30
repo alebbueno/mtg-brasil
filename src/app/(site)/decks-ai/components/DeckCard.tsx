@@ -34,6 +34,7 @@ export default function DeckCard({ deck }: DeckCardProps) {
               src={deck.representative_card_image_url}
               alt={`Arte do deck ${deck.name}`}
               fill
+              unoptimized
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
           )}

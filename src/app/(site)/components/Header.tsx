@@ -49,6 +49,7 @@ export default function Header() {
               src={DeckSageLogo}
               alt={'DeckSage'}
               width={110}
+              unoptimized
               className=""
               priority={true}
             />

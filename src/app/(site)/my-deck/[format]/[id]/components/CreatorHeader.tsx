@@ -18,7 +18,7 @@ export default function CreatorHeader({ profile }: { profile: Profile | null }) 
     <div className="mb-8 p-4 bg-neutral-900 rounded-lg border border-neutral-800">
       <div className="relative h-24 sm:h-32 rounded-md overflow-hidden">
         {profile.cover_image_url ? (
-          <Image src={profile.cover_image_url} alt="Capa do criador" fill className="object-cover" />
+          <Image src={profile.cover_image_url} unoptimized alt="Capa do criador" fill className="object-cover" />
         ) : (
           <div className="w-full h-full bg-gradient-to-r from-neutral-800 to-neutral-700" />
         )}

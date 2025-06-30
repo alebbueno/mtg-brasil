@@ -99,7 +99,7 @@ export default function PlaytestSidebar({ deckFormat, onViewZone }: {
             <ContextMenuTrigger className="w-full relative group" aria-label="Grimório">
                 <button onClick={() => actions.drawCard()} className="w-full appearance-none">
                     <p className="text-sm font-medium text-amber-400 flex items-center justify-center gap-2 mb-1"><Library size={16} /> Grimório ({library.length})</p>
-                    <Image src={cardBackImg} alt="Verso da carta" width={200} height={280} className="rounded-lg shadow-lg mx-auto transition-transform duration-200 group-hover:scale-105" />
+                    <Image src={cardBackImg} alt="Verso da carta" width={200} height={280} unoptimized className="rounded-lg shadow-lg mx-auto transition-transform duration-200 group-hover:scale-105" />
                 </button>
             </ContextMenuTrigger>
             <ContextMenuContent className="w-56 bg-neutral-900 border-neutral-700 text-neutral-200">

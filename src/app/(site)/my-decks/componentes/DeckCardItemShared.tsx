@@ -38,6 +38,7 @@ export default function DeckCardItemShared({ deck, creatorUsername }: DeckCardIt
             src={deck.representative_card_image_url || 'https://placehold.co/400x240/171717/EAB308?text=Deck'}
             alt={`Carta representativa do deck ${deck.name}`}
             fill
+            unoptimized
             className="object-cover "
           />
           {/* Sombra para garantir a legibilidade do texto */}

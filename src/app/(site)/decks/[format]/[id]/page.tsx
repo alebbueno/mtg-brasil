@@ -91,6 +91,7 @@ export default async function DeckPage({ params }: DeckPageProps) {
               src={deck.representative_card_image_url}
               alt={deck.representative_card_name}
               fill
+              unoptimized
               className="object-cover"
               sizes="(max-width: 640px) 192px, 224px"
               priority
@@ -121,6 +122,7 @@ export default async function DeckPage({ params }: DeckPageProps) {
                     src={cardImageMap.get(card.name) || `https://placehold.co/265x370/171717/EAB308?text=${encodeURIComponent(card.name)}`}
                     alt={card.name}
                     fill
+                    unoptimized
                     sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
                     className="rounded-lg shadow-lg w-full transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
@@ -148,6 +150,7 @@ export default async function DeckPage({ params }: DeckPageProps) {
                       src={cardImageMap.get(card.name) || `https://placehold.co/265x370/171717/EAB308?text=${encodeURIComponent(card.name)}`}
                       alt={card.name}
                       fill
+                      unoptimized
                       sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
                       className="rounded-lg shadow-lg w-full transition-transform duration-300 group-hover:scale-105"
                       loading="lazy"

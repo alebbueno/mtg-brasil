@@ -12,6 +12,7 @@ export default function FeaturedPostCard({ post }: { post: any }) {
             src={post.cover_image_url}
             alt={`Capa do post: ${post.title}`}
             fill
+            unoptimized
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (

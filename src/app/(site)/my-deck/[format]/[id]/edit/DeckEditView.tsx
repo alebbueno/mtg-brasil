@@ -230,7 +230,7 @@ export default function DeckEditView({ initialDeck, initialScryfallCards }: Deck
           className="pointer-events-none fixed z-50 transform"
           style={{ top: `${hoveredCard.y}px`, left: `${hoveredCard.x}px` }}
         >
-          <Image src={hoveredCard.imageUrl} alt="Pré-visualização da carta" width={240} height={335} className="rounded-lg shadow-2xl" />
+          <Image src={hoveredCard.imageUrl} alt="Pré-visualização da carta" unoptimized width={240} height={335} className="rounded-lg shadow-2xl" />
         </div>
       )}
 

@@ -113,7 +113,7 @@ export default function DecklistVisualizer({ decklist }: DecklistVisualizerProps
             if (!card) return null;
             return (
               <div key={card.id} className="relative">
-                <Image src={card.image_uris?.normal || ''} alt={card.name} width={244} height={340} className="rounded-md" />
+                <Image src={card.image_uris?.normal || ''} unoptimized alt={card.name} width={244} height={340} className="rounded-md" />
                 <div className="absolute top-1 right-1 bg-black/80 text-white font-bold text-sm h-6 w-6 flex items-center justify-center rounded-full border-2 border-white">
                   {item.count}
                 </div>

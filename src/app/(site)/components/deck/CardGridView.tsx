@@ -81,6 +81,7 @@ export default function CardGridView({ cards, onCardHover, onCardLeave }: CardGr
                         alt={card.name}
                         width={265}
                         height={370}
+                        unoptimized
                         className="w-full object-contain aspect-[5/7] rounded-md shadow-lg"
                       />
                     </div>

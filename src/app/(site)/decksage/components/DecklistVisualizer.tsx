@@ -88,7 +88,7 @@ export default function DecklistVisualizer({ decklist, cardDataMap }: DecklistVi
       {/* Coluna da Imagem da Carta (Lateral) */}
       <div className="w-full lg:w-1/3 p-4 flex justify-center items-start lg:sticky lg:top-24 self-start border-b lg:border-b-0 lg:border-r border-neutral-800">
         {selectedCard ? (
-          <Image src={selectedCard.image_uris?.large || ''} alt={selectedCard.name} width={488} height={680} className="rounded-xl shadow-lg shadow-black/30" priority />
+          <Image src={selectedCard.image_uris?.large || ''} alt={selectedCard.name} unoptimized width={488} height={680} className="rounded-xl shadow-lg shadow-black/30" priority />
         ) : (
           <div className="aspect-[5/7] w-full max-w-[300px] bg-neutral-950 rounded-xl flex items-center justify-center text-neutral-500"><p>Passe o mouse sobre uma carta</p></div>
         )}
@@ -135,7 +135,7 @@ export default function DecklistVisualizer({ decklist, cardDataMap }: DecklistVi
                         {TOP_ROW_ORDER.map(type => {
                              const items = groupedCards[type];
                              if (!items || items.length === 0) return null;
-                             return (<div key={type} className="mb-6"><h4 className="font-semibold text-amber-400 mb-2">{TYPE_DISPLAY_NAMES[type]} ({items.reduce((s,i)=>s+i.count,0)})</h4><div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">{items.map(({card, count})=>(<div key={card.id} className="relative cursor-pointer" onMouseEnter={() => setSelectedCard(card)}><Image src={card.image_uris?.normal || ''} alt={card.name} width={244} height={340} className="rounded-md shadow-sm transition-transform hover:scale-105" /><div className="absolute top-1 right-1 bg-black/80 ...">{count}</div></div>))}</div></div>)
+                             return (<div key={type} className="mb-6"><h4 className="font-semibold text-amber-400 mb-2">{TYPE_DISPLAY_NAMES[type]} ({items.reduce((s,i)=>s+i.count,0)})</h4><div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">{items.map(({card, count})=>(<div key={card.id} className="relative cursor-pointer" onMouseEnter={() => setSelectedCard(card)}><Image src={card.image_uris?.normal || ''} alt={card.name} width={244} unoptimized height={340} className="rounded-md shadow-sm transition-transform hover:scale-105" /><div className="absolute top-1 right-1 bg-black/80 ...">{count}</div></div>))}</div></div>)
                         })}
                     </div>
                      {/* Separador */}
@@ -145,7 +145,7 @@ export default function DecklistVisualizer({ decklist, cardDataMap }: DecklistVi
                         {MAIN_ROW_ORDER.map(type => {
                              const items = groupedCards[type];
                              if (!items || items.length === 0) return null;
-                             return (<div key={type} className="mb-6"><h4 className="font-semibold text-amber-400 mb-2">{TYPE_DISPLAY_NAMES[type]} ({items.reduce((s,i)=>s+i.count,0)})</h4><div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">{items.map(({card, count})=>(<div key={card.id} className="relative cursor-pointer" onMouseEnter={() => setSelectedCard(card)}><Image src={card.image_uris?.normal || ''} alt={card.name} width={244} height={340} className="rounded-md shadow-sm transition-transform hover:scale-105" /><div className="absolute top-1 right-1 bg-black/80 ...">{count}</div></div>))}</div></div>)
+                             return (<div key={type} className="mb-6"><h4 className="font-semibold text-amber-400 mb-2">{TYPE_DISPLAY_NAMES[type]} ({items.reduce((s,i)=>s+i.count,0)})</h4><div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">{items.map(({card, count})=>(<div key={card.id} className="relative cursor-pointer" onMouseEnter={() => setSelectedCard(card)}><Image src={card.image_uris?.normal || ''} alt={card.name} width={244} height={340} unoptimized className="rounded-md shadow-sm transition-transform hover:scale-105" /><div className="absolute top-1 right-1 bg-black/80 ...">{count}</div></div>))}</div></div>)
                         })}
                     </div>
                 </div>

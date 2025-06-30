@@ -29,6 +29,7 @@ export default function CreatorHeader({ profile }: { profile: Profile | null }) 
             src={profile.cover_image_url} 
             alt="Capa do criador" 
             fill 
+            unoptimized
             className="object-cover" 
           />
         ) : (

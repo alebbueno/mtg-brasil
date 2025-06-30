@@ -29,6 +29,7 @@ export default function DeckCardEditor({
           alt={card.name}
           width={60}
           height={85}
+          unoptimized
           className="rounded shadow"
         />
       )}

@@ -37,6 +37,7 @@ export default function LatestSetItem({ set }: LatestSetItemProps) {
               alt={`${set.name} icon`}
               fill
               sizes="64px"
+              unoptimized
               className="object-contain filter invert brightness-150"
             />
 

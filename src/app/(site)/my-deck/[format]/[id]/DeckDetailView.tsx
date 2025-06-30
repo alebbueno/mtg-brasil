@@ -163,6 +163,7 @@ export default function DeckDetailView({
               alt="Pré-visualização da carta"
               width={340}
               height={475}
+              unoptimized
               className="rounded-lg shadow-lg mx-auto transition-all duration-300"
             />
             <PriceDisplay priceData={selectedCardPrice} isLoading={isPriceLoading} />
@@ -174,6 +175,7 @@ export default function DeckDetailView({
                     alt="Pré-visualização da carta"
                     width={280}
                     height={390}
+                    unoptimized
                     className="rounded-lg shadow-lg mx-auto"
                 />
                 <PriceDisplay priceData={selectedCardPrice} isLoading={isPriceLoading} />

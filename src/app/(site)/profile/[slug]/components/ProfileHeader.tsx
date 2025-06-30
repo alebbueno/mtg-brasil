@@ -31,6 +31,7 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
             src={profile.cover_image_url} 
             alt={`Capa do perfil de ${profile.username}`}
             fill
+            unoptimized
             className="object-cover"
             priority
           />

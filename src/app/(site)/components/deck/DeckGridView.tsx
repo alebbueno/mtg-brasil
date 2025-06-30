@@ -56,6 +56,7 @@ function GridCardDisplay({ card, onCardHover, onCardLeave, onPriceFetch }: {
           alt={card.name}
           width={265}
           height={370}
+          unoptimized
           className="w-full object-contain aspect-[5/7] rounded-md shadow-lg"
         />
       </div>

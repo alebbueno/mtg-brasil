@@ -34,6 +34,7 @@ export default function DraggableCard({ card, zone }: DraggableCardProps) {
         alt={card.name}
         width={146}
         height={204}
+        
         className={cn(
           "rounded shadow-lg pointer-events-none transition-transform duration-300",
           card.tapped && "rotate-90"

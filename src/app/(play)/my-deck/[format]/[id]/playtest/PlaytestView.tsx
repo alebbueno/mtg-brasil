@@ -154,7 +154,7 @@ export default function PlaytestView({ initialDecklist, initialCommanderList, in
         </main>
         <PlaytestSidebar deckFormat={deckFormat} onViewZone={handleViewZone} />
       </div>
-      <DragOverlay>{activeCard ? <div className="w-28 opacity-90 rotate-3 shadow-2xl"><Image src={activeCard.image_uris?.small || ''} alt={activeCard.name} width={146} height={204} className="rounded"/></div> : null}</DragOverlay>
+      <DragOverlay>{activeCard ? <div className="w-28 opacity-90 rotate-3 shadow-2xl"><Image src={activeCard.image_uris?.small || ''} alt={activeCard.name} width={146} height={204} unoptimized className="rounded"/></div> : null}</DragOverlay>
       <ZoneViewerModal isOpen={!!zoneViewer.title} onOpenChange={(isOpen) => !isOpen && setZoneViewer({title: '', cards: []})} zoneName={zoneViewer.title} cards={zoneViewer.cards} />
       <CardDetailModal
         isOpen={!!detailModalCard}

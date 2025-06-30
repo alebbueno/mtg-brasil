@@ -56,6 +56,7 @@ export default function DeckInfoForm({
                   src={coverImageUrl} 
                   alt="Capa do deck" 
                   fill
+                  unoptimized
                   className="object-cover" 
                 />
             </div>

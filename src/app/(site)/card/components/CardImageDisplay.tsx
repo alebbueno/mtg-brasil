@@ -17,6 +17,7 @@ const CardImageDisplay = ({ imageUrl, altText, backImageUrl, backAltText }: Card
           alt={altText}
           width={488}
           height={680}
+          unoptimized
           className="rounded-2xl shadow-lg shadow-black/30"
           priority
         />
@@ -27,6 +28,7 @@ const CardImageDisplay = ({ imageUrl, altText, backImageUrl, backAltText }: Card
           alt={backAltText || altText}
           width={488}
           height={680}
+          unoptimized
           className="rounded-2xl shadow-lg shadow-black/30"
         />
       )}

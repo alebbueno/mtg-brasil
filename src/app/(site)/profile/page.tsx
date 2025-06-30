@@ -215,6 +215,7 @@ export default function ProfilePage() {
             src={profile.cover_image_url} 
             alt="Imagem de capa" 
             fill
+            unoptimized
             className="object-cover pointer-events-none"
             style={{ objectPosition: `50% ${profile.cover_position_y || 50}%` }}
             priority
@@ -249,7 +250,7 @@ export default function ProfilePage() {
         <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
           <div className="relative h-32 w-32 rounded-full border-4 border-neutral-950 bg-neutral-700">
             {profile?.avatar_url && (
-              <Image src={profile.avatar_url} alt="Avatar" fill className="object-cover rounded-full" />
+              <Image src={profile.avatar_url} alt="Avatar" unoptimized fill className="object-cover rounded-full" />
             )}
             <label htmlFor="avatar-upload" className="absolute bottom-1 right-1 bg-black/50 p-2 rounded-full cursor-pointer hover:bg-black/70 transition">
               <Upload className="h-4 w-4 text-white" />

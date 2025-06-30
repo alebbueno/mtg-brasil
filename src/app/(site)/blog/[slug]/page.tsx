@@ -93,6 +93,7 @@ export default async function PostPage(props: any) {
             src={post.cover_image_url}
             alt={post.title}
             fill
+            unoptimized
             className="object-cover"
             priority
           />
