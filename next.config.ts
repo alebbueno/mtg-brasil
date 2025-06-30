@@ -1,59 +1,60 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
+    // Configura um tempo de cache longo (31 dias) para reduzir reotimizações
+    minimumCacheTTL: 2678400,
+    // Limita as qualidades das imagens para reduzir transformações
+    qualities: [60, 80],
+    // Define tamanhos específicos para dispositivos, evitando múltiplas variações
+    deviceSizes: [640, 828, 1080, 1200],
+    // Mantém os padrões de URLs externas para processar apenas imagens específicas
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'via.placeholder.com', // ✨ Domínio adicionado para placeholders
+        hostname: 'via.placeholder.com', // ✨ Domínio para placeholders
       },
       {
         protocol: 'https',
-        hostname: 'placehold.co', // Domínio adicionado para as imagens de fallback
+        hostname: 'placehold.co', // Domínio para imagens de fallback
       },
       {
         protocol: 'https',
-        hostname: 'irvppzfjscjphhnzxcxp.supabase.co', // Substitua se o ID do seu projeto for diferente
+        hostname: 'irvppzfjscjphhnzxcxp.supabase.co', // Supabase
       },
       {
         protocol: 'https',
         hostname: 'lh3.googleusercontent.com',
         port: '',
-        pathname: '/a/**',
+        pathname: '/a/**', // Google images
       },
       {
         protocol: 'https',
-        hostname: 'cards.scryfall.io',
+        hostname: 'cards.scryfall.io', // Scryfall
       },
       {
         protocol: 'https',
-        hostname: 'c2.scryfall.com',
+        hostname: 'c2.scryfall.com', // Scryfall
       },
-      // Você pode adicionar outros domínios aqui se precisar
     ],
   },
   serverActions: {
-    bodySizeLimit: '10mb', // Aumenta o limite para 10MB
+    bodySizeLimit: '10mb', // Mantém o limite para 10MB
   },
-  // --- INÍCIO DA ADIÇÃO: Configuração de Cabeçalhos (CORS) ---
+  // Mantém a configuração de cabeçalhos (CORS) inalterada
   async headers() {
     return [
       {
-        // Aplica estas regras a todas as rotas dentro de /api/
         source: "/api/:path*",
         headers: [
-          // Permite que o seu domínio principal acesse a API
           { 
             key: "Access-Control-Allow-Origin", 
             value: "https://decksage.com.br"
           },
-          // Define os métodos HTTP permitidos
           {
             key: "Access-Control-Allow-Methods",
             value: "GET, POST, OPTIONS, PUT, PATCH, DELETE",
           },
-          // Define os cabeçalhos permitidos na requisição
           {
             key: "Access-Control-Allow-Headers",
             value: "X-Requested-With, content-type, Authorization",
@@ -62,7 +63,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // --- FIM DA ADIÇÃO ---
 };
 
 export default nextConfig;
