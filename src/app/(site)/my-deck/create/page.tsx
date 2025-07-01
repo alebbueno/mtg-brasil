@@ -1,48 +1,73 @@
 'use client'
 
-import { useActionState, useState } from 'react'
-// AJUSTE: Não vamos mais precisar do useFormStatus aqui
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { useActionState, useState, useEffect, useMemo } from 'react';
+import { useFormStatus } from 'react-dom';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { createDeck } from '@/app/actions/deckActions'
 import { Loader2, PlusCircle, Globe, Lock } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import AutocompleteInput from '@/app/(site)/components/deck/AutocompleteInput'
+import type { ScryfallCard } from '@/app/lib/types';
+import { Badge } from '@/components/ui/badge';
+// import Link from 'next/link';
 
 const initialState = {
   message: '',
-}
+  success: false
+};
 
-// AJUSTE: O botão agora recebe o estado de loading como uma prop
 function SubmitButton({ isSubmitting }: { isSubmitting: boolean }) {
+  const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full bg-amber-500 text-black hover:bg-amber-600" disabled={isSubmitting}>
-      {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> A criar deck...</> : <><PlusCircle className="mr-2 h-4 w-4" /> Criar Deck</>}
+    <Button type="submit" className="w-full bg-amber-500 text-black hover:bg-amber-600" disabled={isSubmitting || pending}>
+      {isSubmitting || pending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Criando deck...</> : <><PlusCircle className="mr-2 h-4 w-4" /> Criar Deck</>}
     </Button>
-  )
+  );
 }
 
 export default function CreateDeckPage() {
-  const [state, formAction] = useActionState(createDeck, initialState)
-  
-  // AJUSTE: Estado para controlar o clique e o feedback de loading
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const [isPublic, setIsPublic] = useState(false)
-  const [selectedFormat, setSelectedFormat] = useState('')
-  const [commander, setCommander] = useState('')
+  const [state, formAction] = useActionState(createDeck, initialState);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState('');
+  const [commander, setCommander] = useState('');
   const [creationMode, setCreationMode] = useState<'list' | 'builder'>('list');
+  const [decklistText, setDecklistText] = useState('');
+
+  const cardCount = useMemo(() => {
+    if (!decklistText) return 0;
+    return decklistText
+      .split('\n')
+      .reduce((total, line) => {
+        const match = line.trim().match(/^(\d+)/);
+        if (match) {
+          return total + parseInt(match[1], 10);
+        }
+        return total;
+      }, 0);
+  }, [decklistText]);
+
+  useEffect(() => {
+    if (state?.message) {
+      if (!state.success) {
+        toast.error(state.message);
+      }
+    }
+    setIsSubmitting(false);
+  }, [state]);
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 py-8 px-4 md:px-6">
@@ -56,26 +81,24 @@ export default function CreateDeckPage() {
           </p>
         </header>
 
-        {/* AJUSTE: Adicionado o `onSubmit` para ativar nosso estado de loading manual */}
         <form 
           action={formAction} 
           onSubmit={() => setIsSubmitting(true)}
           className="p-8 bg-neutral-900 rounded-lg border border-neutral-800 space-y-6"
         >
-          {/* O `fieldset` agora usa o estado `isSubmitting` */}
           <fieldset 
             disabled={isSubmitting} 
             className="space-y-6 transition-opacity duration-300 [&:disabled]:opacity-50 [&:disabled]:cursor-not-allowed"
           >
             <div className="space-y-2">
               <Label htmlFor="name" className="text-lg font-semibold">Nome do Deck</Label>
-              <Input id="name" name="name" placeholder="Ex: Mono Black Control" className="bg-neutral-800 border-neutral-700 focus:ring-amber-500" />
+              <Input id="name" name="name" placeholder="Ex: Mono Black Control" required className="bg-neutral-800 border-neutral-700 focus:ring-amber-500" />
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="format" className="text-lg font-semibold">Formato</Label>
-                <Select name="format" onValueChange={setSelectedFormat} value={selectedFormat}>
+                <Select name="format" required onValueChange={setSelectedFormat} value={selectedFormat}>
                   <SelectTrigger className="bg-neutral-800 border-neutral-700 focus:ring-amber-500">
                     <SelectValue placeholder="Selecione um formato" />
                   </SelectTrigger>
@@ -105,7 +128,7 @@ export default function CreateDeckPage() {
             {selectedFormat === 'commander' && (
               <div className="space-y-2">
                 <Label htmlFor="commander" className="text-lg font-semibold">Comandante</Label>
-                <AutocompleteInput onSelect={(card) => card ? setCommander(card.name) : setCommander('')} placeholder="Digite o nome do seu comandante..." />
+                <AutocompleteInput onSelect={(card: ScryfallCard | null) => card ? setCommander(card.name) : setCommander('')} placeholder="Digite o nome do seu comandante..." />
                 <input type="hidden" name="commander" value={commander} />
               </div>
             )}
@@ -117,7 +140,7 @@ export default function CreateDeckPage() {
             
             <div className="space-y-3">
                <Label className="text-lg font-semibold">Modo de Criação</Label>
-               <RadioGroup name="creationMode" value={creationMode} onValueChange={(value: 'list' | 'builder') => setCreationMode(value)}>
+               <RadioGroup name="creationMode" value={creationMode} onValueChange={(value: any) => setCreationMode(value)}>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <Label htmlFor="mode-list" className="flex flex-col items-start gap-2 p-4 rounded-lg border border-neutral-700 bg-neutral-800 has-[:checked]:border-amber-500 has-[:checked]:bg-amber-950/50 cursor-pointer">
                            <div className="flex items-center justify-between w-full">
@@ -139,9 +162,12 @@ export default function CreateDeckPage() {
 
             {creationMode === 'list' && (
               <div className="space-y-2">
-                <Label htmlFor="decklist" className="text-lg font-semibold">
-                  Lista de Cartas {selectedFormat === 'commander' && '(as 99, sem o comandante)'}
-                </Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="decklist" className="text-lg font-semibold">
+                    Lista de Cartas {selectedFormat === 'commander' && '(as 99, sem o comandante)'}
+                  </Label>
+                  <Badge variant="secondary">Total: {cardCount}</Badge>
+                </div>
                 <Textarea
                   id="decklist"
                   name="decklist"
@@ -151,12 +177,14 @@ export default function CreateDeckPage() {
                   }
                   rows={20}
                   className="bg-neutral-800 border-neutral-700 font-mono text-sm focus:ring-amber-500"
+                  value={decklistText}
+                  onChange={(e) => setDecklistText(e.target.value)}
                 />
               </div>
             )}
           </fieldset>
 
-          {state.message && !isSubmitting && ( // Mostra erro apenas se não estiver submetendo
+          {state?.message && (
              <Alert variant="destructive">
                <AlertTitle>Erro</AlertTitle>
                <AlertDescription>{state.message}</AlertDescription>
