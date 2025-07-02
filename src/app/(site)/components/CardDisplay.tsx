@@ -63,7 +63,7 @@ export default function CardDisplay({ card, isDoubleFaced, displayCard, translat
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-6 flex items-center justify-center">
       <Card className="w-full max-w-5xl bg-gray-800 border-gray-700 shadow-xl rounded-xl overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-gray-700 to-gray-800 py-6">
+        <CardHeader className="bg-gradient-to-r from-gray-700 to-gray-800">
           <CardTitle className="text-3xl sm:text-4xl font-extrabold text-center text-white drop-shadow-md">
             {card.name}
           </CardTitle>

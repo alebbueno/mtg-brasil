@@ -291,51 +291,40 @@ export async function deleteDecEdit(deckId: string) {
   redirect('/my-decks');
 }
 
-export async function toggleSaveDeck(deckId: string): Promise<{ saved: boolean, message: string }> {
+/**
+ * Adiciona ou remove um deck dos favoritos de um usuário.
+ * AGORA ATUALIZA O CONTADOR CORRETO (save_count).
+ */
+export async function toggleSaveDeck(deckId: string, isCurrentlySaved: boolean) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error('Apenas utilizadores autenticados podem guardar decks.');
+    return { success: false, message: 'Você precisa estar logado.' };
   }
 
-  const { data: existingSave, error: fetchError } = await supabase
-    .from('saved_decks')
-    .select('deck_id')
-    .eq('user_id', user.id)
-    .eq('deck_id', deckId)
-    .maybeSingle();
-  
-  if (fetchError) {
-    console.error("Erro ao verificar deck guardado:", fetchError);
-    throw new Error("Não foi possível realizar a operação.");
-  }
+  try {
+    if (isCurrentlySaved) {
+      // Remove dos favoritos
+      const { error } = await supabase.from('saved_decks').delete().match({ user_id: user.id, deck_id: deckId });
+      if (error) throw error;
+      
+      // Decrementa o save_count
+      await supabase.rpc('decrement_deck_save_count', { deck_id_to_update: deckId });
+      
+      return { success: true, message: 'Deck removido dos favoritos.' };
+    } else {
+      // Adiciona aos favoritos
+      const { error } = await supabase.from('saved_decks').insert({ user_id: user.id, deck_id: deckId });
+      if (error) throw error;
 
-  if (existingSave) {
-    const { error: deleteError } = await supabase
-      .from('saved_decks')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('deck_id', deckId);
-    
-    if (deleteError) {
-      console.error("Erro ao remover deck guardado:", deleteError);
-      throw new Error("Não foi possível remover o deck dos seus guardados.");
+      // Incrementa o save_count
+      await supabase.rpc('increment_deck_save_count', { deck_id_to_update: deckId });
+
+      return { success: true, message: 'Deck salvo nos favoritos!' };
     }
-
-    return { saved: false, message: "Deck removido dos guardados." };
-  } 
-  else {
-    const { error: insertError } = await supabase
-      .from('saved_decks')
-      .insert({ user_id: user.id, deck_id: deckId });
-
-    if (insertError) {
-      console.error("Erro ao guardar deck:", insertError);
-      throw new Error("Não foi possível guardar o deck.");
-    }
-    
-    return { saved: true, message: "Deck guardado com sucesso!" };
+  } catch (error: any) {
+    return { success: false, message: `Erro: ${error.message}` };
   }
 }
 
@@ -400,5 +389,81 @@ export async function analyzeDeckWithAI(deckId: string, decklistText: string): P
   } catch (error) {
     console.error("Erro na análise da IA:", error);
     return { error: "Ocorreu um erro ao comunicar com a IA." };
+  }
+}
+
+/**
+ * Cria uma cópia de um deck existente para o usuário logado.
+ */
+export async function cloneDeck(deckIdToClone: string) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return redirect('/login');
+  }
+
+  try {
+    // 1. Busca o deck original para garantir que ele é público
+    const { data: originalDeck, error: fetchError } = await supabase
+      .from('decks')
+      .select('*')
+      .eq('id', deckIdToClone)
+      .eq('is_public', true)
+      .single();
+    
+    if (fetchError || !originalDeck) {
+      throw new Error("Deck original não encontrado ou não é público.");
+    }
+    
+    if (originalDeck.user_id === user.id) {
+        return redirect(`/my-decks/edit/${originalDeck.format}/${originalDeck.id}`);
+    }
+
+    // AJUSTE CRÍTICO: Chama a função para incrementar o contador de CLONES
+    await supabase.rpc('increment_deck_clone_count', { deck_id_to_update: deckIdToClone });
+
+    // 2. Prepara os dados para o novo deck
+    const newDeckData = {
+      user_id: user.id,
+      name: `Cópia de ${originalDeck.name}`,
+      description: originalDeck.description,
+      format: originalDeck.format,
+      decklist: originalDeck.decklist,
+      color_identity: originalDeck.color_identity,
+      representative_card_image_url: originalDeck.representative_card_image_url,
+      deck_check: originalDeck.deck_check,
+      social_posts: originalDeck.social_posts,
+      how_to_play_guide: originalDeck.how_to_play_guide,
+      is_public: false,
+      source: 'user_clone',
+      owner_type: 'user',
+    };
+
+    // 3. Insere o novo deck e busca o ID e o FORMATO dele
+    const { data: newDeck, error: insertError } = await supabase
+      .from('decks')
+      .insert(newDeckData)
+      // AJUSTE: Pedimos também o formato de volta para usar no redirecionamento
+      .select('id, format')
+      .single();
+
+    if (insertError) {
+      throw insertError;
+    }
+    
+    if (!newDeck) {
+        throw new Error("Não foi possível obter os dados do deck recém-criado.");
+    }
+
+    // 4. Revalida o cache
+    revalidatePath('/my-decks');
+    
+    // AJUSTE CRÍTICO: Usa o formato e o id para construir a URL correta
+    redirect(`/my-decks/edit/${newDeck.format}/${newDeck.id}`);
+
+  } catch (error: any) {
+    console.error("Erro ao clonar deck:", error);
+    return redirect(`/my-decks/`);
   }
 }

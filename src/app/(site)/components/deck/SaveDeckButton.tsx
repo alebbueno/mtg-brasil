@@ -20,9 +20,9 @@ export default function SaveDeckButton({ deckId, initialIsSaved }: SaveDeckButto
   const handleToggleSave = () => {
     startTransition(async () => {
       try {
-        const result = await toggleSaveDeck(deckId);
+        const result = await toggleSaveDeck(deckId, isSaved);
         // Atualiza o estado do botão com base na resposta da ação
-        setIsSaved(result.saved);
+        setIsSaved(result.success);
         toast.success(result.message);
       } catch (error: any) {
         toast.error(error.message || "Ocorreu um erro.");

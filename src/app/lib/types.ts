@@ -120,6 +120,8 @@ export interface DeckFromDB {
 
 // Tipo para os dados do perfil do criador
 export interface CreatorProfile {
+  id: string;
+  full_name: string;
   username: string | null;
   avatar_url: string | null;
   cover_image_url: string | null;

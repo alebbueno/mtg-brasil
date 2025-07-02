@@ -153,9 +153,10 @@ export default function DeckDetailView({
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 p-4 sm:p-8">
+      
       <div className="max-w-screen-xl mx-auto">
         {!isOwner && <CreatorHeader profile={creatorProfile} />}
-        <DeckHeader deck={initialDeck} isOwner={isOwner} isInitiallySaved={isInitiallySaved} />
+        <DeckHeader deck={initialDeck} isOwner={isOwner} isInitiallySaved={isInitiallySaved} creatorProfile={creatorProfile} currentUser={currentUser} />
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
           <aside className="hidden lg:block lg:col-span-3 sticky top-24 self-start">
             <Image
