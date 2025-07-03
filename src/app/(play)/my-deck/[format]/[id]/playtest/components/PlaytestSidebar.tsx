@@ -5,7 +5,7 @@
 import { usePlaytestStore, type GameCard, type Zone } from '@/app/(play)/stores/playtest-store';
 import { Button } from '@/components/ui/button';
 import LifeCounter from './LifeCounter';
-import { Library, Skull, ShieldEllipsis, Shuffle, ArrowDownToLine, Eye, Hand, Play } from 'lucide-react';
+import { Library, Skull, ShieldEllipsis, Shuffle, ArrowDownToLine, Eye, Hand, Play, ArrowRight, RefreshCw } from 'lucide-react';
 import Image from 'next/image';
 import { useDroppable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
@@ -19,10 +19,11 @@ import {
   ContextMenuSubTrigger,
   ContextMenuSubContent,
 } from "@/components/ui/context-menu";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const cardBackImg = '/card-magic.png';
 
-// Sub-componente DroppableZone com a estrutura corrigida
+// Sub-componente DroppableZone com a estrutura original
 function DroppableZone({ zoneId, title, count, Icon, cards, onViewZone }: { 
   zoneId: Zone, 
   title: string, 
@@ -38,18 +39,16 @@ function DroppableZone({ zoneId, title, count, Icon, cards, onViewZone }: {
   return (
     <div className="text-center">
       <ContextMenu>
-        {/* O ContextMenuTrigger agora usa 'asChild' para passar suas props para o filho */}
         <ContextMenuTrigger asChild>
-          {/* Este é o nosso elemento principal que é tanto o trigger quanto a zona de drop */}
           <div ref={setNodeRef} className={cn(
               "w-full block p-2 bg-neutral-800/50 border border-neutral-700 rounded-lg cursor-pointer transition-all duration-200 hover:border-amber-500/50",
               isOver && "border-2 border-amber-400 shadow-lg shadow-amber-500/20"
           )}>
-            <p className="text-sm font-medium text-amber-400 flex items-center justify-center gap-2 mb-1">
+            <p className="text-sm font-medium text-amber-400 flex items-center justify-center gap-1 mb-1">
               <Icon size={16} /> {title} ({count})
             </p>
-            <div className="h-44 w-full flex items-center justify-center rounded-md">
-              {topCard ? <Image src={topCard.image_uris?.small} alt={topCard.name} width={100} height={140} className="rounded pointer-events-none" unoptimized/> : <Icon size={32} className="text-neutral-600"/>}
+            <div className="h-24 w-full flex items-center justify-center rounded-md">
+              {topCard ? <Image src={topCard.image_uris?.small} alt={topCard.name} width={70} height={110} className="rounded pointer-events-none" unoptimized/> : <Icon size={32} className="text-neutral-600"/>}
             </div>
           </div>
         </ContextMenuTrigger>
@@ -81,7 +80,6 @@ function DroppableZone({ zoneId, title, count, Icon, cards, onViewZone }: {
   )
 }
 
-
 export default function PlaytestSidebar({ deckFormat, onViewZone }: {
   deckFormat: string;
   onViewZone: (title: string, cards: GameCard[]) => void;
@@ -90,7 +88,7 @@ export default function PlaytestSidebar({ deckFormat, onViewZone }: {
   const isCommander = deckFormat === 'commander';
   
   return (
-    <aside className="w-56 bg-neutral-900 p-4 border-l border-neutral-800 flex flex-col gap-4 overflow-y-auto">
+    <aside className="w-56 bg-neutral-900 p-2 border-l border-neutral-800 flex flex-col gap-2 overflow-y-auto">
       <h2 className="text-lg font-bold text-center text-amber-500">Zonas</h2>
       <LifeCounter initialLife={isCommander ? 40 : 20} />
       
@@ -99,7 +97,7 @@ export default function PlaytestSidebar({ deckFormat, onViewZone }: {
             <ContextMenuTrigger className="w-full relative group" aria-label="Grimório">
                 <button onClick={() => actions.drawCard()} className="w-full appearance-none">
                     <p className="text-sm font-medium text-amber-400 flex items-center justify-center gap-2 mb-1"><Library size={16} /> Grimório ({library.length})</p>
-                    <Image src={cardBackImg} alt="Verso da carta" width={200} height={280} unoptimized className="rounded-lg shadow-lg mx-auto transition-transform duration-200 group-hover:scale-105" />
+                    <Image src={cardBackImg} alt="Verso da carta" width={120} height={200} unoptimized className="rounded-lg shadow-lg mx-auto transition-transform duration-200 group-hover:scale-105" />
                 </button>
             </ContextMenuTrigger>
             <ContextMenuContent className="w-56 bg-neutral-900 border-neutral-700 text-neutral-200">
@@ -124,8 +122,34 @@ export default function PlaytestSidebar({ deckFormat, onViewZone }: {
       <DroppableZone zoneId="graveyard" title="Cemitério" count={graveyard.length} Icon={Skull} cards={graveyard} onViewZone={onViewZone} />
       <DroppableZone zoneId="exile" title="Exílio" count={exile.length} Icon={ShieldEllipsis} cards={exile} onViewZone={onViewZone} />
       
+      <div>
+        <CardContent className="p-3 flex flex-col gap-2">
+          <Button 
+            variant="default" 
+            className="bg-green-600 hover:bg-green-700 text-white"
+            onClick={() => actions.nextTurn()}
+          >
+            <ArrowRight className="mr-2 h-4 w-4" /> Próximo Turno
+          </Button>
+          <Button 
+            variant="destructive" 
+            onClick={() => actions.resetGame()}
+          >
+            <RefreshCw className="mr-2 h-4 w-4" /> Reiniciar Jogo
+          </Button>
+        </CardContent>
+      </div>
+
+      <Card className="bg-neutral-800/50 border-neutral-700">
+        <CardHeader className="">
+          <CardTitle className="text-sm font-medium text-amber-400">Mecânicas</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col">
+          <p className="text-neutral-500 text-sm">Nenhuma mecânica disponível no momento.</p>
+        </CardContent>
+      </Card>
+
       <div className="flex-grow"></div>
-      <Button onClick={() => actions.resetGame()} variant="destructive" size="sm">Reiniciar Jogo</Button>
     </aside>
   );
 }

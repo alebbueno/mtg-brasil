@@ -10,13 +10,13 @@ export default function LifeCounter({ initialLife = 40 }: { initialLife: number 
 
   return (
     <Card className="bg-red-900/40 border-red-500/50 text-center">
-      <CardHeader className="p-2">
-        <CardTitle className="text-sm font-medium text-red-300 flex items-center justify-center gap-2">
+      <CardHeader className="">
+        <CardTitle className="text-sm font-medium text-red-300 flex items-center justify-center gap-1">
           <Heart size={16} />
           Vida
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-2 flex items-center justify-center gap-2">
+      <CardContent className="flex items-center justify-center gap-2">
         <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full" onClick={() => setLife(l => l - 1)}>
             <Minus size={16} />
         </Button>

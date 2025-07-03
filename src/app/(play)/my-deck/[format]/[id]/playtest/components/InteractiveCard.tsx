@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 'use client'
 
@@ -14,7 +15,7 @@ import {
   ContextMenuTrigger,
   ContextMenuSeparator,
 } from "@/components/ui/context-menu";
-import { Hand, Skull, ShieldEllipsis, ArrowDownToLine, ArrowUpToLine, RefreshCw, Play, BookOpen, Crown } from 'lucide-react';
+import { Hand, Skull, ShieldEllipsis, ArrowDownToLine, ArrowUpToLine, RefreshCw, Play, BookOpen, Crown, Plus } from 'lucide-react';
 
 interface InteractiveCardProps {
   card: GameCard;
@@ -43,29 +44,51 @@ export default function InteractiveCard({ card, zone, onHover, onViewDetails }: 
     }
   };
 
+  const handleAddPowerToughnessCounters = () => {
+    const powerInput = window.prompt(`Quantos marcadores de poder deseja adicionar a ${card.name}? (Ex.: 2 ou -2)`, '0');
+    const toughnessInput = window.prompt(`Quantos marcadores de resistência deseja adicionar a ${card.name}? (Ex.: 2 ou -2)`, '0');
+    if (powerInput !== null && toughnessInput !== null) {
+      const power = parseInt(powerInput, 10);
+      const toughness = parseInt(toughnessInput, 10);
+      if (!isNaN(power) && !isNaN(toughness)) {
+        actions.addPowerToughnessCounters(card.instanceId, power, toughness);
+      } else {
+        toast.warning('Por favor, insira números válidos para poder e resistência.');
+      }
+    }
+  };
+
   const isCommander = card.instanceId.startsWith('cmd-');
+  const isBattlefield = zone === 'battlefield';
+  const cardWidth = isBattlefield ? 116 : 146; // 80% do tamanho original (146 * 0.8 ≈ 116)
+  const cardHeight = isBattlefield ? 163 : 204; // 80% do tamanho original (204 * 0.8 ≈ 163)
 
   const CardImage = (
     <div
       onMouseEnter={() => onHover(card)}
       onMouseLeave={() => onHover(null)}
-      className={cn("w-28 flex-shrink-0 relative group", isDragging && "opacity-30")}
+      className={cn("flex-shrink-0 relative group", isDragging && "opacity-30", isBattlefield ? "w-[116px]" : "w-28")}
       title={card.name}
     >
       <Image 
         src={card.image_uris?.small || ''}
         alt={card.name}
-        width={146}
-        height={204}
+        width={cardWidth}
+        height={cardHeight}
         className={cn(
           "rounded-md shadow-lg pointer-events-none transition-transform duration-200 group-hover:-translate-y-1", 
-          card.tapped && "rotate-90"
+          card.tapped && isBattlefield && "rotate-90"
         )}
         unoptimized
       />
       {zone === 'commandZone' && card.commanderTax > 0 && (
         <div className="absolute -top-2 -right-2 bg-sky-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-neutral-900 shadow-md">
           +{card.commanderTax}
+        </div>
+      )}
+      {zone === 'battlefield' && (card.powerCounters !== 0 || card.toughnessCounters !== 0) && (
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-bold px-2 py-1 rounded-full flex items-center justify-center border-2 border-neutral-900 shadow-md">
+          {card.powerCounters >= 0 ? '+' : ''}{card.powerCounters}/{card.toughnessCounters >= 0 ? '+' : ''}{card.toughnessCounters}
         </div>
       )}
     </div>
@@ -100,6 +123,9 @@ export default function InteractiveCard({ card, zone, onHover, onViewDetails }: 
               )}
               <ContextMenuItem onSelect={() => actions.toggleTap(card.instanceId)} className="cursor-pointer">
                 <RefreshCw className="mr-2 h-4 w-4" /> Virar / Desvirar
+              </ContextMenuItem>
+              <ContextMenuItem onSelect={handleAddPowerToughnessCounters} className="cursor-pointer">
+                <Plus className="mr-2 h-4 w-4" /> Adicionar Marcadores Poder/Resistência
               </ContextMenuItem>
               <ContextMenuItem onSelect={() => actions.moveCard(card.instanceId, 'battlefield', 'hand')} className="cursor-pointer">
                 <Hand className="mr-2 h-4 w-4" /> Voltar para a Mão

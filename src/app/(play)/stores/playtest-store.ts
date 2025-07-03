@@ -10,6 +10,8 @@ export interface GameCard extends ScryfallCard {
   instanceId: string;
   tapped: boolean;
   commanderTax: number;
+  powerCounters: number; // Contadores para poder
+  toughnessCounters: number; // Contadores para resistência
 }
 
 export type Zone = 'library' | 'hand' | 'battlefield' | 'graveyard' | 'exile' | 'commandZone';
@@ -41,6 +43,8 @@ interface PlaytestState extends PlaytestZones {
     millCards: (count: number) => void;
     shuffleGraveyardIntoLibrary: () => void;
     returnCommanderToZone: (cardInstanceId: string) => void;
+    nextTurn: () => void;
+    addPowerToughnessCounters: (cardInstanceId: string, power: number, toughness: number) => void; // Ação renomeada
   }
 }
 
@@ -63,6 +67,8 @@ export const usePlaytestStore = create<PlaytestState>((set, get) => ({
         instanceId: id,
         tapped: false,
         commanderTax: 0,
+        powerCounters: 0, // Inicializa com 0
+        toughnessCounters: 0, // Inicializa com 0
         zone: ''
       });
 
@@ -216,5 +222,52 @@ export const usePlaytestStore = create<PlaytestState>((set, get) => ({
         return { ...state, battlefield, commandZone };
       });
     },
+
+    nextTurn: () => {
+      set(state => {
+        const updatedBattlefield = state.battlefield.map(card => ({
+          ...card,
+          tapped: false
+        }));
+        if (state.library.length === 0) {
+          toast.warning("Não há cartas suficientes no grimório para o próximo turno.");
+          return { ...state, battlefield: updatedBattlefield };
+        }
+        const drawnCards = state.library.slice(0, 1);
+        const newLibrary = state.library.slice(1);
+        toast.info("Próximo turno: cartas desviradas e 1 carta comprada.");
+        return {
+          ...state,
+          battlefield: updatedBattlefield,
+          library: newLibrary,
+          hand: [...drawnCards, ...state.hand]
+        };
+      });
+    },
+
+    addPowerToughnessCounters: (cardInstanceId: string, power: number, toughness: number) => {
+      set(state => {
+        const battlefield = state.battlefield.map(card =>
+          card.instanceId === cardInstanceId
+            ? {
+                ...card,
+                powerCounters: (card.powerCounters || 0) + power,
+                toughnessCounters: (card.toughnessCounters || 0) + toughness
+              }
+            : card
+        );
+        const updatedCard = battlefield.find(card => card.instanceId === cardInstanceId);
+        if (updatedCard) {
+          toast.info(
+            `Adicionado ${power >= 0 ? '+' : ''}${power}/${toughness >= 0 ? '+' : ''}${toughness} em ${
+              updatedCard.name
+            }. Total: ${updatedCard.powerCounters >= 0 ? '+' : ''}${updatedCard.powerCounters}/${
+              updatedCard.toughnessCounters >= 0 ? '+' : ''
+            }${updatedCard.toughnessCounters}`
+          );
+        }
+        return { ...state, battlefield };
+      });
+    }
   }
 }));
