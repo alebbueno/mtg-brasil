@@ -158,3 +158,30 @@ export async function deleteSiteDeck(deckId: string) {
   revalidatePath('/admin/decks');
   return { success: true, message: 'Deck apagado com sucesso.' };
 }
+
+/**
+ * Ação para um ADMIN atualizar apenas a imagem de capa de um deck do site.
+ */
+export async function updateSiteDeckCoverImage(deckId: string, newUrl: string) {
+  const isAdmin = await checkUserRole('admin');
+  if (!isAdmin) {
+    return { success: false, message: 'Acesso negado.' };
+  }
+
+  const supabase = createClient();
+  try {
+    const { error } = await supabase
+      .from('decks')
+      .update({ representative_card_image_url: newUrl, updated_at: new Date().toISOString() })
+      .eq('id', deckId);
+
+    if (error) throw error;
+    
+    revalidatePath(`/admin/decks/edit/${deckId}`);
+    revalidatePath(`/decksage/${deckId}`); // Revalida a página pública também
+    
+    return { success: true, message: 'Imagem de capa atualizada.' };
+  } catch (error: any) {
+    return { success: false, message: `Falha ao atualizar imagem: ${error.message}` };
+  }
+}
