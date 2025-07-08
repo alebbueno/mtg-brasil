@@ -19,7 +19,7 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold text-amber-500 mb-3">Recursos</h3>
             <ul className="space-y-2">
-              <li><Link href="/about" className="hover:text-amber-500 transition">Sobre o MTG Translate</Link></li>
+              {/* <li><Link href="/about" className="hover:text-amber-500 transition">Sobre o MTG Translate</Link></li> */}
               <li><a href="https://magic.wizards.com" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition">Site Oficial do Magic</a></li>
               <li><a href="https://scryfall.com" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition">Scryfall</a></li>
               {/* Adicione aqui: Termos de Uso, Política de Privacidade se necessário */}
