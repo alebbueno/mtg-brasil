@@ -12,7 +12,10 @@ import { fetchCardsByNames} from '../lib/scryfall';
 // import { checkUserRole } from '@/lib/auth';
 import { createDeckPrompt } from '../lib/ai/prompts'; // Importa nossa nova função
 
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 
 interface CoreCard { name: string; count: number; }
 interface Decklist { mainboard: CoreCard[]; sideboard?: CoreCard[]; commander?: CoreCard[]; }

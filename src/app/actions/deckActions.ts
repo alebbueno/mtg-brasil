@@ -10,10 +10,13 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { fetchCardByName, fetchCardsByNames, getCardPriceFromScryfall } from '@/app/lib/scryfall'
 
+// --- Lógica de IA Flexível ---
 import OpenAI from 'openai';
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+import { GoogleGenerativeAI } from '@google/generative-ai';
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 
 
 // --- Tipos e Interfaces ---
@@ -337,12 +340,34 @@ interface AnalysisState {
   error?: string;
 }
 
+/**
+ * AJUSTE: Função auxiliar para limpar a string de JSON vinda da IA,
+ * removendo blocos de código Markdown e outros textos.
+ */
+const cleanJsonString = (rawResponse: string): string => {
+  if (!rawResponse) return '{}';
+  
+  // Encontra o primeiro '{' e o último '}' para extrair o objeto JSON
+  const startIndex = rawResponse.indexOf('{');
+  const endIndex = rawResponse.lastIndexOf('}');
+
+  if (startIndex === -1 || endIndex === -1) {
+    // Retorna um objeto JSON vazio se não encontrar um JSON válido
+    return '{}';
+  }
+
+  return rawResponse.substring(startIndex, endIndex + 1);
+};
+
+/**
+ * Analisa uma decklist usando o provedor de IA definido no .env
+ */
 export async function analyzeDeckWithAI(deckId: string, decklistText: string): Promise<AnalysisState> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: 'Apenas utilizadores autenticados podem analisar decks.' };
+    return { error: 'Apenas usuários autenticados podem analisar decks.' };
   }
 
   const prompt = `
@@ -359,22 +384,34 @@ export async function analyzeDeckWithAI(deckId: string, decklistText: string): P
   `;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      response_format: { type: "json_object" },
-    });
+    let rawJsonResponse: string | undefined | null;
+    const aiProvider = process.env.AI_PROVIDER || 'openai';
+    console.log(`[Análise] Usando o provedor de IA: ${aiProvider}`);
 
-    const analysisJSON = completion.choices[0]?.message?.content;
-    if (!analysisJSON) {
-      return { error: "A IA não conseguiu gerar uma análise." };
+    if (aiProvider === 'google') {
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const result = await model.generateContent(prompt);
+      rawJsonResponse = result.response.text();
+    } else {
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        response_format: { type: "json_object" },
+      });
+      rawJsonResponse = completion.choices[0]?.message?.content;
     }
 
-    const analysisData = JSON.parse(analysisJSON);
+    if (!rawJsonResponse) {
+      return { error: "A IA não conseguiu gerar uma análise." };
+    }
+    
+    // AJUSTE: Limpamos a resposta antes de fazer o parse
+    const cleanedJson = cleanJsonString(rawJsonResponse);
+    const analysisData = JSON.parse(cleanedJson);
     
     const { error: updateError } = await supabase
       .from('decks')
-      .update({ ai_analysis: analysisData })
+      .update({ ai_analysis: analysisData, updated_at: new Date().toISOString() })
       .eq('id', deckId)
       .eq('user_id', user.id); 
 
@@ -387,7 +424,7 @@ export async function analyzeDeckWithAI(deckId: string, decklistText: string): P
     return { analysis: analysisData };
 
   } catch (error) {
-    console.error("Erro na análise da IA:", error);
+    console.error(`Erro na análise da IA com ${process.env.AI_PROVIDER}:`, error);
     return { error: "Ocorreu um erro ao comunicar com a IA." };
   }
 }
