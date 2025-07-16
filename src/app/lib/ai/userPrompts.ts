@@ -11,21 +11,22 @@ const jsonOutputFormat = 'Você DEVE responder usando apenas um objeto JSON vál
 
 /**
  * Cria o prompt para o gerador PÚBLICO de decks.
+ * @param param0 Dados do prompt: formato, instrução do usuário, nome e identidade de cor do comandante.
+ * @returns Prompt formatado para a IA.
  */
 export function createDeckForUserPrompt({ format, commanderName, userPrompt, commanderColorIdentity }: DeckPromptData): string {
-  
-  const instructions = userPrompt ? `A instrução principal do usuário é: "${userPrompt}". A sinergia do deck deve girar em torno desta instrução.` : `Construa um arquétipo popular, sinérgico e eficaz para o formato ${format}.`;
+  const instructions = userPrompt
+    ? `Construa um deck de Magic: The Gathering para o formato ${format} com base na seguinte instrução: "${userPrompt}". A sinergia do deck deve girar em torno desta instrução.`
+    : `Construa um deck sinérgico e eficaz para o formato ${format}.`;
 
-  let rules = '';
-  switch (format) {
-    case 'commander':
-      rules = `Regras: O deck é do formato Commander. Deve conter 100 cartas singleton (exceto terrenos básicos). ${commanderName ? `O Comandante é ${commanderName} e a identidade de cor é [${commanderColorIdentity?.join(', ')}].` : 'O usuário não especificou um comandante, então escolha um comandante popular que se encaixe na instrução.'} Inclua 36-40 terrenos.`;
-      break;
-    default: // Modern, Standard, Pioneer, Pauper
-      rules = `Regras: O deck é do formato ${format}. Deve conter 60 cartas no maindeck, até 15 no sideboard, e no máximo 4 cópias de cada carta. Inclua uma base de mana apropriada.`;
-      break;
+  let commanderClause = '';
+  if (format === 'commander') {
+    if (commanderName && commanderColorIdentity) {
+      commanderClause = `O deck deve ter OBRIGATORIAMENTE EXATAMENTE 99 cartas no mainboard, EXCLUINDO o comandante ${commanderName}, que deve ser especificado separadamente. Todas as cartas devem ESTRITAMENTE respeitar a identidade de cor [${commanderColorIdentity.join(', ')}]. Inclua 20-30 criaturas para garantir jogabilidade.`;
+    } else {
+      commanderClause = `Escolha um comandante popular que se encaixe na instrução fornecida e construa um deck com OBRIGATORIAMENTE EXATAMENTE 99 cartas no mainboard, EXCLUINDO o comandante, e ESTRITAMENTE respeitando a identidade de cor do comandante escolhido. Inclua 20-30 criaturas para garantir jogabilidade.`;
+    }
   }
-  
-  return `Você é um deckbuilder especialista em Magic: The Gathering. Sua tarefa é criar um deck do zero. ${instructions}. ${rules} Não inclua cartas banidas no formato. O nome e a descrição do deck DEVEM ser em Português do Brasil. ${jsonOutputFormat}`;
-}
 
+  return `Você é um deckbuilder especialista em Magic: The Gathering. Sua tarefa é criar um deck do zero para o formato ${format}. ${instructions} ${commanderClause} Não inclua cartas banidas no formato. O nome e a descrição do deck DEVEM ser em Português do Brasil. ${jsonOutputFormat}`;
+}
