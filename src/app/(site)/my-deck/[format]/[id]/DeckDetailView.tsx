@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
+/* eslint-disable no-prototype-builtins */
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -45,13 +46,12 @@ export default function DeckDetailView({
   } = useMemo(() => {
     let commander: GridCardData | null = null;
     const featuredCardIds = new Set<string>(); 
-    const planeswalkers: GridCardData[] = [];
+    const planeswalkersTemp: GridCardData[] = []; // Usar temp para deduplicar
     let previewUrl = initialDeck.representative_card_image_url;
 
     // Constrói uma lista completa de todas as cartas do deck com os dados Scryfall
-    // E garante que cada objeto DeckCard original tenha o scryfall_id mapeado corretamente
     const allDeckCardsWithScryfallId = [
-      ...(initialDeck.decklist.commander || []), // Inclui comandantes explicitamente do decklist
+      ...(initialDeck.decklist.commander || []), 
       ...initialDeck.decklist.mainboard,
       ...(initialDeck.decklist.sideboard || []),
     ].map(deckCard => {
@@ -61,11 +61,10 @@ export default function DeckDetailView({
         return null;
       }
       return {
-        ...deckCard, // Mantém count e name do decklist original
-        scryfall_id: cardData.id, // O ID da Scryfall
-        // Espalha todas as propriedades da ScryfallCard aqui também
+        ...deckCard, 
+        scryfall_id: cardData.id, 
         ...cardData,
-      } as GridCardData; // Garante que o tipo seja GridCardData
+      } as GridCardData;
     }).filter((card): card is GridCardData => card !== null);
 
     // Lógica para Commander (prioriza decklist.commander, senão mainboard[0] para formato commander)
@@ -86,25 +85,25 @@ export default function DeckDetailView({
     // Lógica para Planeswalkers
     for (const c of allDeckCardsWithScryfallId) {
       if (c.type_line.includes('Planeswalker') && !featuredCardIds.has(c.id)) {
-        planeswalkers.push(c);
+        planeswalkersTemp.push(c);
         featuredCardIds.add(c.id); 
       }
     }
     
     // Filtra Mainboard para Grid View: Remove Commander e Planeswalkers já destacados
-    const mainboardGrid = allDeckCardsWithScryfallId.filter(
+    const mainboardGridTemp = allDeckCardsWithScryfallId.filter(
       (c) => initialDeck.decklist.mainboard.some((mc) => mc.name === c.name) && !featuredCardIds.has(c.id)
     );
 
     // Sideboard Grid (não interage com featuredCardIds)
-    const sideboardGrid = allDeckCardsWithScryfallId.filter(
+    const sideboardGridTemp = allDeckCardsWithScryfallId.filter(
       (c) => initialDeck.decklist.sideboard?.some((sc) => sc.name === c.name)
     );
 
     // Função auxiliar para agrupar cartas para o DeckListView
     const groupForListView = (cardsToGroup: GridCardData[]) => {
       const grouped: Record<string, { card: ScryfallCard; count: number }[]> = {};
-      for (const cardData of cardsToGroup) { // Agora itera sobre GridCardData
+      for (const cardData of cardsToGroup) { 
         let mainType = 'Outros';
         if (cardData.type_line.includes('Planeswalker')) mainType = 'Planeswalkers';
         else if (cardData.type_line.includes('Creature')) mainType = 'Criaturas';
@@ -114,7 +113,6 @@ export default function DeckDetailView({
         else if (cardData.type_line.includes('Enchantment')) mainType = 'Encantamentos';
         else if (cardData.type_line.includes('Land')) mainType = 'Terrenos';
         grouped[mainType] ||= [];
-        // Certifique-se de que 'card' aqui é a ScryfallCard completa
         grouped[mainType].push({ card: cardData, count: cardData.count }); 
       }
       const order = ['Planeswalkers', 'Criaturas', 'Mágicas Instantâneas', 'Feitiços', 'Encantamentos', 'Artefatos', 'Terrenos', 'Outros'];
@@ -122,22 +120,76 @@ export default function DeckDetailView({
     };
 
     // Prepara as listas para o DeckListView, já filtradas
-    const mainboardForList = allDeckCardsWithScryfallId.filter(
+    const mainboardForListTemp = allDeckCardsWithScryfallId.filter(
       (c) => initialDeck.decklist.mainboard.some((mc) => mc.name === c.name) && !featuredCardIds.has(c.id)
     );
-    const sideboardForList = allDeckCardsWithScryfallId.filter(
+    const sideboardForListTemp = allDeckCardsWithScryfallId.filter(
       (c) => initialDeck.decklist.sideboard?.some((sc) => sc.name === c.name)
     );
 
+    // FINAL DEDUPLICATION STEP: Ensure no duplicates in the final arrays
+    // This is the last resort to ensure unique keys
+    const seenIds = new Set<string>();
+    const planeswalkerCards = planeswalkersTemp.filter(card => {
+      if (seenIds.has(card.id)) return false;
+      seenIds.add(card.id);
+      return true;
+    });
+
+    seenIds.clear(); // Clear for the next array
+    const mainboardGridCards = mainboardGridTemp.filter(card => {
+      if (seenIds.has(card.id)) return false;
+      seenIds.add(card.id);
+      return true;
+    });
+
+    seenIds.clear(); // Clear for the next array
+    const sideboardGridCards = sideboardGridTemp.filter(card => {
+      if (seenIds.has(card.id)) return false;
+      seenIds.add(card.id);
+      return true;
+    });
+
+    // Para as listas agrupadas, a deduplicação precisa ser feita antes do agrupamento
+    // Mas como a lógica de `featuredCardIds` já filtra antes, o problema deve estar
+    // na origem dos dados ou se uma carta foi adicionada duas vezes na decklist original.
+    // Vamos garantir a unicidade dentro de cada grupo para DeckListView também.
+    const mainboardGroupedForList = groupForListView(mainboardForListTemp);
+    for (const type in mainboardGroupedForList) {
+        if (mainboardGroupedForList.hasOwnProperty(type)) {
+            const groupCards = mainboardGroupedForList[type];
+            seenIds.clear();
+            mainboardGroupedForList[type] = groupCards.filter(item => {
+                if (seenIds.has(item.card.id)) return false;
+                seenIds.add(item.card.id);
+                return true;
+            });
+        }
+    }
+
+    const sideboardGroupedForList = groupForListView(sideboardForListTemp);
+    for (const type in sideboardGroupedForList) {
+        if (sideboardGroupedForList.hasOwnProperty(type)) {
+            const groupCards = sideboardGroupedForList[type];
+            seenIds.clear();
+            sideboardGroupedForList[type] = groupCards.filter(item => {
+                if (seenIds.has(item.card.id)) return false;
+                seenIds.add(item.card.id);
+                return true;
+            });
+        }
+    }
+
+
     return {
       commanderCard: commander,
-      planeswalkerCards: planeswalkers,
-      mainboardGridCards: mainboardGrid,
-      sideboardGridCards: sideboardGrid,
-      mainboardGroupedForList: groupForListView(mainboardForList),
-      sideboardGroupedForList: groupForListView(sideboardForList),
-      mainboardListTotalCount: mainboardForList.reduce((sum, c) => sum + c.count, 0),
-      sideboardListTotalCount: sideboardForList.reduce((sum, c) => sum + c.count, 0),
+      planeswalkerCards: planeswalkerCards, // Usar a versão deduplicada
+      mainboardGridCards: mainboardGridCards, // Usar a versão deduplicada
+      sideboardGridCards: sideboardGridCards, // Usar a versão deduplicada
+      mainboardGroupedForList: mainboardGroupedForList,
+      sideboardGroupedForList: sideboardGroupedForList,
+      mainboardListTotalCount: mainboardForListTemp.reduce((sum, c) => sum + c.count, 0),
+      sideboardListTotalCount: sideboardForListTemp.reduce((sum, c) => sum + c.count, 0),
       defaultPreviewImageUrl: previewUrl,
     };
   }, [initialDeck, scryfallCardMap]);
@@ -218,7 +270,6 @@ export default function DeckDetailView({
             </div>
             {viewMode === 'list' ? (
               <DeckListView
-                // Passa o comandante como um objeto DeckCard para DeckListView
                 commanderCard={ commanderCard ? { card: scryfallCardMap.get(commanderCard.name)!, count: commanderCard.count } : null }
                 mainboardGrouped={mainboardGroupedForList}
                 mainboardTotalCount={mainboardListTotalCount}
