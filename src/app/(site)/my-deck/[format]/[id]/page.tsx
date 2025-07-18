@@ -6,6 +6,8 @@ import type { ScryfallCard } from '@/app/lib/types';
 import { fetchCardsByNames } from '@/app/lib/scryfall';
 import DeckDetailView from './DeckDetailView';
 import type { DeckFromDB, CreatorProfile } from '@/app/lib/types';
+// Importa a nova função para buscar a coleção física
+import { fetchUserPhysicalCollection } from '@/app/actions/deckActions'; 
 
 interface PageProps {
   params: {
@@ -82,6 +84,9 @@ export default async function DeckDetailPage(props: any) {
   
   const scryfallCardMapArray = scryfallCards.map(card => [card.name, card] as [string, ScryfallCard]);
 
+  // NOVO: Busca a coleção física do usuário logado
+  const userPhysicalCollection = user ? await fetchUserPhysicalCollection() : new Map<string, number>();
+
   return (
     <DeckDetailView 
       initialDeck={deckData}
@@ -89,6 +94,8 @@ export default async function DeckDetailPage(props: any) {
       currentUser={user}
       creatorProfile={creatorProfile}
       isInitiallySaved={isSavedByCurrentUser} 
+      // NOVO: Passa a coleção física para o componente
+      userPhysicalCollection={userPhysicalCollection} 
     />
   );
 }

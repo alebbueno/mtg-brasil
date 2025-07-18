@@ -504,3 +504,28 @@ export async function cloneDeck(deckIdToClone: string) {
     return redirect(`/my-decks/`);
   }
 }
+
+/**
+ * Busca a coleção física do usuário logado.
+ */
+export async function fetchUserPhysicalCollection(): Promise<Map<string, number>> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    // Retorna um mapa vazio se o usuário não estiver logado
+    return new Map();
+  }
+
+  const { data, error } = await supabase
+    .from('user_collections')
+    .select('card_scryfall_id, quantity')
+    .eq('user_id', user.id);
+
+  if (error) {
+    console.error('Erro ao buscar coleção física do usuário:', error);
+    return new Map();
+  }
+
+  return new Map(data.map(item => [item.card_scryfall_id, item.quantity]));
+}

@@ -134,6 +134,7 @@ export interface DeckDetailViewProps {
   currentUser: SupabaseUser | null;
   creatorProfile: CreatorProfile | null;
   isInitiallySaved: boolean;
+  userPhysicalCollection: Map<string, number>; // ADICIONAR ESTA LINHA
 }
 
 
