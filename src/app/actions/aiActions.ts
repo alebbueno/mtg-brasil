@@ -59,7 +59,7 @@ export async function translateCardText(
     // Verifica a variável de ambiente para decidir qual IA usar
     if (process.env.AI_PROVIDER === 'google') {
       console.log("Usando Google Gemini para tradução...");
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"});
       const result = await model.generateContent(prompt);
       translatedText = result.response.text();
     } else { // O padrão será OpenAI
