@@ -55,7 +55,7 @@ export async function translateCardText(
   let translatedText: string | undefined | null;
 
   try {
-    // --- ROTEADOR DE IA ---
+    // --- ROTEADOR DE IA --- Novo Gemini
     // Verifica a variável de ambiente para decidir qual IA usar
     if (process.env.AI_PROVIDER === 'google') {
       console.log("Usando Google Gemini para tradução...");
