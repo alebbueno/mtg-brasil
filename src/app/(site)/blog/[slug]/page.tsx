@@ -7,7 +7,8 @@ import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import DOMPurify from 'isomorphic-dompurify';
-import styles from './PostStyles.module.css';
+// Para:
+import styles from './PostStyles.module.scss';
 
 // O tipo das props para referência interna, evitando o erro de build do Next.js
 interface PageProps {
