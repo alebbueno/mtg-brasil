@@ -1,87 +1,82 @@
-/* app/(site)/blog/[slug]/PostStyles.module.scss */
+/* src/app/(site)/blog/[slug]/PostStyles.module.scss */
 
-/*
-  Este é o nosso contêiner principal para os estilos do artigo.
-  Vamos usar o seletor :global() para forçar a estilização
-  do HTML puro que vem do nosso editor de texto.
-*/
 .articleContent {
-  :global {
-    /* Estilos Gerais do Corpo do Texto */
-    .prose {
-      color: #d4d4d8; // Cor do texto (neutral-300)
-    }
+  /* Ajuste: Em vez de um bloco :global {}, aplicamos o seletor :global 
+     diretamente na classe que queremos manter inalterada (.prose)
+  */
 
-    .prose p {
-      line-height: 1.8; /* Mais "respiro" entre as linhas */
+  :global(.prose) {
+    color: #d4d4d8; // neutral-300
+
+    p {
+      line-height: 1.8;
       margin: 1.25em 0;
     }
 
-    /* Estilos para Títulos */
-    .prose h2, .prose h3, .prose h4 {
-      color: #f59e0b; // Cor de destaque (amber-500)
+    h2, h3, h4 {
+      color: #f59e0b; // amber-500
       font-weight: 700;
       margin-top: 1.5em;
       margin-bottom: 0.75em;
     }
 
-    /* Estilos para Links */
-    .prose a {
-      color: #fbbf24; // Cor de link (amber-400)
+    a {
+      color: #fbbf24; // amber-400
       font-weight: 600;
       text-decoration: none;
       transition: color 0.2s ease-in-out;
+      
       &:hover {
-        color: #fcd34d; // Cor mais clara no hover (amber-300)
+        color: #fcd34d; // amber-300
         text-decoration: underline;
       }
     }
     
-    /* Estilos para Imagens */
-    .prose img {
+    img {
       width: 100%;
       margin-top: 2em;
       margin-bottom: 2em;
-      border-radius: 0.75rem; // xl
+      border-radius: 0.75rem;
       border: 1px solid #262626; // neutral-800
     }
 
-    /* Estilos para Listas */
-    .prose ul, .prose ol {
+    ul, ol {
       margin: 1.25em 0;
-      padding-left: 1.5em; /* Adiciona um recuo padrão */
+      padding-left: 1.5em;
     }
 
-    /* Estilo específico para listas com o checkmark */
-    /* Para usar, no editor TinyMCE, selecione a lista e aplique a classe 'checklist' */
-    .prose ul.checklist {
+    ul.checklist {
         list-style-type: none;
         padding-left: 0;
     }
 
-    /* Estilos para Tabelas */
-    .prose table {
+    table {
       width: 100%;
       margin-top: 2em;
       margin-bottom: 2em;
       border-collapse: collapse;
     }
-    .prose thead {
-      background-color: #262626; // neutral-800
-      border-bottom: 2px solid #404040; // neutral-700
+
+    thead {
+      background-color: #262626;
+      border-bottom: 2px solid #404040;
     }
-    .prose th {
+
+    th {
       color: #ffffff;
       padding: 0.75rem;
       text-align: left;
     }
-    .prose td {
+
+    td {
         padding: 0.75rem;
     }
-    .prose tr {
-        border-bottom: 1px solid #262626; // neutral-800
+
+    tr {
+        border-bottom: 1px solid #262626;
     }
-    .prose tbody tr:last-child {
+
+    tbody tr:last-child {
         border-bottom: none;
     }
   }
