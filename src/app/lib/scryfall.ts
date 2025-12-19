@@ -54,26 +54,6 @@ import type { ScryfallCard } from './types';
  * @param scryfallId - O UUID da carta no Scryfall.
  * @returns Um objeto ScryfallCard completo ou null.
  */
-export async function fetchCardById(scryfallId: string): Promise<ScryfallCard | null> {
-  if (!scryfallId) return null;
-
-  try {
-    const url = `https://api.scryfall.com/cards/${scryfallId}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      console.error(`Scryfall API error for ID "${scryfallId}": ${response.statusText}`);
-      return null;
-    }
-
-    const cardData: ScryfallCard = await response.json();
-    return cardData;
-
-  } catch (error) {
-    console.error(`Failed to fetch card by ID "${scryfallId}" from Scryfall:`, error);
-    return null;
-  }
-}
 
 export async function fetchAutocomplete(query: string): Promise<{ data: string[] }> {
   if (!query || typeof query !== 'string') {
@@ -86,17 +66,54 @@ export async function fetchAutocomplete(query: string): Promise<{ data: string[]
   return res.json();
 }
 
-export async function fetchCardByName(name: string, exact: boolean = true): Promise<ScryfallCard> {
-  if (!name || typeof name !== 'string') {
-    throw new Error('Nome da carta inválido');
+/**
+ * Busca carta por ID UUID do Scryfall.
+ */
+export async function fetchCardById(scryfallId: string): Promise<ScryfallCard | null> {
+  if (!scryfallId || scryfallId === "undefined") return null;
+
+  try {
+    const response = await fetch(`https://api.scryfall.com/cards/${scryfallId}`);
+
+    if (!response.ok) {
+      console.error(`Erro Scryfall ID: ${response.status}`);
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Falha ao buscar por ID:", error);
+    return null;
   }
+}
+
+/**
+ * Busca carta por nome. Tenta busca exata, se falhar, tenta fuzzy.
+ */
+export async function fetchCardByName(name: string, exact: boolean = true): Promise<ScryfallCard | null> {
+  if (!name || name === "undefined") return null;
   
   const param = exact ? 'exact' : 'fuzzy';
-  const res = await fetch(`https://api.scryfall.com/cards/named?${param}=${encodeURIComponent(name)}`);
-  if (!res.ok) {
-    throw new Error(`Erro ao buscar carta por nome: ${res.status} - ${res.statusText}`);
+  const url = `https://api.scryfall.com/cards/named?${param}=${encodeURIComponent(name)}`;
+
+  try {
+    const res = await fetch(url);
+
+    if (res.status === 404) {
+      if (exact) {
+        console.log(`Exata não encontrada para "${name}", tentando fuzzy...`);
+        return fetchCardByName(name, false); 
+      }
+      return null;
+    }
+
+    if (!res.ok) return null;
+
+    return await res.json();
+  } catch (error) {
+    console.error("Erro em fetchCardByName:", error);
+    return null;
   }
-  return res.json();
 }
 
 export async function fetchSearchResults(

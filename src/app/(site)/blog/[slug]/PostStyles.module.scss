@@ -1,40 +1,32 @@
 /* app/(site)/blog/[slug]/PostStyles.module.scss */
 
 /*
-  CORREÇÃO: Usamos o seletor pai (&) para combinar com a sintaxe :global.
-  O Turbopack/Next.js prefere que o seletor que será 'global' seja especificado
-  com uma vírgula ou em um bloco próprio, mas vamos tentar aninhar de forma explícita.
+  Este é o nosso contêiner principal para os estilos do artigo.
+  Vamos usar o seletor :global() para forçar a estilização
+  do HTML puro que vem do nosso editor de texto.
 */
 .articleContent {
-  /*
-    Se o Turbopack ainda falhar com o aninhamento SCSS, a solução final é
-    usar o bloco @apply dentro do .articleContent sem o :global,
-    ou mudar o arquivo para ser um SCSS normal e importá-lo globalmente.
-    
-    TENTATIVA DE CORREÇÃO (Aninhamento Explícito de Seletor)
-  */
-  
-  // Estilos Globais aplicados no contexto de .articleContent
-  
-  // Estilos Gerais do Corpo do Texto
-  :global(.prose) {
-    color: #d4d4d8; // Cor do texto (neutral-300)
-    
-    p {
+  :global {
+    /* Estilos Gerais do Corpo do Texto */
+    .prose {
+      color: #d4d4d8; // Cor do texto (neutral-300)
+    }
+
+    .prose p {
       line-height: 1.8; /* Mais "respiro" entre as linhas */
       margin: 1.25em 0;
     }
-    
-    // Estilos para Títulos
-    h2, h3, h4 {
+
+    /* Estilos para Títulos */
+    .prose h2, .prose h3, .prose h4 {
       color: #f59e0b; // Cor de destaque (amber-500)
       font-weight: 700;
       margin-top: 1.5em;
       margin-bottom: 0.75em;
     }
-    
-    // Estilos para Links
-    a {
+
+    /* Estilos para Links */
+    .prose a {
       color: #fbbf24; // Cor de link (amber-400)
       font-weight: 600;
       text-decoration: none;
@@ -45,8 +37,8 @@
       }
     }
     
-    // Estilos para Imagens
-    img {
+    /* Estilos para Imagens */
+    .prose img {
       width: 100%;
       margin-top: 2em;
       margin-bottom: 2em;
@@ -55,40 +47,41 @@
     }
 
     /* Estilos para Listas */
-    ul, ol {
+    .prose ul, .prose ol {
       margin: 1.25em 0;
       padding-left: 1.5em; /* Adiciona um recuo padrão */
     }
 
     /* Estilo específico para listas com o checkmark */
-    ul.checklist {
+    /* Para usar, no editor TinyMCE, selecione a lista e aplique a classe 'checklist' */
+    .prose ul.checklist {
         list-style-type: none;
         padding-left: 0;
     }
 
     /* Estilos para Tabelas */
-    table {
+    .prose table {
       width: 100%;
       margin-top: 2em;
       margin-bottom: 2em;
       border-collapse: collapse;
     }
-    thead {
+    .prose thead {
       background-color: #262626; // neutral-800
       border-bottom: 2px solid #404040; // neutral-700
     }
-    th {
+    .prose th {
       color: #ffffff;
       padding: 0.75rem;
       text-align: left;
     }
-    td {
+    .prose td {
         padding: 0.75rem;
     }
-    tr {
+    .prose tr {
         border-bottom: 1px solid #262626; // neutral-800
     }
-    tbody tr:last-child {
+    .prose tbody tr:last-child {
         border-bottom: none;
     }
   }
