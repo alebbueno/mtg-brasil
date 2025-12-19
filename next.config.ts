@@ -38,8 +38,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  serverActions: {
-    bodySizeLimit: '10mb', // Mantém o limite para 10MB
+  // CORREÇÃO: serverActions agora fica dentro de experimental
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
   },
   // Mantém a configuração de cabeçalhos (CORS) inalterada
   async headers() {
